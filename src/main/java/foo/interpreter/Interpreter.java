@@ -3,8 +3,6 @@ package foo.interpreter;
 import foo.model.*;
 import org.pcollections.*;
 
-import java.util.Objects;
-
 public class Interpreter {
     public Object eval(Node node, HashPMap<NamedNode, Object> locals) {
         return node.accept(new InterpretingVisitor(locals));
@@ -33,14 +31,14 @@ public class Interpreter {
             HashPMap<NamedNode, Object> savedLocals = locals;
             try {
                 FunctionNode functionNode = callNode.getFunction();
-                if (functionNode instanceof NativeNode) {
-                    Node[] args = callNode.getFunction()
+
+                if (functionNode instanceof NativeFunctionNode) {
+                    Object[] args = callNode.getFunction()
                         .getParameters()
                         .stream()
-                        .map(param -> callNode.getArguments().get(param))
-                        .filter(Objects::nonNull) // TODO: reimplement
-                        .toArray(Node[]::new);
-                    return ((NativeNode) functionNode).eval(Interpreter.this, locals, args);
+                        .map(param -> callNode.getArguments().get(param).accept(this))
+                        .toArray();
+                    return ((NativeFunctionNode) functionNode).eval(args);
                 }
 
                 for (ParameterNode param: callNode.getFunction().getParameters()) {

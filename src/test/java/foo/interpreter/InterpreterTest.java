@@ -7,6 +7,7 @@ import static org.junit.Assert.*;
 
 public class InterpreterTest {
     private Interpreter interpreter = new Interpreter();
+    private SystemPackage systemPackage = new SystemPackage();
 
     @Test
     public void testSimpleFunction() {
@@ -19,13 +20,14 @@ public class InterpreterTest {
         parameterNode2.setName("y");
         functionNode.getParameters().add(parameterNode2);
         CallNode callNode = new CallNode();
-        callNode.setFunction(SystemPackage.MINUS);
+        FunctionNode minus = (FunctionNode) systemPackage.item("minus");
+        callNode.setFunction(minus);
         RefNode refNode1 = new RefNode();
         refNode1.setNode(parameterNode1);
         RefNode refNode2 = new RefNode();
         refNode2.setNode(parameterNode2);
-        callNode.getArguments().put(SystemPackage.MINUS.getParameters().get(0), refNode1);
-        callNode.getArguments().put(SystemPackage.MINUS.getParameters().get(1), refNode2);
+        callNode.getArguments().put(minus.getParameters().get(0), refNode1);
+        callNode.getArguments().put(minus.getParameters().get(1), refNode2);
         functionNode.getBody().add(callNode);
 
 

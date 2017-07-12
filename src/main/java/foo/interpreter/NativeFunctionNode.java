@@ -1,15 +1,30 @@
 package foo.interpreter;
 
-import java.util.function.Function;
+import foo.model.FunctionNode;
+import foo.model.ParameterNode;
 
-public class NativeFunctionNode extends NativeNode {
-    public NativeFunctionNode(String signature, Function<Object[], Object> function) {
-        super(signature, ((interpreter, locals, nodes) -> {
-            Object[] args = new Object[nodes.length];
-            for (int i = 0; i < args.length; i++) {
-                args[i] = interpreter.eval(nodes[i], locals);
-            }
-            return function.apply(args);
-        }));
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+
+public class NativeFunctionNode extends FunctionNode {
+    private final Method method;
+
+    public NativeFunctionNode(Method method) {
+        setName(method.getName());
+        for (Parameter parameter: method.getParameters()) {
+            ParameterNode param = new ParameterNode();
+            param.setName(parameter.getName());
+            getParameters().add(param);
+        }
+        this.method = method;
+    }
+
+    public Object eval(Object[] args) {
+        try {
+            return method.invoke(null, args);
+        } catch (IllegalAccessException|InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

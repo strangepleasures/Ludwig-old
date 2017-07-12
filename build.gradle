@@ -9,6 +9,15 @@ repositories {
     mavenCentral()
 }
 
+
+compileJava {
+    options.compilerArgs += ["-parameters"]
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ["-parameters"]
+}
+
 dependencies {
     compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
     compile group: 'io.takari.pcollections', name: 'pcollections', version: '2.1.3'
