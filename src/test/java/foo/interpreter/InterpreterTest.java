@@ -2,6 +2,7 @@ package foo.interpreter;
 
 import foo.model.*;
 import org.junit.Test;
+import org.pcollections.HashTreePMap;
 
 import static org.junit.Assert.*;
 
@@ -19,20 +20,42 @@ public class InterpreterTest {
         ParameterNode parameterNode2 = new ParameterNode();
         parameterNode2.setName("y");
         functionNode.getParameters().add(parameterNode2);
-        CallNode callNode = new CallNode();
+        BoundCallNode boundCallNode = new BoundCallNode();
         FunctionNode minus = (FunctionNode) systemPackage.item("minus");
-        callNode.setFunction(minus);
+        boundCallNode.setFunction(minus);
         RefNode refNode1 = new RefNode();
         refNode1.setNode(parameterNode1);
         RefNode refNode2 = new RefNode();
         refNode2.setNode(parameterNode2);
-        callNode.getArguments().put(minus.getParameters().get(0), refNode1);
-        callNode.getArguments().put(minus.getParameters().get(1), refNode2);
-        functionNode.getBody().add(callNode);
+        boundCallNode.getArguments().put(minus.getParameters().get(0), refNode1);
+        boundCallNode.getArguments().put(minus.getParameters().get(1), refNode2);
+        functionNode.getBody().add(boundCallNode);
 
 
         Object result = interpreter.call(functionNode, 50.0, 8.0);
         assertEquals(42.0, result);
+    }
+
+    @Test
+    public void testClosure() {
+        LambdaNode lambda = new LambdaNode();
+
+        lambda.getParameters().add(new ParameterNode());
+        FunctionNode plus = (FunctionNode) systemPackage.item("plus");
+        BoundCallNode bcn = new BoundCallNode();
+        bcn.setFunction(plus);
+        RefNode refNode = new RefNode();
+        refNode.setNode(lambda.getParameters().get(0));
+        bcn.getArguments().put(plus.getParameters().get(0), refNode);
+        bcn.getArguments().put(plus.getParameters().get(1), LiteralNode.ofValue(3.0));
+        lambda.getBody().add(bcn);
+
+        UnboundCallNode ucn = new UnboundCallNode();
+        ucn.setFunction(lambda);
+        ucn.getArguments().add(LiteralNode.ofValue(2.0));
+
+        Object result = interpreter.eval(ucn, HashTreePMap.empty());
+        assertEquals(5.0, result);
     }
 
 }

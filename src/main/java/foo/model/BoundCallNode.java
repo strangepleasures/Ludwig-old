@@ -3,7 +3,7 @@ package foo.model;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CallNode extends Node {
+public class BoundCallNode extends Node {
     private FunctionNode function;
 
     private final Map<ParameterNode, Node> arguments = new HashMap<>();
@@ -22,6 +22,6 @@ public class CallNode extends Node {
 
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {
-        return visitor.visitCall(this);
+        return visitor.visitBoundCall(this);
     }
 }

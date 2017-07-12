@@ -15,17 +15,17 @@ public class PrintUtil {
         private boolean inline;
 
         @Override
-        public Void visitCall(CallNode callNode) {
+        public Void visitBoundCall(BoundCallNode boundCallNode) {
             indent();
-            out.append(callNode.getFunction().getName()).append("\n");
+            out.append(boundCallNode.getFunction().getName()).append("\n");
             indentation++;
-            for (ParameterNode param : callNode.getFunction().getParameters()) {
+            for (ParameterNode param : boundCallNode.getFunction().getParameters()) {
                 indent();
                 out.append(param.getName()).append(": ");
-                if (callNode.getArguments().containsKey(param)) {
+                if (boundCallNode.getArguments().containsKey(param)) {
                     inline = true;
                     indentation++;
-                    callNode.getArguments().get(param).accept(this);
+                    boundCallNode.getArguments().get(param).accept(this);
                     indentation--;
                 } else {
                     out.append('\n');
@@ -105,6 +105,48 @@ public class PrintUtil {
         public Void visitRef(RefNode refNode) {
             indent();
             out.append(refNode.getNode().getName()).append('\n');
+            return null;
+        }
+
+        @Override
+        public Void visitUnboundCall(UnboundCallNode unboundCallNode) {
+            indent();
+            if (unboundCallNode.getFunction() instanceof RefNode) {
+                out.append(((RefNode) unboundCallNode.getFunction()).getNode().getName());
+                if (unboundCallNode.getArguments().isEmpty()) {
+                    out.append(" []\n");
+                } else {
+                    out.append('\n');
+                    indentation++;
+                    for (Node item : unboundCallNode.getArguments()) {
+                        item.accept(this);
+                    }
+                    indentation--;
+                }
+            } else {
+                // TODO: Support ?
+            }
+            return null;
+        }
+
+        @Override
+        public Void visitLambda(LambdaNode lambdaNode) {
+            indent();
+            out.append("lambda [");
+            boolean first = true;
+            for (ParameterNode param : lambdaNode.getParameters()) {
+                if (!first) {
+                    out.append(' ');
+                }
+                first = false;
+                out.append(param.getName());
+            }
+            out.append("]\n");
+            indentation++;
+            for (Node node : lambdaNode.getBody()) {
+                node.accept(this);
+            }
+            indentation--;
             return null;
         }
 

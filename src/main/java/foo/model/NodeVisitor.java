@@ -1,7 +1,7 @@
 package foo.model;
 
 public interface NodeVisitor<T> {
-    T visitCall(CallNode callNode);
+    T visitBoundCall(BoundCallNode boundCallNode);
 
     T visitFunction(FunctionNode functionNode);
 
@@ -16,4 +16,8 @@ public interface NodeVisitor<T> {
     T visitParameter(ParameterNode parameterNode);
 
     T visitRef(RefNode refNode);
+
+    T visitUnboundCall(UnboundCallNode unboundCallNode);
+
+    T visitLambda(LambdaNode lambdaNode);
 }

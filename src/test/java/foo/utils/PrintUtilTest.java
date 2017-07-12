@@ -19,15 +19,15 @@ public class PrintUtilTest {
         ParameterNode parameterNode2 = new ParameterNode();
         parameterNode2.setName("y");
         functionNode.getParameters().add(parameterNode2);
-        CallNode callNode = new CallNode();
-        callNode.setFunction(functionNode);
+        BoundCallNode boundCallNode = new BoundCallNode();
+        boundCallNode.setFunction(functionNode);
         RefNode refNode1 = new RefNode();
         refNode1.setNode(parameterNode2);
         RefNode refNode2 = new RefNode();
         refNode2.setNode(parameterNode1);
-        callNode.getArguments().put(parameterNode1, refNode1);
-        callNode.getArguments().put(parameterNode2, refNode2);
-        functionNode.getBody().add(callNode);
+        boundCallNode.getArguments().put(parameterNode1, refNode1);
+        boundCallNode.getArguments().put(parameterNode2, refNode2);
+        functionNode.getBody().add(boundCallNode);
         packageNode.getItems().add(functionNode);
         assertEquals(
             "package mypackage\n" +
