@@ -150,6 +150,20 @@ public class PrintUtil {
             return null;
         }
 
+        @Override
+        public Void visitReturn(ReturnNode returnNode) {
+            indent();
+            out.append("return");
+            if (returnNode.getValue() != null) {
+                inline = true;
+                out.append(' ');
+                returnNode.getValue().accept(this);
+            } else {
+                out.append('\n');
+            }
+            return null;
+        }
+
         private void indent() {
             if (!inline) {
                 for (int i = 0; i < indentation; i++) {

@@ -178,5 +178,10 @@ public class Interpreter {
         public Object visitLambda(LambdaNode lambdaNode) {
             return new Closure(locals, lambdaNode.getParameters(), lambdaNode.getBody());
         }
+
+        @Override
+        public Object visitReturn(ReturnNode returnNode) {
+            return returnNode.getValue() != null ? new Return(returnNode.getValue().accept(this)) : Return.EMPTY;
+        }
     }
 }

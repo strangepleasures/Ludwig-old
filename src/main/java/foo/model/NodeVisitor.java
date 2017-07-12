@@ -20,4 +20,6 @@ public interface NodeVisitor<T> {
     T visitUnboundCall(UnboundCallNode unboundCallNode);
 
     T visitLambda(LambdaNode lambdaNode);
+
+    T visitReturn(ReturnNode returnNode);
 }
