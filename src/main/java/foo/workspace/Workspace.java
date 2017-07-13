@@ -1,6 +1,5 @@
 package foo.workspace;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.Lister;
 import foo.changes.*;
 import foo.model.*;
 
