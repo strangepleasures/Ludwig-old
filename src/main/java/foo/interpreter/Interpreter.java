@@ -183,5 +183,10 @@ public class Interpreter {
         public Object visitReturn(ReturnNode returnNode) {
             return returnNode.getValue() != null ? new Return(returnNode.getValue().accept(this)) : Return.EMPTY;
         }
+
+        @Override
+        public Object visitProject(ProjectNode projectNode) {
+            throw new UnsupportedOperationException();
+        }
     }
 }

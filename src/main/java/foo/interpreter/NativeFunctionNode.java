@@ -12,9 +12,11 @@ public class NativeFunctionNode extends FunctionNode {
 
     public NativeFunctionNode(Method method) {
         setName(method.getName());
+        setId("system:" + method.getName());
         for (Parameter parameter: method.getParameters()) {
             ParameterNode param = new ParameterNode();
             param.setName(parameter.getName());
+            param.setId("system:" + method.getName() + ":" + parameter.getName());
             getParameters().add(param);
         }
         this.method = method;

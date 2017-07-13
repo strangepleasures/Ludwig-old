@@ -22,4 +22,6 @@ public interface NodeVisitor<T> {
     T visitLambda(LambdaNode lambdaNode);
 
     T visitReturn(ReturnNode returnNode);
+
+    T visitProject(ProjectNode projectNode);
 }

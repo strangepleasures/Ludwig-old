@@ -164,6 +164,18 @@ public class PrintUtil {
             return null;
         }
 
+        @Override
+        public Void visitProject(ProjectNode projectNode) {
+            indent();
+            out.append("project ").append(projectNode.getName()).append('\n');
+            indentation++;
+            for (Node item : projectNode.getPackages()) {
+                item.accept(this);
+            }
+            indentation--;
+            return null;
+        }
+
         private void indent() {
             if (!inline) {
                 for (int i = 0; i < indentation; i++) {
