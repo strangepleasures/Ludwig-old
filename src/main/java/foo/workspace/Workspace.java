@@ -62,7 +62,6 @@ public class Workspace {
             place(parameterNode, parameter.getPosition());
 
             return null;
-
         }
 
         @Override
@@ -96,7 +95,6 @@ public class Workspace {
         public Problem visitUnboundCall(UnboundCall unboundCall) {
             UnboundCallNode node = new UnboundCallNode();
             node.setId(unboundCall.getId());
-            node.setFunction(node(unboundCall.getFunction()));
             place(node, unboundCall.getDestination());
             return null;
         }
@@ -106,6 +104,14 @@ public class Workspace {
             ReturnNode node = new ReturnNode();
             node.setId(aReturn.getId());
             place(node, aReturn.getPosition());
+            return null;
+        }
+
+        @Override
+        public Problem visitLambda(Lambda lambda) {
+            LambdaNode lambdaNode = new LambdaNode();
+            lambdaNode.setId(lambda.getId());
+            place(lambdaNode, lambda.getDestination());
             return null;
         }
     };
@@ -187,8 +193,7 @@ public class Workspace {
             Node prev = node(position.getPrev());
             Node next = node(position.getNext());
 
-            List items = (node instanceof ParameterNode) ? ((FunctionNode) parent).getParameters() : parent.getItems();
-
+            List items = (node instanceof ParameterNode) ? ((Signature) parent).getParameters() : parent.getNodes();
 
             if (next == null) {
                 if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {

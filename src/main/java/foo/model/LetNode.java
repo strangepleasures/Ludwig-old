@@ -4,7 +4,7 @@ import lombok.*;
 
 @Getter
 @Setter
-public class LetNode extends NamedNode {
+public class LetNode extends NamedNode implements ValueHolder<Node> {
     private Node value;
 
     @Override

@@ -4,8 +4,6 @@ import foo.model.*;
 import foo.utils.PrintUtil;
 import org.pcollections.HashPMap;
 
-import java.util.List;
-
 public class Closure implements Callable {
     private final HashPMap<NamedNode, Object> locals;
     private final LambdaNode lambda;
@@ -25,7 +23,7 @@ public class Closure implements Callable {
         InterpretingVisitor visitor = new InterpretingVisitor(env);
 
         Object result = null;
-        for (Node node : lambda.getBody()) {
+        for (Node node : lambda.getItems()) {
             result = node.accept(visitor);
             if (result instanceof Signal) {
                 break;

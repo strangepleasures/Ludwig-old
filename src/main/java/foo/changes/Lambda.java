@@ -1,14 +1,14 @@
 package foo.changes;
 
-import lombok.*;
+import lombok.Value;
 
 @Value
-public class UnboundCall extends Change {
+public class Lambda extends Change {
     String id;
     Destination destination;
 
     @Override
     public <T> T accept(ChangeVisitor<T> visitor) {
-        return visitor.visitUnboundCall(this);
+        return visitor.visitLambda(this);
     }
 }

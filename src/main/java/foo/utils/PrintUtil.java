@@ -49,7 +49,7 @@ public class PrintUtil {
             }
             out.append("]\n");
             indentation++;
-            for (Node node : functionNode.getItems()) {
+            for (Node node : functionNode.getNodes()) {
                 node.accept(this);
             }
             indentation--;
@@ -111,16 +111,17 @@ public class PrintUtil {
         @Override
         public Void visitUnboundCall(UnboundCallNode unboundCallNode) {
             indent();
-            if (unboundCallNode.getFunction() instanceof RefNode) {
-                out.append(((RefNode) unboundCallNode.getFunction()).getNode().getName());
-                if (unboundCallNode.getItems().isEmpty()) {
+            if (unboundCallNode.getNodes().get(0) instanceof RefNode) {
+                out.append(((RefNode) unboundCallNode.getNodes().get(0)).getNode().getName());
+                if (unboundCallNode.getNodes().size() == 1) {
                     out.append(" []\n");
                 } else {
                     out.append('\n');
                     indentation++;
-                    for (Node item : unboundCallNode.getItems()) {
-                        item.accept(this);
-                    }
+                    unboundCallNode.getNodes()
+                        .stream()
+                        .skip(1)
+                        .forEach(item -> item.accept(this));
                     indentation--;
                 }
             } else {
@@ -143,7 +144,7 @@ public class PrintUtil {
             }
             out.append("]\n");
             indentation++;
-            for (Node node : lambdaNode.getBody()) {
+            for (Node node : lambdaNode.getItems()) {
                 node.accept(this);
             }
             indentation--;
@@ -170,6 +171,18 @@ public class PrintUtil {
             out.append("project ").append(projectNode.getName()).append('\n');
             indentation++;
             for (Node item : projectNode.getPackages()) {
+                item.accept(this);
+            }
+            indentation--;
+            return null;
+        }
+
+        @Override
+        public Void visitIf(IfNode ifNode) {
+            indent();
+            out.append("if\n");
+            indentation++;
+            for (Node item : ifNode.getNodes()) {
                 item.accept(this);
             }
             indentation--;

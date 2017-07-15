@@ -49,16 +49,17 @@ destination: !Slot
 --- !Reference
 id: 11
 node: system:minus
-destination: !Slot
+destination: !Position
   parent: 10
 --- !Literal
 id: 12
 value: 3
 destination: !Position
   parent: 10
+  prev: 11
 --- !Literal
 id: 13
 value: 2
 destination: !Position
   parent: 10
-  next: 12
+  prev: 12

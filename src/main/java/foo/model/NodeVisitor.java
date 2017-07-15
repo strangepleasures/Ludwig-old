@@ -24,4 +24,6 @@ public interface NodeVisitor<T> {
     T visitReturn(ReturnNode returnNode);
 
     T visitProject(ProjectNode projectNode);
+
+    T visitIf(IfNode ifNode);
 }

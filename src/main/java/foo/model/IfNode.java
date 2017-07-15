@@ -8,10 +8,10 @@ import java.util.List;
 @Getter
 @Setter
 public class IfNode extends Node implements ListLike {
-    private List<Node> items;
+    private List<Node> nodes;
 
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {
-        return null;
+        return visitor.visitIf(this);
     }
 }

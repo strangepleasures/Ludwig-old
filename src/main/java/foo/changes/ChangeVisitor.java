@@ -18,4 +18,6 @@ public interface ChangeVisitor<T> {
     T visitUnboundCall(UnboundCall unboundCall);
 
     T visitReturn(Return aReturn);
+
+    T visitLambda(Lambda lambda);
 }

@@ -6,6 +6,7 @@ import org.pcollections.TreePVector;
 
 class InterpretingVisitor implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
+    private boolean doElse;
 
     InterpretingVisitor(HashPMap<NamedNode, Object> locals) {
         this.locals = locals;
@@ -31,7 +32,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
             }
 
             Object result = null;
-            for (Node node : functionNode.getItems()) {
+            for (Node node : functionNode.getNodes()) {
                 result = node.accept(this);
                 if (result instanceof Signal) {
                     break;
@@ -97,8 +98,8 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitUnboundCall(UnboundCallNode unboundCallNode) {
-        Callable callable = (Callable) unboundCallNode.getFunction().accept(this);
-        Object[] args = unboundCallNode.getItems()
+        Callable callable = (Callable) unboundCallNode.getNodes().get(0).accept(this);
+        Object[] args = unboundCallNode.getNodes()
             .stream()
             .skip(1)
             .map(arg -> arg.accept(this))
@@ -119,5 +120,28 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     @Override
     public Object visitProject(ProjectNode projectNode) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Object visitIf(IfNode ifNode) {
+        Boolean test = (Boolean) ifNode.getNodes().get(0).accept(this);
+        if (test) {
+            Object result = null;
+            for (Node node : ifNode.getNodes()) {
+                result = node.accept(this);
+                if (result instanceof Signal) {
+                    break;
+                }
+            }
+
+            if (result instanceof Return) {
+                return ((Return) result).getValue();
+            }
+
+            return result;
+        } else {
+            doElse = true;
+        }
+        return null;
     }
 }

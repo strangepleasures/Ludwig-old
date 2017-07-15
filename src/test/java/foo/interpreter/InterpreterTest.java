@@ -28,7 +28,7 @@ public class InterpreterTest {
         refNode2.setNode(parameterNode2);
         boundCallNode.getArguments().put(minus.getParameters().get(0), refNode1);
         boundCallNode.getArguments().put(minus.getParameters().get(1), refNode2);
-        functionNode.getItems().add(boundCallNode);
+        functionNode.getNodes().add(boundCallNode);
 
 
         Object result = Interpreter.call(functionNode, 50.0, 8.0);
@@ -47,11 +47,11 @@ public class InterpreterTest {
         refNode.setNode(lambda.getParameters().get(0));
         bcn.getArguments().put(plus.getParameters().get(0), refNode);
         bcn.getArguments().put(plus.getParameters().get(1), LiteralNode.ofValue(3.0));
-        lambda.getBody().add(bcn);
+        lambda.getItems().add(bcn);
 
         UnboundCallNode ucn = new UnboundCallNode();
-        ucn.setFunction(lambda);
-        ucn.getItems().add(LiteralNode.ofValue(2.0));
+        ucn.getNodes().add(lambda);
+        ucn.getNodes().add(LiteralNode.ofValue(2.0));
 
         Object result = Interpreter.eval(ucn, HashTreePMap.empty());
         assertEquals(5.0, result);
