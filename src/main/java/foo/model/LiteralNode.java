@@ -1,11 +1,12 @@
 package foo.model;
 
 import foo.utils.LiteralParser;
+import lombok.Data;
 
+@Data
 public class LiteralNode extends Node {
     private final String text;
     private final Object value;
-
 
     public LiteralNode(String text) {
         this(text, LiteralParser.parse(text));
@@ -14,15 +15,6 @@ public class LiteralNode extends Node {
     private LiteralNode(String text, Object value) {
         this.text = text;
         this.value = LiteralParser.parse(text);
-    }
-
-
-    public String getText() {
-        return text;
-    }
-
-    public Object getValue() {
-        return value;
     }
 
     @Override

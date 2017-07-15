@@ -1,0 +1,19 @@
+--- !<CreateProject>
+id: 1
+name: My Project
+--- !<CreatePackage>
+id: 2
+name: com.example.package
+parentId: 1
+--- !<CreateFunction>
+id: 3
+name: foo
+parentId: 2
+--- !<CreateParameter>
+id: 4
+name: x
+parentId: 3
+--- !<CreateParameter>
+id: 5
+name: 3
+parentId: 3

@@ -14,20 +14,20 @@ public class Workspace {
 
     private final ChangeVisitor<Problem> changeVisitor = new ChangeVisitor<Problem>() {
         @Override
-        public Problem visitCreateProject(CreateProjectChange createProjectChange) {
+        public Problem visitCreateProject(CreateProject createProject) {
             ProjectNode projectNode = new ProjectNode();
-            projectNode.setId(createProjectChange.getId());
-            projectNode.setName(createProjectChange.getName());
+            projectNode.setId(createProject.getId());
+            projectNode.setName(createProject.getName());
             addNode(projectNode);
             return null;
         }
 
         @Override
-        public Problem visitCreatePackage(CreatePackageChange createPackageChange) {
-            Node parent = node(createPackageChange.getParentId());
+        public Problem visitCreatePackage(CreatePackage createPackage) {
+            Node parent = node(createPackage.getParentId());
             PackageNode packageNode = new PackageNode();
-            packageNode.setName(createPackageChange.getName());
-            packageNode.setId(createPackageChange.getId());
+            packageNode.setName(createPackage.getName());
+            packageNode.setId(createPackage.getId());
             addNode(packageNode);
             if (parent instanceof ProjectNode) {
                 ((ProjectNode) parent).getPackages().add(packageNode);
@@ -35,6 +35,29 @@ public class Workspace {
                 ((PackageNode) parent).getItems().add(packageNode);
             }
             return null;
+        }
+
+        @Override
+        public Problem visitCreateFunction(CreateFunction createFunction) {
+            PackageNode parent = node(createFunction.getParentId());
+            FunctionNode functionNode = new FunctionNode();
+            functionNode.setName(createFunction.getName());
+            functionNode.setId(createFunction.getId());
+            addNode(functionNode);
+            parent.getItems().add(functionNode);
+            return null;
+        }
+
+        @Override
+        public Problem visitCreateParameter(CreateParameter createParameter) {
+            FunctionNode parent = node(createParameter.getParentId());
+            ParameterNode parameterNode = new ParameterNode();
+            parameterNode.setName(createParameter.getName());
+            parameterNode.setId(createParameter.getId());
+            addNode(parameterNode);
+            parent.getParameters().add(parameterNode);
+            return null;
+
         }
     };
 

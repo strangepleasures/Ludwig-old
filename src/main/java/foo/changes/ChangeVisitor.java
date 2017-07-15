@@ -1,7 +1,11 @@
 package foo.changes;
 
 public interface ChangeVisitor<T> {
-    T visitCreateProject(CreateProjectChange createProjectChange);
+    T visitCreateProject(CreateProject createProject);
 
-    T visitCreatePackage(CreatePackageChange createPackageChange);
+    T visitCreatePackage(CreatePackage createPackage);
+
+    T visitCreateFunction(CreateFunction createFunction);
+
+    T visitCreateParameter(CreateParameter createParameter);
 }

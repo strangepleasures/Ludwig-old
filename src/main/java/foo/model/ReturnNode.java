@@ -1,15 +1,10 @@
 package foo.model;
 
+import lombok.Data;
+
+@Data
 public class ReturnNode extends Node {
     private Node value;
-
-    public Node getValue() {
-        return value;
-    }
-
-    public void setValue(Node value) {
-        this.value = value;
-    }
 
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {

@@ -1,6 +1,7 @@
-package foo.changes;
+package foo.repository;
 
 import com.google.gson.*;
+import foo.changes.Change;
 
 import java.lang.reflect.Type;
 
