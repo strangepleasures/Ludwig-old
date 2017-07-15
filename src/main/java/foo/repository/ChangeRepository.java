@@ -24,6 +24,7 @@ public class ChangeRepository {
             UnboundCall.class,
             Literal.class,
             Reference.class,
+            Return.class,
 
             Position.class,
             Binding.class,

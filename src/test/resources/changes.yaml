@@ -37,11 +37,15 @@ node: 5
 destination: !Binding
   parent: 7
   parameter: system:plus:y
---- !UnboundCall
-id: 10
-destination: !Position
+--- !Return
+id: 101
+position: !Position
   parent: 3
   prev: 7
+--- !UnboundCall
+id: 10
+destination: !Slot
+  parent: 101
 --- !Reference
 id: 11
 node: system:minus

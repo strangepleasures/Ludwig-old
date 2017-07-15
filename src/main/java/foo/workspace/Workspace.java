@@ -99,6 +99,14 @@ public class Workspace {
             place(node, unboundCall.getDestination());
             return null;
         }
+
+        @Override
+        public Problem visitReturn(Return aReturn) {
+            ReturnNode node = new ReturnNode();
+            node.setId(aReturn.getId());
+            place(node, aReturn.getPosition());
+            return null;
+        }
     };
 
     public List<ProjectNode> getProjects() {
@@ -130,7 +138,7 @@ public class Workspace {
         nodes.clear();
         projects.clear();
 
-        List<Change> changes =new ArrayList<>(appliedChanges);
+        List<Change> changes = new ArrayList<>(appliedChanges);
         appliedChanges.clear();
         apply(changes);
     }

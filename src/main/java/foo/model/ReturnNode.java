@@ -3,7 +3,7 @@ package foo.model;
 import lombok.Data;
 
 @Data
-public class ReturnNode extends Node {
+public class ReturnNode extends Node implements ValueHolder<Node> {
     private Node value;
 
     @Override

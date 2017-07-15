@@ -16,4 +16,6 @@ public interface ChangeVisitor<T> {
     T visitLiteral(Literal literal);
 
     T visitUnboundCall(UnboundCall unboundCall);
+
+    T visitReturn(Return aReturn);
 }

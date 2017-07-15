@@ -27,7 +27,7 @@ public class ChangeRepositoryTest {
                 "      plus\n" +
                 "        x: x\n" +
                 "        y: y\n" +
-                "      minus\n" +
+                "      return minus\n" +
                 "        2\n" +
                 "        3\n",
             PrintUtil.toString(workspace.getProjects().get(0)));
