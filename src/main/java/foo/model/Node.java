@@ -2,7 +2,8 @@ package foo.model;
 
 import lombok.*;
 
-@Data
+@Getter
+@Setter
 public abstract class Node {
     String id;
     String comment;

@@ -4,6 +4,7 @@ import foo.changes.*;
 import foo.changes.Package;
 import foo.interpreter.SystemPackage;
 import foo.model.*;
+import foo.runtime.StdLib;
 
 import java.util.*;
 
@@ -15,7 +16,7 @@ public class Workspace {
     private final List<ProjectNode> projects = new ArrayList<>();
 
     public Workspace() {
-        registerPackage(new SystemPackage());
+        registerProject(new foo.interpreter.Runtime());
     }
 
     private final ChangeVisitor<Problem> changeVisitor = new ChangeVisitor<Problem>() {
@@ -158,6 +159,13 @@ public class Workspace {
         nodes.put(node.getId(), node);
         if (node instanceof ProjectNode) {
             projects.add((ProjectNode) node);
+        }
+    }
+
+    public void registerProject(ProjectNode projectNode) {
+        addNode(projectNode);
+        for (PackageNode packageNode: projectNode.getPackages()) {
+            registerPackage(packageNode);
         }
     }
 

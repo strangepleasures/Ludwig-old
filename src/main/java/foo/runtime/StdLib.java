@@ -1,11 +1,16 @@
-package foo.interpreter;
+package foo.runtime;
 
+import foo.interpreter.Callable;
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
 import java.util.Iterator;
 
 public class StdLib {
+    public static String str(Object x) {
+        return String.valueOf(x);
+    }
+
     public static double exp(Number x) {
         return Math.exp(x.doubleValue());
     }

@@ -12,12 +12,36 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
     private final Method method;
 
     public NativeFunctionNode(Method method) {
-        setName(method.getName());
-        setId("system:" + method.getName());
+        if (method.isAnnotationPresent(Name.class)) {
+            setName(method.getAnnotation(Name.class).value());
+        } else {
+            setName(method.getName());
+        }
+
+        String packageName;
+        if (method.getDeclaringClass().isAnnotationPresent(Name.class)) {
+            packageName = method.getDeclaringClass().getAnnotation(Name.class).value();
+        } else {
+            packageName = method.getDeclaringClass().getSimpleName().toLowerCase();
+        }
+
+        setId(packageName + ":" + method.getName());
+
+        if (method.isAnnotationPresent(Description.class)) {
+            setComment(method.getAnnotation(Description.class).value());
+        }
+
         for (Parameter parameter: method.getParameters()) {
             ParameterNode param = new ParameterNode();
-            param.setName(parameter.getName());
-            param.setId("system:" + method.getName() + ":" + parameter.getName());
+            if (parameter.isAnnotationPresent(Name.class)) {
+                setName(parameter.getAnnotation(Name.class).value());
+            } else {
+                setName(parameter.getName());
+            }
+            param.setId(getId() + ":" + parameter.getName());
+            if (parameter.isAnnotationPresent(Description.class)) {
+                param.setComment(parameter.getAnnotation(Description.class).value());
+            }
             getParameters().add(param);
         }
         this.method = method;
