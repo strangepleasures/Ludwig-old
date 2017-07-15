@@ -3,6 +3,7 @@ package foo.repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.*;
 import foo.changes.*;
+import foo.changes.Package;
 
 import java.io.IOException;
 import java.net.URL;
@@ -15,11 +16,11 @@ public class ChangeRepository {
 
     static {
         mapper.registerSubtypes(
-            CreateProject.class,
-            CreatePackage.class,
-            CreateFunction.class,
-            CreateParameter.class,
-            CreateBoundCall.class,
+            Project.class,
+            Package.class,
+            Function.class,
+            Parameter.class,
+            BoundCall.class,
             Reference.class,
 
             Position.class,

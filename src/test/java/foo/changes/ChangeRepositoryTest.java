@@ -24,7 +24,7 @@ public class ChangeRepositoryTest {
 
         assertEquals(
             "project My Project\n" +
-            "  package com.example.package\n" +
+            "  package mypackage\n" +
             "    def foo [x y]\n" +
             "      plus\n" +
             "        x: x\n" +

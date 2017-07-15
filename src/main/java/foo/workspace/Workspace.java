@@ -1,6 +1,7 @@
 package foo.workspace;
 
 import foo.changes.*;
+import foo.changes.Package;
 import foo.interpreter.SystemPackage;
 import foo.model.*;
 
@@ -19,20 +20,20 @@ public class Workspace {
 
     private final ChangeVisitor<Problem> changeVisitor = new ChangeVisitor<Problem>() {
         @Override
-        public Problem visitCreateProject(CreateProject createProject) {
+        public Problem visitProject(Project project) {
             ProjectNode projectNode = new ProjectNode();
-            projectNode.setId(createProject.getId());
-            projectNode.setName(createProject.getName());
+            projectNode.setId(project.getId());
+            projectNode.setName(project.getName());
             addNode(projectNode);
             return null;
         }
 
         @Override
-        public Problem visitCreatePackage(CreatePackage createPackage) {
-            Node parent = node(createPackage.getParent());
+        public Problem visitPackage(Package aPackage) {
+            Node parent = node(aPackage.getParent());
             PackageNode packageNode = new PackageNode();
-            packageNode.setName(createPackage.getName());
-            packageNode.setId(createPackage.getId());
+            packageNode.setName(aPackage.getName());
+            packageNode.setId(aPackage.getId());
             addNode(packageNode);
             if (parent instanceof ProjectNode) {
                 ((ProjectNode) parent).getPackages().add(packageNode);
@@ -43,34 +44,34 @@ public class Workspace {
         }
 
         @Override
-        public Problem visitCreateFunction(CreateFunction createFunction) {
-            PackageNode parent = node(createFunction.getParent());
+        public Problem visitFunction(Function function) {
+            PackageNode parent = node(function.getParent());
             FunctionNode functionNode = new FunctionNode();
-            functionNode.setName(createFunction.getName());
-            functionNode.setId(createFunction.getId());
+            functionNode.setName(function.getName());
+            functionNode.setId(function.getId());
             addNode(functionNode);
             parent.getItems().add(functionNode);
             return null;
         }
 
         @Override
-        public Problem visitCreateParameter(CreateParameter createParameter) {
+        public Problem visitParameter(Parameter parameter) {
             ParameterNode parameterNode = new ParameterNode();
-            parameterNode.setName(createParameter.getName());
-            parameterNode.setId(createParameter.getId());
-            place(parameterNode, createParameter.getPosition());
+            parameterNode.setName(parameter.getName());
+            parameterNode.setId(parameter.getId());
+            place(parameterNode, parameter.getPosition());
 
             return null;
 
         }
 
         @Override
-        public Problem visitCreateBoundCall(CreateBoundCall createBoundCall) {
-            FunctionNode function = node(createBoundCall.getFunction());
+        public Problem visitBoundCall(BoundCall boundCall) {
+            FunctionNode function = node(boundCall.getFunction());
             BoundCallNode node = new BoundCallNode();
             node.setFunction(function);
-            node.setId(createBoundCall.getId());
-            place(node, createBoundCall.getDestination());
+            node.setId(boundCall.getId());
+            place(node, boundCall.getDestination());
             return null;
         }
 

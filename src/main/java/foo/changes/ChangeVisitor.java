@@ -1,15 +1,15 @@
 package foo.changes;
 
 public interface ChangeVisitor<T> {
-    T visitCreateProject(CreateProject createProject);
+    T visitProject(Project project);
 
-    T visitCreatePackage(CreatePackage createPackage);
+    T visitPackage(Package aPackage);
 
-    T visitCreateFunction(CreateFunction createFunction);
+    T visitFunction(Function function);
 
-    T visitCreateParameter(CreateParameter createParameter);
+    T visitParameter(Parameter parameter);
 
-    T visitCreateBoundCall(CreateBoundCall createBoundCall);
+    T visitBoundCall(BoundCall boundCall);
 
     T visitReference(Reference reference);
 
