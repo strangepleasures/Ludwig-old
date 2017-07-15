@@ -29,7 +29,7 @@ public class InterpreterTest {
         refNode2.setNode(parameterNode2);
         boundCallNode.getArguments().put(minus.getParameters().get(0), refNode1);
         boundCallNode.getArguments().put(minus.getParameters().get(1), refNode2);
-        functionNode.getBody().add(boundCallNode);
+        functionNode.getItems().add(boundCallNode);
 
 
         Object result = interpreter.call(functionNode, 50.0, 8.0);

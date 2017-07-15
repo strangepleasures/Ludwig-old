@@ -1,19 +1,39 @@
---- !<CreateProject>
+--- !CreateProject
 id: 1
 name: My Project
---- !<CreatePackage>
+--- !CreatePackage
 id: 2
 name: com.example.package
-parentId: 1
---- !<CreateFunction>
+parent: 1
+--- !CreateFunction
 id: 3
 name: foo
-parentId: 2
---- !<CreateParameter>
+parent: 2
+--- !CreateParameter
 id: 4
 name: x
-parentId: 3
---- !<CreateParameter>
+position: !Position
+  parent: 3
+--- !CreateParameter
 id: 5
-name: 3
-parentId: 3
+name: y
+position: !Position
+  parent: 3
+  prev: 4
+--- !CreateBoundCall
+  id: 7
+  function: system:plus
+  destination: !Position
+    parent: 3
+--- !Reference
+  id: 8
+  nodeId: 4
+  destination: !Binding
+    parent: 7
+    parameter: system:plus:x
+--- !Reference
+  id: 9
+  nodeId: 5
+  destination: !Binding
+    parent: 7
+    parameter: system:plus:y

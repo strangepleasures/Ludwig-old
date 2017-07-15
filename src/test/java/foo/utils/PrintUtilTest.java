@@ -27,7 +27,7 @@ public class PrintUtilTest {
         refNode2.setNode(parameterNode1);
         boundCallNode.getArguments().put(parameterNode1, refNode1);
         boundCallNode.getArguments().put(parameterNode2, refNode2);
-        functionNode.getBody().add(boundCallNode);
+        functionNode.getItems().add(boundCallNode);
         packageNode.getItems().add(functionNode);
         assertEquals(
             "package mypackage\n" +

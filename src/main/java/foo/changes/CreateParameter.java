@@ -6,7 +6,7 @@ import lombok.Value;
 public class CreateParameter extends Change {
     String id;
     String name;
-    String parentId;
+    Position position;
 
     @Override
     public <T> T accept(ChangeVisitor<T> visitor) {

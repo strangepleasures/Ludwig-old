@@ -46,7 +46,7 @@ public class Interpreter {
                 }
 
                 Object result = null;
-                for (Node node: functionNode.getBody()) {
+                for (Node node: functionNode.getItems()) {
                     result = node.accept(this);
                     if (result instanceof Signal) {
                         break;
@@ -129,7 +129,7 @@ public class Interpreter {
                     }
 
                     Object result = null;
-                    for (Node node : functionNode.getBody()) {
+                    for (Node node : functionNode.getItems()) {
                         result = node.accept(this);
                         if (result instanceof Signal) {
                             break;

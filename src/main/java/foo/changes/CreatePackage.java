@@ -6,7 +6,7 @@ import lombok.Value;
 public class CreatePackage extends Change {
     String id;
     String name;
-    String parentId;
+    String parent;
 
     @Override
     public <T> T accept(ChangeVisitor<T> visitor) {

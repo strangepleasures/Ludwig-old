@@ -18,7 +18,12 @@ public class ChangeRepository {
             CreateProject.class,
             CreatePackage.class,
             CreateFunction.class,
-            CreateParameter.class);
+            CreateParameter.class,
+            CreateBoundCall.class,
+            Reference.class,
+
+            Position.class,
+            Binding.class);
     }
 
     public static List<Change> fetch(URL url) throws IOException {

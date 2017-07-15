@@ -49,7 +49,7 @@ public class PrintUtil {
             }
             out.append("]\n");
             indentation++;
-            for (Node node : functionNode.getBody()) {
+            for (Node node : functionNode.getItems()) {
                 node.accept(this);
             }
             indentation--;
