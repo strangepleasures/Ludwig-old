@@ -17,9 +17,9 @@ public class Workspace {
         registerPackage(new SystemPackage());
     }
 
-    private final ChangeVisitor<Node> changeVisitor = new ChangeVisitor<Node>() {
+    private final ChangeVisitor<Problem> changeVisitor = new ChangeVisitor<Problem>() {
         @Override
-        public Node visitCreateProject(CreateProject createProject) {
+        public Problem visitCreateProject(CreateProject createProject) {
             ProjectNode projectNode = new ProjectNode();
             projectNode.setId(createProject.getId());
             projectNode.setName(createProject.getName());
@@ -28,7 +28,7 @@ public class Workspace {
         }
 
         @Override
-        public Node visitCreatePackage(CreatePackage createPackage) {
+        public Problem visitCreatePackage(CreatePackage createPackage) {
             Node parent = node(createPackage.getParent());
             PackageNode packageNode = new PackageNode();
             packageNode.setName(createPackage.getName());
@@ -43,7 +43,7 @@ public class Workspace {
         }
 
         @Override
-        public Node visitCreateFunction(CreateFunction createFunction) {
+        public Problem visitCreateFunction(CreateFunction createFunction) {
             PackageNode parent = node(createFunction.getParent());
             FunctionNode functionNode = new FunctionNode();
             functionNode.setName(createFunction.getName());
@@ -54,11 +54,10 @@ public class Workspace {
         }
 
         @Override
-        public Node visitCreateParameter(CreateParameter createParameter) {
+        public Problem visitCreateParameter(CreateParameter createParameter) {
             ParameterNode parameterNode = new ParameterNode();
             parameterNode.setName(createParameter.getName());
             parameterNode.setId(createParameter.getId());
-            addNode(parameterNode);
             place(parameterNode, createParameter.getPosition());
 
             return null;
@@ -66,28 +65,30 @@ public class Workspace {
         }
 
         @Override
-        public Node visitCreateBoundCall(CreateBoundCall createBoundCall) {
+        public Problem visitCreateBoundCall(CreateBoundCall createBoundCall) {
             FunctionNode function = node(createBoundCall.getFunction());
             BoundCallNode node = new BoundCallNode();
             node.setFunction(function);
             node.setId(createBoundCall.getId());
-            addNode(node);
-
             place(node, createBoundCall.getDestination());
-
-            return node;
+            return null;
         }
 
         @Override
-        public Node visitReference(Reference reference) {
+        public Problem visitReference(Reference reference) {
             RefNode ref = new RefNode();
             ref.setId(reference.getId());
             ref.setNode(node(reference.getNodeId()));
-            addNode(ref);
-
             place(ref, reference.getDestination());
+            return null;
+        }
 
-            return ref;
+        @Override
+        public Problem visitLiteral(Literal literal) {
+            LiteralNode literalNode = new LiteralNode(literal.getValue());
+            literalNode.setId(literal.getId());
+            place(literalNode, literal.getDestination());
+            return null;
         }
     };
 
@@ -99,19 +100,13 @@ public class Workspace {
         List<Problem> problems = new ArrayList<>();
 
         for (Change change: changes) {
-
-            try {
-                change.accept(changeVisitor);
-            } catch (Exception e) {
-//            Problem problem =
-//            if (problem != null) {
-//                problems.add(problem);
-//                if (problems.size() == MAX_PROBLEMS) {
-//                    break;
-//                }
-//            }
+            Problem problem = change.accept(changeVisitor);
+            if (problem != null) {
+                problems.add(problem);
+                if (problems.size() == MAX_PROBLEMS) {
+                    break;
+                }
             }
-
         }
 
         if (problems.isEmpty()) { // TODO: Make a distinction between warnings and errors
@@ -160,6 +155,8 @@ public class Workspace {
     }
 
     private void place(Node node, Destination destination) {
+        addNode(node);
+
         if (destination instanceof Binding) {
             Binding binding = (Binding) destination;
             BoundCallNode parent = node(binding.getParent());

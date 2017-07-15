@@ -12,4 +12,6 @@ public interface ChangeVisitor<T> {
     T visitCreateBoundCall(CreateBoundCall createBoundCall);
 
     T visitReference(Reference reference);
+
+    T visitLiteral(Literal literal);
 }
