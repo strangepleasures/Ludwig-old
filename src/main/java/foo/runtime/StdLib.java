@@ -1,6 +1,7 @@
 package foo.runtime;
 
 import foo.interpreter.Callable;
+import foo.interpreter.Name;
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
@@ -45,6 +46,7 @@ public class StdLib {
         };
     }
 
+    @Name("to-list")
     public static PVector tolist(Iterable source) {
         if (source instanceof PVector) {
             return (PVector) source;

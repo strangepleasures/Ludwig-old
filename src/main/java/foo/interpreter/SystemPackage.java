@@ -4,6 +4,7 @@ import foo.model.PackageNode;
 import foo.runtime.StdLib;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 public class SystemPackage extends PackageNode {
     public SystemPackage(Class<?> clazz) {
@@ -17,7 +18,9 @@ public class SystemPackage extends PackageNode {
         setId(packageName);
 
         for (Method method : StdLib.class.getDeclaredMethods()) {
-            getItems().add(new NativeFunctionNode(method));
+            if (Modifier.isPublic(method.getModifiers())) {
+                getItems().add(new NativeFunctionNode(method));
+            }
         }
     }
 }

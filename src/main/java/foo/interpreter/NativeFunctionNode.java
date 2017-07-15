@@ -34,9 +34,9 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
         for (Parameter parameter: method.getParameters()) {
             ParameterNode param = new ParameterNode();
             if (parameter.isAnnotationPresent(Name.class)) {
-                setName(parameter.getAnnotation(Name.class).value());
+                param.setName(parameter.getAnnotation(Name.class).value());
             } else {
-                setName(parameter.getName());
+                param.setName(parameter.getName());
             }
             param.setId(getId() + ":" + parameter.getName());
             if (parameter.isAnnotationPresent(Description.class)) {
@@ -54,10 +54,5 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
         } catch (IllegalAccessException|InvocationTargetException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public String toString() {
-        return PrintUtil.toString(this);
     }
 }

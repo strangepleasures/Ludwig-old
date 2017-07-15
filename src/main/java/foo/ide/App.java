@@ -3,12 +3,14 @@ package foo.ide;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import foo.changes.Change;
-import foo.model.NamedNode;
+import foo.model.*;
 import foo.repository.ChangeRepository;
 import foo.workspace.Workspace;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -22,7 +24,6 @@ public class App extends Application {
 
     private Settings settings;
     private Workspace workspace = new Workspace();
-    private WorkspaceTreeModel workspaceTreeModel;
 
     public static void main(String[] args) {
         launch(args);
@@ -33,10 +34,40 @@ public class App extends Application {
         loadSettings();  // TODO: async
         loadWorkspace(); // TODO: async
 
-        TreeView<NamedNode> packageTree = new TreeView<>(workspaceTreeModel.getWorkspaceRoot());
+        SplitPane splitPane = new SplitPane();
+
+        PackageTreeView packageTree = new PackageTreeView(workspace);
         packageTree.setShowRoot(false);
-        primaryStage.setScene(new Scene(packageTree, 640, 480));
+        ListView<NamedNode> functionList = new ListView<>();
+
+        packageTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            fillFunctionList(functionList, newValue);
+        });
+
+        splitPane.getItems().add(packageTree);
+        splitPane.getItems().add(functionList);
+
+        primaryStage.setScene(new Scene(splitPane, 640, 480));
         primaryStage.show();
+    }
+
+    private void fillFunctionList(ListView<NamedNode> functionList, TreeItem<NamedNode> newValue) {
+        NamedNode node = newValue.getValue();
+
+        if (node instanceof PackageNode) {
+            PackageNode packageNode = (PackageNode) node;
+            functionList.getItems().clear();
+
+            for (NamedNode item: packageNode.getItems()) {
+                if (item instanceof FunctionNode) {
+                    functionList.getItems().add(item);
+                }
+            }
+        }
+
+
+
+
     }
 
     @Override
@@ -66,7 +97,6 @@ public class App extends Application {
             try {
                 List<Change> changes = ChangeRepository.fetch(settings.getProject());
                 workspace.apply(changes);
-                workspaceTreeModel = new WorkspaceTreeModel(workspace);
             } catch (IOException e) {
                 // TODO:
             }
