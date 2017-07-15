@@ -1,11 +1,11 @@
 package foo.model;
 
-import lombok.Data;
+import lombok.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Data
+@Getter @Setter
 public class BoundCallNode extends Node {
     private FunctionNode function;
 

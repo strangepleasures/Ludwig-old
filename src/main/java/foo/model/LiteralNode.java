@@ -1,9 +1,10 @@
 package foo.model;
 
 import foo.utils.LiteralParser;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 public class LiteralNode extends Node {
     private final String text;
     private final Object value;

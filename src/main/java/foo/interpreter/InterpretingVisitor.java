@@ -100,6 +100,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         Callable callable = (Callable) unboundCallNode.getFunction().accept(this);
         Object[] args = unboundCallNode.getItems()
             .stream()
+            .skip(1)
             .map(arg -> arg.accept(this))
             .toArray();
         return callable.call(args);

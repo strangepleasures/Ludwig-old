@@ -1,5 +1,10 @@
 package foo.interpreter;
 
+import org.pcollections.PVector;
+import org.pcollections.TreePVector;
+
+import java.util.Iterator;
+
 public class StdLib {
     public static double exp(Number x) {
         return Math.exp(x.doubleValue());
@@ -17,5 +22,32 @@ public class StdLib {
             return x.doubleValue() - y.doubleValue();
         }
         return x.longValue() - y.longValue();
+    }
+
+    public static Iterable map(Iterable source, Callable f) {
+        return () -> new Iterator() {
+            Iterator it = source.iterator();
+
+            @Override
+            public boolean hasNext() {
+                return it.hasNext();
+            }
+
+            @Override
+            public Object next() {
+                return f.call(it.next());
+            }
+        };
+    }
+
+    public static PVector tolist(Iterable source) {
+        if (source instanceof PVector) {
+            return (PVector) source;
+        }
+        PVector v = TreePVector.empty();
+        for (Object x: source) {
+            v = v.plus(x);
+        }
+        return v;
     }
 }

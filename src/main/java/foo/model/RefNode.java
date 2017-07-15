@@ -1,8 +1,9 @@
 package foo.model;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 public class RefNode extends Node {
     private NamedNode node;
 

@@ -96,6 +96,7 @@ public class Workspace {
         public Problem visitUnboundCall(UnboundCall unboundCall) {
             UnboundCallNode node = new UnboundCallNode();
             node.setId(unboundCall.getId());
+            node.setFunction(node(unboundCall.getFunction()));
             place(node, unboundCall.getDestination());
             return null;
         }

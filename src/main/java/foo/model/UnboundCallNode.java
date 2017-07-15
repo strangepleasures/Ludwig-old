@@ -1,11 +1,11 @@
 package foo.model;
 
-import lombok.Data;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter @Setter
 public class UnboundCallNode extends Node implements ValueHolder<Node>, ListLike {
     private Node function;
     private final List<Node> items = new ArrayList<>();

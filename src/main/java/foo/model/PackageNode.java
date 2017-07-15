@@ -1,10 +1,11 @@
 package foo.model;
 
-import lombok.Data;
+import lombok.*;
 
 import java.util.*;
 
-@Data
+@Getter
+@Setter
 public class PackageNode extends NamedNode {
     private final SortedSet<NamedNode> items = new TreeSet<>(Comparator.comparing(NamedNode::getName));
 
