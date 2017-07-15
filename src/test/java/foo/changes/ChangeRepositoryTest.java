@@ -20,15 +20,16 @@ public class ChangeRepositoryTest {
 
         workspace.apply(changes);
 
-//        assertEquals(6, changes.size());
-
         assertEquals(
             "project My Project\n" +
-            "  package mypackage\n" +
-            "    def foo [x y]\n" +
-            "      plus\n" +
-            "        x: x\n" +
-            "        y: y\n",
+                "  package mypackage\n" +
+                "    def foo [x y]\n" +
+                "      plus\n" +
+                "        x: x\n" +
+                "        y: y\n" +
+                "      minus\n" +
+                "        2\n" +
+                "        3\n",
             PrintUtil.toString(workspace.getProjects().get(0)));
     }
 

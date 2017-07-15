@@ -51,7 +51,7 @@ public class InterpreterTest {
 
         UnboundCallNode ucn = new UnboundCallNode();
         ucn.setFunction(lambda);
-        ucn.getArguments().add(LiteralNode.ofValue(2.0));
+        ucn.getItems().add(LiteralNode.ofValue(2.0));
 
         Object result = Interpreter.eval(ucn, HashTreePMap.empty());
         assertEquals(5.0, result);

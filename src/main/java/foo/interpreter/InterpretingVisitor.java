@@ -98,7 +98,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     @Override
     public Object visitUnboundCall(UnboundCallNode unboundCallNode) {
         Callable callable = (Callable) unboundCallNode.getFunction().accept(this);
-        Object[] args = unboundCallNode.getArguments()
+        Object[] args = unboundCallNode.getItems()
             .stream()
             .map(arg -> arg.accept(this))
             .toArray();

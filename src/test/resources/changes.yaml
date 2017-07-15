@@ -21,19 +21,40 @@ position: !Position
   parent: 3
   prev: 4
 --- !BoundCall
-  id: 7
-  function: system:plus
-  destination: !Position
-    parent: 3
+id: 7
+function: system:plus
+destination: !Position
+  parent: 3
 --- !Reference
-  id: 8
-  nodeId: 4
-  destination: !Binding
-    parent: 7
-    parameter: system:plus:x
+id: 8
+node: 4
+destination: !Binding
+  parent: 7
+  parameter: system:plus:x
 --- !Reference
-  id: 9
-  nodeId: 5
-  destination: !Binding
-    parent: 7
-    parameter: system:plus:y
+id: 9
+node: 5
+destination: !Binding
+  parent: 7
+  parameter: system:plus:y
+--- !UnboundCall
+id: 10
+destination: !Position
+  parent: 3
+  prev: 7
+--- !Reference
+id: 11
+node: system:minus
+destination: !Slot
+  parent: 10
+--- !Literal
+id: 12
+value: 3
+destination: !Position
+  parent: 10
+--- !Literal
+id: 13
+value: 2
+destination: !Position
+  parent: 10
+  next: 12

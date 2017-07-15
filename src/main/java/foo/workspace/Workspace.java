@@ -79,7 +79,7 @@ public class Workspace {
         public Problem visitReference(Reference reference) {
             RefNode ref = new RefNode();
             ref.setId(reference.getId());
-            ref.setNode(node(reference.getNodeId()));
+            ref.setNode(node(reference.getNode()));
             place(ref, reference.getDestination());
             return null;
         }
@@ -89,6 +89,14 @@ public class Workspace {
             LiteralNode literalNode = new LiteralNode(literal.getValue());
             literalNode.setId(literal.getId());
             place(literalNode, literal.getDestination());
+            return null;
+        }
+
+        @Override
+        public Problem visitUnboundCall(UnboundCall unboundCall) {
+            UnboundCallNode node = new UnboundCallNode();
+            node.setId(unboundCall.getId());
+            place(node, unboundCall.getDestination());
             return null;
         }
     };
@@ -163,7 +171,7 @@ public class Workspace {
             BoundCallNode parent = node(binding.getParent());
             ParameterNode parameter = node(binding.getParameter());
             parent.getArguments().put(parameter, node);
-        } else {
+        } else if (destination instanceof Position) {
             Position position = (Position) destination;
             ListLike parent = node(position.getParent());
 
@@ -189,6 +197,9 @@ public class Workspace {
                     items.add(nextIndex, next);
                 }
             }
+        } else if (destination instanceof Slot) {
+            ValueHolder<Node> dest = node(((Slot) destination).getParent());
+            dest.setValue(node);
         }
     }
 }

@@ -1,15 +1,15 @@
 package foo.changes;
 
-import lombok.Value;
+import lombok.*;
 
 @Value
-public class Reference extends Change {
+public class UnboundCall extends Change {
     String id;
-    String node;
+    String function;
     Destination destination;
 
     @Override
     public <T> T accept(ChangeVisitor<T> visitor) {
-        return visitor.visitReference(this);
+        return visitor.visitUnboundCall(this);
     }
 }

@@ -113,12 +113,12 @@ public class PrintUtil {
             indent();
             if (unboundCallNode.getFunction() instanceof RefNode) {
                 out.append(((RefNode) unboundCallNode.getFunction()).getNode().getName());
-                if (unboundCallNode.getArguments().isEmpty()) {
+                if (unboundCallNode.getItems().isEmpty()) {
                     out.append(" []\n");
                 } else {
                     out.append('\n');
                     indentation++;
-                    for (Node item : unboundCallNode.getArguments()) {
+                    for (Node item : unboundCallNode.getItems()) {
                         item.accept(this);
                     }
                     indentation--;

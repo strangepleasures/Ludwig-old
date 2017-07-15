@@ -21,10 +21,13 @@ public class ChangeRepository {
             Function.class,
             Parameter.class,
             BoundCall.class,
+            UnboundCall.class,
+            Literal.class,
             Reference.class,
 
             Position.class,
-            Binding.class);
+            Binding.class,
+            Slot.class);
     }
 
     public static List<Change> fetch(URL url) throws IOException {
