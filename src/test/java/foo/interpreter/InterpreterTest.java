@@ -7,7 +7,6 @@ import org.pcollections.HashTreePMap;
 import static org.junit.Assert.*;
 
 public class InterpreterTest {
-    private Interpreter interpreter = new Interpreter();
     private SystemPackage systemPackage = new SystemPackage();
 
     @Test
@@ -32,7 +31,7 @@ public class InterpreterTest {
         functionNode.getItems().add(boundCallNode);
 
 
-        Object result = interpreter.call(functionNode, 50.0, 8.0);
+        Object result = Interpreter.call(functionNode, 50.0, 8.0);
         assertEquals(42.0, result);
     }
 
@@ -54,7 +53,7 @@ public class InterpreterTest {
         ucn.setFunction(lambda);
         ucn.getArguments().add(LiteralNode.ofValue(2.0));
 
-        Object result = interpreter.eval(ucn, HashTreePMap.empty());
+        Object result = Interpreter.eval(ucn, HashTreePMap.empty());
         assertEquals(5.0, result);
     }
 

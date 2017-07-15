@@ -2,12 +2,13 @@ package foo.interpreter;
 
 import foo.model.FunctionNode;
 import foo.model.ParameterNode;
+import foo.utils.PrintUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-public class NativeFunctionNode extends FunctionNode {
+public class NativeFunctionNode extends FunctionNode implements Callable {
     private final Method method;
 
     public NativeFunctionNode(Method method) {
@@ -22,11 +23,17 @@ public class NativeFunctionNode extends FunctionNode {
         this.method = method;
     }
 
-    public Object eval(Object[] args) {
+    @Override
+    public Object call(Object[] args) {
         try {
             return method.invoke(null, args);
         } catch (IllegalAccessException|InvocationTargetException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return PrintUtil.toString(this);
     }
 }

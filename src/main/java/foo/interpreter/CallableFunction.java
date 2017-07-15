@@ -3,29 +3,27 @@ package foo.interpreter;
 import foo.model.*;
 import foo.utils.PrintUtil;
 import org.pcollections.HashPMap;
+import org.pcollections.HashTreePMap;
 
-import java.util.List;
+public class CallableFunction implements Callable {
+    private final FunctionNode function;
 
-public class Closure implements Callable {
-    private final HashPMap<NamedNode, Object> locals;
-    private final LambdaNode lambda;
-
-    public Closure(HashPMap<NamedNode, Object> locals, LambdaNode lambda) {
-        this.locals = locals;
-        this.lambda = lambda;
+    public CallableFunction(FunctionNode function) {
+        this.function = function;
     }
 
     @Override
     public Object call(Object[] args) {
-        HashPMap<NamedNode, Object> env = locals;
+        HashPMap<NamedNode, Object> env = HashTreePMap.empty();
+
         for (int i = 0; i < args.length; i++) {
-            env = env.plus(lambda.getParameters().get(i), args[i]);
+            env = env.plus(function.getParameters().get(i), args[i]);
         }
 
         InterpretingVisitor visitor = new InterpretingVisitor(env);
 
         Object result = null;
-        for (Node node : lambda.getBody()) {
+        for (Node node : function.getItems()) {
             result = node.accept(visitor);
             if (result instanceof Signal) {
                 break;
@@ -41,6 +39,6 @@ public class Closure implements Callable {
 
     @Override
     public String toString() {
-        return PrintUtil.toString(lambda);
+        return PrintUtil.toString(function);
     }
 }
