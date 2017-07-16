@@ -1,7 +1,6 @@
 package foo.runtime;
 
-import foo.interpreter.Callable;
-import foo.interpreter.Name;
+import foo.interpreter.*;
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
@@ -13,6 +12,7 @@ public class StdLib {
         return String.valueOf(x);
     }
 
+    @Description("Exponent")
     public static double exp(Number x) {
         return Math.exp(x.doubleValue());
     }

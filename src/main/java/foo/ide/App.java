@@ -7,10 +7,16 @@ import foo.model.*;
 import foo.repository.ChangeRepository;
 import foo.workspace.Workspace;
 import javafx.application.Application;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -39,13 +45,41 @@ public class App extends Application {
         PackageTreeView packageTree = new PackageTreeView(workspace);
         packageTree.setShowRoot(false);
         ListView<NamedNode> functionList = new ListView<>();
+        functionList.setMinWidth(120);
 
         packageTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             fillFunctionList(functionList, newValue);
         });
 
-        splitPane.getItems().add(packageTree);
-        splitPane.getItems().add(functionList);
+        VBox methodPane = new VBox();
+        TableView<NamedNode> signatureView = new TableView<>();
+        methodPane.getChildren().add(signatureView);
+
+        TableColumn<NamedNode, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        TableColumn<NamedNode, String> descriptionColumn = new TableColumn<>("Description");
+        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
+        signatureView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        signatureView.getColumns().addAll(nameColumn, descriptionColumn);
+        signatureView.setFixedCellSize(25);
+
+        signatureView.prefHeightProperty().bind(Bindings.size(signatureView.getItems()).multiply(signatureView.getFixedCellSize()).add(30));
+
+        WebView bodyEditor = new WebView();
+        methodPane.getChildren().add(bodyEditor);
+
+        functionList.getSelectionModel().selectedItemProperty().addListener(observable -> {
+            signatureView.getItems().clear();
+            NamedNode node = functionList.getSelectionModel().getSelectedItem();
+            if (node instanceof FunctionNode) {
+                FunctionNode functionNode = (FunctionNode) node;
+
+                signatureView.getItems().add(functionNode);
+                signatureView.getItems().addAll(functionNode.getParameters());
+            }
+        });
+
+        splitPane.getItems().addAll(packageTree, functionList, methodPane);
 
         primaryStage.setScene(new Scene(splitPane, 640, 480));
         primaryStage.show();
@@ -64,10 +98,6 @@ public class App extends Application {
                 }
             }
         }
-
-
-
-
     }
 
     @Override
