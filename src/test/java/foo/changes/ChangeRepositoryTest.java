@@ -1,5 +1,6 @@
 package foo.changes;
 
+import foo.model.ProjectNode;
 import foo.repository.ChangeRepository;
 import foo.utils.PrintUtil;
 import foo.workspace.Workspace;
@@ -7,6 +8,7 @@ import org.junit.Test;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -20,6 +22,9 @@ public class ChangeRepositoryTest {
 
         workspace.apply(changes);
 
+        Optional<ProjectNode> myProjectNodeOpt = workspace.getProjects().stream()
+                .filter(n -> n.getName().equals("My Project")).findFirst();
+        assertTrue(myProjectNodeOpt.isPresent());
         assertEquals(
             "project My Project\n" +
                 "  package mypackage\n" +
@@ -30,7 +35,7 @@ public class ChangeRepositoryTest {
                 "      return minus\n" +
                 "        3\n" +
                 "        2\n",
-            PrintUtil.toString(workspace.getProjects().get(0)));
+            PrintUtil.toString(myProjectNodeOpt.get()));
     }
 
 }

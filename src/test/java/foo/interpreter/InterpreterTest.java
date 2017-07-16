@@ -1,13 +1,14 @@
 package foo.interpreter;
 
 import foo.model.*;
+import foo.runtime.StdLib;
 import org.junit.Test;
 import org.pcollections.HashTreePMap;
 
 import static org.junit.Assert.*;
 
 public class InterpreterTest {
-    private SystemPackage systemPackage = new SystemPackage();
+    private SystemPackage systemPackage = new SystemPackage(StdLib.class);
 
     @Test
     public void testSimpleFunction() {

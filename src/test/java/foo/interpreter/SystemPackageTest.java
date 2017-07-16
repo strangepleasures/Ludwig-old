@@ -1,13 +1,14 @@
 package foo.interpreter;
 
 import foo.model.FunctionNode;
+import foo.runtime.StdLib;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class SystemPackageTest {
 
-    private SystemPackage systemPackage = new SystemPackage();
+    private SystemPackage systemPackage = new SystemPackage(StdLib.class);
 
     @Test
     public void testPlus() {
