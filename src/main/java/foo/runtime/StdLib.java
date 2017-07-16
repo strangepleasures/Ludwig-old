@@ -7,6 +7,7 @@ import org.pcollections.TreePVector;
 
 import java.util.*;
 
+@Name("system")
 public class StdLib {
     public static String str(Object x) {
         return String.valueOf(x);

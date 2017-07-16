@@ -17,7 +17,7 @@ public class SystemPackage extends PackageNode {
         setName(packageName);
         setId(packageName);
 
-        for (Method method : StdLib.class.getDeclaredMethods()) {
+        for (Method method : clazz.getDeclaredMethods()) {
             if (Modifier.isPublic(method.getModifiers())) {
                 getItems().add(new NativeFunctionNode(method));
             }
