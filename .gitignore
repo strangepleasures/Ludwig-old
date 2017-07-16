@@ -63,6 +63,9 @@ gradle-app.setting
 # Mongo Explorer plugin:
 .idea/**/mongoSettings.xml
 
+# Miscellaneous user specific settings:
+.idea/misc.xml
+
 ## File-based project format:
 *.iws
 
