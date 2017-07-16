@@ -5,7 +5,7 @@ import foo.interpreter.Name;
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
-import java.util.Iterator;
+import java.util.*;
 
 public class StdLib {
     public static String str(Object x) {
@@ -44,6 +44,61 @@ public class StdLib {
                 return f.call(it.next());
             }
         };
+    }
+
+    @Name("==")
+    public static boolean equals(Object x, Object y) {
+        return Objects.equals(x, y);
+    }
+
+    @Name("<")
+    public static boolean less(Comparable x, Comparable y) {
+        return x.compareTo(y) < 0;
+    }
+
+    @Name(">")
+    public static boolean greater(Comparable x, Comparable y) {
+        return x.compareTo(y) > 0;
+    }
+
+    @Name("<=")
+    public static boolean le(Comparable x, Comparable y) {
+        return x.compareTo(y) <= 0;
+    }
+
+    @Name(">=")
+    public static boolean ge(Comparable x, Comparable y) {
+        return x.compareTo(y) >= 0;
+    }
+
+    @Name("list")
+    public static PVector<?> $(Object... args) {
+        return TreePVector.from(Arrays.asList(args));
+    }
+
+    public static Object head(Iterable it) {
+        return it.iterator().next();
+    }
+
+    public static List tail(List list) {
+        return list.subList(1, list.size());
+    }
+
+    @Name("empty?")
+    public static boolean empty(Iterable x) {
+        return !x.iterator().hasNext();
+    }
+
+    public static PVector prepend(Object x, PVector list) {
+        return list.plus(0, x);
+    }
+
+    public static PVector append(PVector list, Object x) {
+        return list.plus(x);
+    }
+
+    public static void println(Object o) {
+        System.out.println(o);
     }
 
     @Name("to-list")
