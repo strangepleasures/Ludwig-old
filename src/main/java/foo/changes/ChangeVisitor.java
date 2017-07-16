@@ -20,4 +20,8 @@ public interface ChangeVisitor<T> {
     T visitReturn(Return aReturn);
 
     T visitLambda(Lambda lambda);
+
+    T visitAnd(And and);
+
+    T visitOr(Or or);
 }

@@ -115,6 +115,22 @@ public class Workspace {
             place(lambdaNode, lambda.getDestination());
             return null;
         }
+
+        @Override
+        public Problem visitAnd(And and) {
+            AndNode andNode = new AndNode();
+            andNode.setId(and.getId());
+            place(andNode, and.getDestination());
+            return null;
+        }
+
+        @Override
+        public Problem visitOr(Or or) {
+            OrNode orNode = new OrNode();
+            orNode.setId(or.getId());
+            place(orNode, or.getDestination());
+            return null;
+        }
     };
 
     public List<ProjectNode> getProjects() {

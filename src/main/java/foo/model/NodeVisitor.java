@@ -26,4 +26,8 @@ public interface NodeVisitor<T> {
     T visitProject(ProjectNode projectNode);
 
     T visitIf(IfNode ifNode);
+
+    T visitAnd(AndNode andNode);
+
+    T visitOr(OrNode orNode);
 }

@@ -144,4 +144,24 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         }
         return null;
     }
+
+    @Override
+    public Object visitAnd(AndNode andNode) {
+        for (Node node: andNode.getNodes()) {
+            if (!(Boolean) node.accept(this)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public Object visitOr(OrNode orNode) {
+        for (Node node: orNode.getNodes()) {
+            if ((Boolean) node.accept(this)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

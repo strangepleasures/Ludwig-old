@@ -189,6 +189,18 @@ public class PrintUtil {
             return null;
         }
 
+        @Override
+        public Void visitAnd(AndNode andNode) {
+            // TODO:
+            return null;
+        }
+
+        @Override
+        public Void visitOr(OrNode orNode) {
+            // TODO:
+            return null;
+        }
+
         private void indent() {
             if (!inline) {
                 for (int i = 0; i < indentation; i++) {
