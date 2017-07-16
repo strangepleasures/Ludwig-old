@@ -12,11 +12,8 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
     private final Method method;
 
     public NativeFunctionNode(Method method) {
-        if (method.isAnnotationPresent(Name.class)) {
-            setName(method.getAnnotation(Name.class).value());
-        } else {
-            setName(method.getName());
-        }
+        String methodName = method.isAnnotationPresent(Name.class) ? method.getAnnotation(Name.class).value() : method.getName();
+        setName(methodName);
 
         String packageName;
         if (method.getDeclaringClass().isAnnotationPresent(Name.class)) {
@@ -25,7 +22,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
             packageName = method.getDeclaringClass().getSimpleName().toLowerCase();
         }
 
-        setId(packageName + ":" + method.getName());
+        setId(packageName + ":" + methodName);
 
         if (method.isAnnotationPresent(Description.class)) {
             setComment(method.getAnnotation(Description.class).value());
@@ -33,12 +30,9 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
 
         for (Parameter parameter: method.getParameters()) {
             ParameterNode param = new ParameterNode();
-            if (parameter.isAnnotationPresent(Name.class)) {
-                param.setName(parameter.getAnnotation(Name.class).value());
-            } else {
-                param.setName(parameter.getName());
-            }
-            param.setId(getId() + ":" + parameter.getName());
+            String paramName = parameter.isAnnotationPresent(Name.class) ? parameter.getAnnotation(Name.class).value() : parameter.getName();
+            param.setName(paramName);
+            param.setId(getId() + ":" + paramName);
             if (parameter.isAnnotationPresent(Description.class)) {
                 param.setComment(parameter.getAnnotation(Description.class).value());
             }

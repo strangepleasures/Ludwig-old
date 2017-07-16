@@ -29,10 +29,10 @@ public class ChangeRepositoryTest {
             "project My Project\n" +
                 "  package mypackage\n" +
                 "    def foo [x y]\n" +
-                "      plus\n" +
+                "      +\n" +
                 "        x: x\n" +
                 "        y: y\n" +
-                "      return minus\n" +
+                "      return -\n" +
                 "        3\n" +
                 "        2\n",
             PrintUtil.toString(myProjectNodeOpt.get()));

@@ -21,7 +21,7 @@ public class InterpreterTest {
         parameterNode2.setName("y");
         functionNode.getParameters().add(parameterNode2);
         BoundCallNode boundCallNode = new BoundCallNode();
-        FunctionNode minus = (FunctionNode) systemPackage.item("minus");
+        FunctionNode minus = (FunctionNode) systemPackage.item("-");
         boundCallNode.setFunction(minus);
         RefNode refNode1 = new RefNode();
         refNode1.setNode(parameterNode1);
@@ -41,7 +41,7 @@ public class InterpreterTest {
         LambdaNode lambda = new LambdaNode();
 
         lambda.getParameters().add(new ParameterNode());
-        FunctionNode plus = (FunctionNode) systemPackage.item("plus");
+        FunctionNode plus = (FunctionNode) systemPackage.item("+");
         BoundCallNode bcn = new BoundCallNode();
         bcn.setFunction(plus);
         RefNode refNode = new RefNode();

@@ -22,7 +22,7 @@ position: !Position
   prev: 4
 --- !BoundCall
 id: 7
-function: system:plus
+function: system:+
 destination: !Position
   parent: 3
 --- !Reference
@@ -30,13 +30,13 @@ id: 8
 node: 4
 destination: !Binding
   parent: 7
-  parameter: system:plus:x
+  parameter: system:+:x
 --- !Reference
 id: 9
 node: 5
 destination: !Binding
   parent: 7
-  parameter: system:plus:y
+  parameter: system:+:y
 --- !Return
 id: 101
 position: !Position
@@ -48,7 +48,7 @@ destination: !Slot
   parent: 101
 --- !Reference
 id: 11
-node: system:minus
+node: system:-
 destination: !Position
   parent: 10
 --- !Literal

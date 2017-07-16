@@ -17,6 +17,7 @@ public class StdLib {
         return Math.exp(x.doubleValue());
     }
 
+    @Name("+")
     public static Number plus(Number x, Number y) {
         if (x instanceof Double || y instanceof Double) {
             return x.doubleValue() + y.doubleValue();
@@ -24,11 +25,33 @@ public class StdLib {
         return x.longValue() + y.longValue();
     }
 
+    @Name("-")
     public static Number minus(Number x, Number y) {
         if (x instanceof Double || y instanceof Double) {
             return x.doubleValue() - y.doubleValue();
         }
         return x.longValue() - y.longValue();
+    }
+
+    @Name("*")
+    public static Number multiply(Number x, Number y) {
+        if (x instanceof Double || y instanceof Double) {
+            return x.doubleValue() * y.doubleValue();
+        }
+        return x.longValue() * y.longValue();
+    }
+
+    @Name("/")
+    public static double divide(Number x, Number y) {
+        return x.doubleValue() / y.doubleValue();
+    }
+
+    @Name("\\")
+    public static long intdiv(Number x, Number y) {
+        if (x instanceof Double || y instanceof Double) {
+            return Math.round(x.doubleValue() / y.doubleValue());
+        }
+        return x.longValue() / y.longValue();
     }
 
     public static Iterable map(Iterable source, Callable f) {
