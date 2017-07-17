@@ -8,8 +8,6 @@ import java.util.Map;
 
 @Getter @Setter
 public class BoundCallNode extends Node {
-    private FunctionNode function;
-
     private final Map<ParameterNode, Node> arguments = new HashMap<>();
 
     @Override

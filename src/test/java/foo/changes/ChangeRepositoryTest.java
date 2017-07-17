@@ -27,14 +27,14 @@ public class ChangeRepositoryTest {
         assertTrue(myProjectNodeOpt.isPresent());
         assertEquals(
             "project My Project\n" +
-                "  package mypackage\n" +
-                "    def foo [x y]\n" +
-                "      +\n" +
-                "        x: x\n" +
-                "        y: y\n" +
-                "      return -\n" +
-                "        3\n" +
-                "        2\n",
+                "\tpackage mypackage\n" +
+                "\t\tdef foo [x y]\n" +
+                "\t\t\t+\n" +
+                "\t\t\t\tx: x\n" +
+                "\t\t\t\ty: y\n" +
+                "\t\t\treturn -\n" +
+                "\t\t\t\t\t\t3\n" +
+                "\t\t\t\t\t\t2\n",
             PrintUtil.toString(myProjectNodeOpt.get()));
     }
 

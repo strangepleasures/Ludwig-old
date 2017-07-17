@@ -17,9 +17,10 @@ public class PrintUtil {
         @Override
         public Void visitBoundCall(BoundCallNode boundCallNode) {
             indent();
-            out.append(boundCallNode.getFunction().getName()).append("\n");
+            FunctionNode functionNode = (FunctionNode) boundCallNode.getChildren().get(0);
+            out.append(functionNode.getName()).append("\n");
             indentation++;
-            for (ParameterNode param : boundCallNode.getFunction().getParameters()) {
+            for (ParameterNode param : functionNode.getParameters()) {
                 indent();
                 out.append(param.getName()).append(": ");
                 if (boundCallNode.getArguments().containsKey(param)) {
@@ -47,33 +48,24 @@ public class PrintUtil {
                 first = false;
                 out.append(param.getName());
             }
-            out.append("]\n");
-            indentation++;
-            for (Node node : functionNode.getChildren()) {
-                node.accept(this);
-            }
-            indentation--;
+            out.append("]");
+            printChildren(functionNode, false);
             return null;
         }
 
         @Override
         public Void visitLet(LetNode letNode) {
             indent();
-            out.append("= ").append(letNode.getName()).append(' ');
-            inline = true;
-            letNode.getChildren().get(0).accept(this);
+            out.append("= ").append(letNode.getName());
+            printChildren(letNode, true);
             return null;
         }
 
         @Override
         public Void visitList(ListNode listNode) {
             indent();
-            out.append("list\n");
-            indentation++;
-            for (Node item : listNode.getChildren()) {
-                item.accept(this);
-            }
-            indentation--;
+            out.append("list");
+            printChildren(listNode, false);
             return null;
         }
 
@@ -87,12 +79,8 @@ public class PrintUtil {
         @Override
         public Void visitPackage(PackageNode packageNode) {
             indent();
-            out.append("package ").append(packageNode.getName()).append('\n');
-            indentation++;
-            for (Node item : packageNode.getChildren()) {
-                item.accept(this);
-            }
-            indentation--;
+            out.append("package ").append(packageNode.getName());
+            printChildren(packageNode, false);
             return null;
         }
 
@@ -118,10 +106,7 @@ public class PrintUtil {
                 } else {
                     out.append('\n');
                     indentation++;
-                    unboundCallNode.getChildren()
-                        .stream()
-                        .skip(1)
-                        .forEach(item -> item.accept(this));
+                    unboundCallNode.getChildren().stream().skip(1).forEach(this::print);
                     indentation--;
                 }
             } else {
@@ -142,12 +127,8 @@ public class PrintUtil {
                 first = false;
                 out.append(param.getName());
             }
-            out.append("]\n");
-            indentation++;
-            for (Node node : lambdaNode.getChildren()) {
-                node.accept(this);
-            }
-            indentation--;
+            out.append(']');
+            printChildren(lambdaNode, true);
             return null;
         }
 
@@ -155,60 +136,46 @@ public class PrintUtil {
         public Void visitReturn(ReturnNode returnNode) {
             indent();
             out.append("return");
-            if (returnNode.getChildren().isEmpty()) {
-                out.append('\n');
-            } else {
-                inline = true;
-                out.append(' ');
-                returnNode.getChildren().get(0).accept(this);
-            }
+            printChildren(returnNode, true);
             return null;
         }
 
         @Override
         public Void visitProject(ProjectNode projectNode) {
             indent();
-            out.append("project ").append(projectNode.getName()).append('\n');
-            indentation++;
-            for (Node item : projectNode.getChildren()) {
-                item.accept(this);
-            }
-            indentation--;
+            out.append("project ").append(projectNode.getName());
+            printChildren(projectNode, false);
             return null;
         }
 
         @Override
         public Void visitIf(IfNode ifNode) {
             indent();
-            out.append("if\n");
-            indentation++;
-            for (Node item : ifNode.getChildren()) {
-                item.accept(this);
-            }
-            indentation--;
+            out.append("if");
+            printChildren(ifNode, true);
             return null;
         }
 
         @Override
         public Void visitAnd(AndNode andNode) {
-            // TODO:
+            out.append("&");
+            printChildren(andNode, false);
             return null;
         }
 
         @Override
         public Void visitOr(OrNode orNode) {
-            // TODO:
+            indent();
+            out.append("|");
+            printChildren(orNode, false);
             return null;
         }
 
         @Override
         public Void visitAssignment(AssignmentNode assignmentNode) {
             indent();
-            out.append(":= ").append(assignmentNode.getLhs().getName()).append(" ");
-            inline = true;
-            indentation++;
-            assignmentNode.getRhs().accept(this);
-            indentation--;
+            out.append(":= ").append(((NamedNode)assignmentNode.getChildren().get(0)).getName());
+            printChildren(assignmentNode, true);
             return null;
         }
 
@@ -216,18 +183,47 @@ public class PrintUtil {
         public Void visitElse(ElseNode elseNode) {
             indent();
             out.append("else");
-            indentation++;
-            for (Node item : elseNode.getChildren()) {
-                item.accept(this);
-            }
-            indentation--;
+            printChildren(elseNode, false);
             return null;
+        }
+
+        @Override
+        public Void visitFor(ForNode forNode) {
+            indent();
+            out.append("for ").append(forNode.getName());
+            printChildren(forNode, true);
+            return null;
+        }
+
+        private void print(Node node) {
+            node.accept(this);
+        }
+
+        private void printChildren(Node node, boolean inlineFirst) {
+            if (inlineFirst) {
+                out.append(' ');
+                inline = true;
+                indentation += 2;
+                if (node.getChildren().isEmpty()) {
+                    out.append('\n');
+                } else {
+                    print(node.getChildren().get(0));
+                }
+                indentation--;
+                node.getChildren().stream().skip(1).forEach(this::print);
+                indentation--;
+            } else {
+                out.append('\n');
+                indentation++;
+                node.getChildren().forEach(this::print);
+                indentation--;
+            }
         }
 
         private void indent() {
             if (!inline) {
                 for (int i = 0; i < indentation; i++) {
-                    out.append("  ");
+                    out.append('\t');
                 }
             }
             inline = false;

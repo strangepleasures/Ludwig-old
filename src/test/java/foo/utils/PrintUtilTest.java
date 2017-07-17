@@ -20,7 +20,7 @@ public class PrintUtilTest {
         parameterNode2.setName("y");
         functionNode.getParameters().add(parameterNode2);
         BoundCallNode boundCallNode = new BoundCallNode();
-        boundCallNode.setFunction(functionNode);
+        boundCallNode.getChildren().add(functionNode);
         RefNode refNode1 = new RefNode();
         refNode1.getChildren().add(parameterNode2);
         RefNode refNode2 = new RefNode();

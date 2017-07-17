@@ -67,7 +67,7 @@ public class Workspace {
         public Problem visitBoundCall(BoundCall boundCall) {
             FunctionNode function = node(boundCall.getFunction());
             BoundCallNode node = new BoundCallNode();
-            node.setFunction(function);
+            node.getChildren().add(function);
             node.setId(boundCall.getId());
             place(node, boundCall.getDestination());
             return null;

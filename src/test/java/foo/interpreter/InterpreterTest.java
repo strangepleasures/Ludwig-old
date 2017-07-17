@@ -22,7 +22,7 @@ public class InterpreterTest {
         functionNode.getParameters().add(parameterNode2);
         BoundCallNode boundCallNode = new BoundCallNode();
         FunctionNode minus = (FunctionNode) systemPackage.item("-");
-        boundCallNode.setFunction(minus);
+        boundCallNode.getChildren().add(minus);
         RefNode refNode1 = new RefNode();
         refNode1.getChildren().add(parameterNode1);
         RefNode refNode2 = new RefNode();
@@ -43,7 +43,7 @@ public class InterpreterTest {
         lambda.getParameters().add(new ParameterNode());
         FunctionNode plus = (FunctionNode) systemPackage.item("+");
         BoundCallNode bcn = new BoundCallNode();
-        bcn.setFunction(plus);
+        bcn.getChildren().add(plus);
         RefNode refNode = new RefNode();
         refNode.getChildren().add(lambda.getParameters().get(0));
         bcn.getArguments().put(plus.getParameters().get(0), refNode);

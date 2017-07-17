@@ -34,4 +34,6 @@ public interface NodeVisitor<T> {
     T visitAssignment(AssignmentNode assignmentNode);
 
     T visitElse(ElseNode elseNode);
+
+    T visitFor(ForNode forNode);
 }

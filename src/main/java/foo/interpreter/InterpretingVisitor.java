@@ -16,10 +16,10 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     public Object visitBoundCall(BoundCallNode boundCallNode) {
         HashPMap<NamedNode, Object> savedLocals = locals;
         try {
-            FunctionNode functionNode = boundCallNode.getFunction();
+            FunctionNode functionNode = (FunctionNode) boundCallNode.getChildren().get(0);
 
             if (functionNode instanceof NativeFunctionNode) {
-                Object[] args = boundCallNode.getFunction()
+                Object[] args = functionNode
                     .getParameters()
                     .stream()
                     .map(param -> boundCallNode.getArguments().get(param).accept(this))
@@ -27,7 +27,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
                 return ((NativeFunctionNode) functionNode).call(args);
             }
 
-            for (ParameterNode param : boundCallNode.getFunction().getParameters()) {
+            for (ParameterNode param : functionNode.getParameters()) {
                 locals = locals.plus(param, boundCallNode.getArguments().get(param).accept(this));
             }
 
@@ -133,11 +133,6 @@ class InterpretingVisitor implements NodeVisitor<Object> {
                     break;
                 }
             }
-
-            if (result instanceof Return) {
-                return ((Return) result).getValue();
-            }
-
             return result;
         } else {
             doElse = true;
@@ -167,7 +162,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitAssignment(AssignmentNode assignmentNode) {
-        return locals = locals.plus(assignmentNode.getLhs(), assignmentNode.getRhs().accept(this));
+        return locals = locals.plus((NamedNode) assignmentNode.getChildren().get(0), assignmentNode.getChildren().get(1).accept(this));
     }
 
     @Override
@@ -182,11 +177,32 @@ class InterpretingVisitor implements NodeVisitor<Object> {
                 }
             }
 
-            if (result instanceof Return) {
-                return ((Return) result).getValue();
-            }
-
             return result;
+        }
+        return null;
+    }
+
+    @Override
+    public Object visitFor(ForNode forNode) {
+        for (Object var: (Iterable) forNode.getChildren().get(0).accept(this)) {
+            locals = locals.plus(forNode, var);
+            for (int i = 1; i < forNode.getChildren().size(); i++) {
+                Object value = forNode.getChildren().get(i).accept(this);
+                if (value instanceof Signal) {
+                    if (value instanceof Break) {
+                        Break br = (Break) value;
+                        if (br.getLoop() == forNode || br.getLoop() == null) {
+                            break;
+                        }
+                    } else if (value instanceof Continue) {
+                        Continue c = (Continue) value;
+                        if (c.getLoop() == forNode || c.getLoop() == null) {
+                            break;
+                        }
+                    }
+                    return value;
+                }
+            }
         }
         return null;
     }
