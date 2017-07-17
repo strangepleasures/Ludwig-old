@@ -164,4 +164,9 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         }
         return false;
     }
+
+    @Override
+    public Object visitAssignment(AssignmentNode assignmentNode) {
+        return locals = locals.plus(assignmentNode.getLhs(), assignmentNode.getRhs().accept(this));
+    }
 }

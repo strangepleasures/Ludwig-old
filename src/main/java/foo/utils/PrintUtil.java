@@ -201,6 +201,17 @@ public class PrintUtil {
             return null;
         }
 
+        @Override
+        public Void visitAssignment(AssignmentNode assignmentNode) {
+            indent();
+            out.append(":= ").append(assignmentNode.getLhs().getName()).append(" ");
+            inline = true;
+            indentation++;
+            assignmentNode.getRhs().accept(this);
+            indentation--;
+            return null;
+        }
+
         private void indent() {
             if (!inline) {
                 for (int i = 0; i < indentation; i++) {

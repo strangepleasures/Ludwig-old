@@ -30,4 +30,6 @@ public interface NodeVisitor<T> {
     T visitAnd(AndNode andNode);
 
     T visitOr(OrNode orNode);
+
+    T visitAssignment(AssignmentNode assignmentNode);
 }
