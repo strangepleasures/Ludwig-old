@@ -144,7 +144,7 @@ public class PrintUtil {
             }
             out.append("]\n");
             indentation++;
-            for (Node node : lambdaNode.getItems()) {
+            for (Node node : lambdaNode.getNodes()) {
                 node.accept(this);
             }
             indentation--;

@@ -23,7 +23,7 @@ public class Closure implements Callable {
         InterpretingVisitor visitor = new InterpretingVisitor(env);
 
         Object result = null;
-        for (Node node : lambda.getItems()) {
+        for (Node node : lambda.getNodes()) {
             result = node.accept(visitor);
             if (result instanceof Signal) {
                 break;

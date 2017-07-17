@@ -48,7 +48,7 @@ public class InterpreterTest {
         refNode.setNode(lambda.getParameters().get(0));
         bcn.getArguments().put(plus.getParameters().get(0), refNode);
         bcn.getArguments().put(plus.getParameters().get(1), LiteralNode.ofValue(3.0));
-        lambda.getItems().add(bcn);
+        lambda.getNodes().add(bcn);
 
         UnboundCallNode ucn = new UnboundCallNode();
         ucn.getNodes().add(lambda);

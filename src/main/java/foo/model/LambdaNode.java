@@ -10,7 +10,6 @@ import java.util.List;
 @Setter
 public class LambdaNode extends Node implements Signature {
     private final List<ParameterNode> parameters = new ArrayList<>();
-    private final List<Node> items = new ArrayList<>();
 
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {
