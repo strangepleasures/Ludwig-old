@@ -44,7 +44,7 @@ position: !Position
   prev: 7
 --- !UnboundCall
 id: 10
-destination: !Slot
+destination: !Position
   parent: 101
 --- !Reference
 id: 11

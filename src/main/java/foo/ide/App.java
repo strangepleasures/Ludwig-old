@@ -7,11 +7,7 @@ import foo.model.*;
 import foo.repository.ChangeRepository;
 import foo.workspace.Workspace;
 import javafx.application.Application;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -92,9 +88,9 @@ public class App extends Application {
             PackageNode packageNode = (PackageNode) node;
             functionList.getItems().clear();
 
-            for (NamedNode item: packageNode.getItems()) {
+            for (Node item: packageNode.getChildren()) {
                 if (item instanceof FunctionNode) {
-                    functionList.getItems().add(item);
+                    functionList.getItems().add((NamedNode) item);
                 }
             }
         }

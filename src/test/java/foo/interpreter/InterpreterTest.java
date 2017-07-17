@@ -24,12 +24,12 @@ public class InterpreterTest {
         FunctionNode minus = (FunctionNode) systemPackage.item("-");
         boundCallNode.setFunction(minus);
         RefNode refNode1 = new RefNode();
-        refNode1.setNode(parameterNode1);
+        refNode1.getChildren().add(parameterNode1);
         RefNode refNode2 = new RefNode();
-        refNode2.setNode(parameterNode2);
+        refNode2.getChildren().add(parameterNode2);
         boundCallNode.getArguments().put(minus.getParameters().get(0), refNode1);
         boundCallNode.getArguments().put(minus.getParameters().get(1), refNode2);
-        functionNode.getNodes().add(boundCallNode);
+        functionNode.getChildren().add(boundCallNode);
 
 
         Object result = Interpreter.call(functionNode, 50.0, 8.0);
@@ -45,14 +45,14 @@ public class InterpreterTest {
         BoundCallNode bcn = new BoundCallNode();
         bcn.setFunction(plus);
         RefNode refNode = new RefNode();
-        refNode.setNode(lambda.getParameters().get(0));
+        refNode.getChildren().add(lambda.getParameters().get(0));
         bcn.getArguments().put(plus.getParameters().get(0), refNode);
         bcn.getArguments().put(plus.getParameters().get(1), LiteralNode.ofValue(3.0));
-        lambda.getNodes().add(bcn);
+        lambda.getChildren().add(bcn);
 
         UnboundCallNode ucn = new UnboundCallNode();
-        ucn.getNodes().add(lambda);
-        ucn.getNodes().add(LiteralNode.ofValue(2.0));
+        ucn.getChildren().add(lambda);
+        ucn.getChildren().add(LiteralNode.ofValue(2.0));
 
         Object result = Interpreter.eval(ucn, HashTreePMap.empty());
         assertEquals(5.0, result);

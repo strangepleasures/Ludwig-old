@@ -23,7 +23,7 @@ public class CallableFunction implements Callable {
         InterpretingVisitor visitor = new InterpretingVisitor(env);
 
         Object result = null;
-        for (Node node : function.getNodes()) {
+        for (Node node : function.getChildren()) {
             result = node.accept(visitor);
             if (result instanceof Signal) {
                 break;

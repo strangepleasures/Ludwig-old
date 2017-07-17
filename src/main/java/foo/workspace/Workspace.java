@@ -2,9 +2,7 @@ package foo.workspace;
 
 import foo.changes.*;
 import foo.changes.Package;
-import foo.interpreter.SystemPackage;
 import foo.model.*;
-import foo.runtime.StdLib;
 
 import java.util.*;
 
@@ -37,9 +35,9 @@ public class Workspace {
             packageNode.setId(aPackage.getId());
             addNode(packageNode);
             if (parent instanceof ProjectNode) {
-                ((ProjectNode) parent).getPackages().add(packageNode);
+                parent.getChildren().add(packageNode);
             } else if(parent instanceof PackageNode) {
-                ((PackageNode) parent).getItems().add(packageNode);
+                parent.getChildren().add(packageNode);
             }
             return null;
         }
@@ -51,7 +49,7 @@ public class Workspace {
             functionNode.setName(function.getName());
             functionNode.setId(function.getId());
             addNode(functionNode);
-            parent.getItems().add(functionNode);
+            parent.getChildren().add(functionNode);
             return null;
         }
 
@@ -79,7 +77,7 @@ public class Workspace {
         public Problem visitReference(Reference reference) {
             RefNode ref = new RefNode();
             ref.setId(reference.getId());
-            ref.setNode(node(reference.getNode()));
+            ref.getChildren().add(node(reference.getNode()));
             place(ref, reference.getDestination());
             return null;
         }
@@ -180,14 +178,14 @@ public class Workspace {
 
     public void registerProject(ProjectNode projectNode) {
         addNode(projectNode);
-        for (PackageNode packageNode: projectNode.getPackages()) {
-            registerPackage(packageNode);
+        for (Node packageNode: projectNode.getChildren()) {
+            registerPackage((PackageNode) packageNode);
         }
     }
 
     public void registerPackage(PackageNode p) {
         addNode(p);
-        for (Node n: p.getItems()) {
+        for (Node n: p.getChildren()) {
             if (n instanceof PackageNode) {
                 registerPackage(p);
             } else {
@@ -217,7 +215,7 @@ public class Workspace {
             Node prev = node(position.getPrev());
             Node next = node(position.getNext());
 
-            List items = (node instanceof ParameterNode) ? ((Signature) parent).getParameters() : parent.getNodes();
+            List items = (node instanceof ParameterNode) ? ((Signature) parent).getParameters() : parent.getChildren();
 
             if (next == null) {
                 if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {
@@ -235,9 +233,6 @@ public class Workspace {
                     items.add(nextIndex, next);
                 }
             }
-        } else if (destination instanceof Slot) {
-            ValueHolder<Node> dest = node(((Slot) destination).getParent());
-            dest.setValue(node);
         }
     }
 }

@@ -27,8 +27,7 @@ public class ChangeRepository {
             Return.class,
 
             Position.class,
-            Binding.class,
-            Slot.class);
+            Binding.class);
     }
 
     public static List<Change> fetch(URL url) throws IOException {

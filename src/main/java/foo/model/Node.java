@@ -11,7 +11,7 @@ import java.util.List;
 public abstract class Node {
     String id;
     String comment;
-    final List<Node> nodes = new ArrayList<>();
+    final List<Node> children = new ArrayList<>();
 
     public abstract <T> T accept(NodeVisitor<T> visitor);
 }

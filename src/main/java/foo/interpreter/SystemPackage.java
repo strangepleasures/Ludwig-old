@@ -1,7 +1,6 @@
 package foo.interpreter;
 
 import foo.model.PackageNode;
-import foo.runtime.StdLib;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -19,7 +18,7 @@ public class SystemPackage extends PackageNode {
 
         for (Method method : clazz.getDeclaredMethods()) {
             if (Modifier.isPublic(method.getModifiers())) {
-                getItems().add(new NativeFunctionNode(method));
+                getChildren().add(new NativeFunctionNode(method));
             }
         }
     }

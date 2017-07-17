@@ -32,7 +32,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
             }
 
             Object result = null;
-            for (Node node : functionNode.getNodes()) {
+            for (Node node : functionNode.getChildren()) {
                 result = node.accept(this);
                 if (result instanceof Signal) {
                     break;
@@ -56,7 +56,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitLet(LetNode letNode) {
-        Object value = letNode.getValue().accept(this);
+        Object value = letNode.getChildren().get(0).accept(this);
         locals = locals.plus(letNode, value);
         return value;
     }
@@ -64,7 +64,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     @Override
     public Object visitList(ListNode listNode) {
         TreePVector<Object> list = TreePVector.empty();
-        for (Node item : listNode.getItems()) {
+        for (Node item : listNode.getChildren()) {
             list = list.plus(item.accept(this));
         }
         return list;
@@ -87,7 +87,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitRef(RefNode refNode) {
-        NamedNode node = refNode.getNode();
+        NamedNode node = (NamedNode) refNode.getChildren().get(0);
 
         if (node.getClass() == FunctionNode.class) {
             return new CallableFunction((FunctionNode) node);
@@ -98,8 +98,8 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitUnboundCall(UnboundCallNode unboundCallNode) {
-        Callable callable = (Callable) unboundCallNode.getNodes().get(0).accept(this);
-        Object[] args = unboundCallNode.getNodes()
+        Callable callable = (Callable) unboundCallNode.getChildren().get(0).accept(this);
+        Object[] args = unboundCallNode.getChildren()
             .stream()
             .skip(1)
             .map(arg -> arg.accept(this))
@@ -114,7 +114,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitReturn(ReturnNode returnNode) {
-        return returnNode.getValue() != null ? new Return(returnNode.getValue().accept(this)) : Return.EMPTY;
+        return returnNode.getChildren().isEmpty() ? Return.EMPTY : new Return(returnNode.getChildren().get(0).accept(this));
     }
 
     @Override
@@ -124,10 +124,10 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitIf(IfNode ifNode) {
-        Boolean test = (Boolean) ifNode.getNodes().get(0).accept(this);
+        Boolean test = (Boolean) ifNode.getChildren().get(0).accept(this);
         if (test) {
             Object result = null;
-            for (Node node : ifNode.getNodes()) {
+            for (Node node : ifNode.getChildren()) {
                 result = node.accept(this);
                 if (result instanceof Signal) {
                     break;
@@ -147,7 +147,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitAnd(AndNode andNode) {
-        for (Node node: andNode.getNodes()) {
+        for (Node node: andNode.getChildren()) {
             if (!(Boolean) node.accept(this)) {
                 return false;
             }
@@ -157,7 +157,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitOr(OrNode orNode) {
-        for (Node node: orNode.getNodes()) {
+        for (Node node: orNode.getChildren()) {
             if ((Boolean) node.accept(this)) {
                 return true;
             }

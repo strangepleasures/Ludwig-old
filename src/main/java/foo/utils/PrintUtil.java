@@ -49,7 +49,7 @@ public class PrintUtil {
             }
             out.append("]\n");
             indentation++;
-            for (Node node : functionNode.getNodes()) {
+            for (Node node : functionNode.getChildren()) {
                 node.accept(this);
             }
             indentation--;
@@ -61,7 +61,7 @@ public class PrintUtil {
             indent();
             out.append("= ").append(letNode.getName()).append(' ');
             inline = true;
-            letNode.getValue().accept(this);
+            letNode.getChildren().get(0).accept(this);
             return null;
         }
 
@@ -70,7 +70,7 @@ public class PrintUtil {
             indent();
             out.append("list\n");
             indentation++;
-            for (Node item : listNode.getItems()) {
+            for (Node item : listNode.getChildren()) {
                 item.accept(this);
             }
             indentation--;
@@ -89,7 +89,7 @@ public class PrintUtil {
             indent();
             out.append("package ").append(packageNode.getName()).append('\n');
             indentation++;
-            for (Node item : packageNode.getItems()) {
+            for (Node item : packageNode.getChildren()) {
                 item.accept(this);
             }
             indentation--;
@@ -104,21 +104,21 @@ public class PrintUtil {
         @Override
         public Void visitRef(RefNode refNode) {
             indent();
-            out.append(refNode.getNode().getName()).append('\n');
+            out.append(((NamedNode)refNode.getChildren().get(0)).getName()).append('\n');
             return null;
         }
 
         @Override
         public Void visitUnboundCall(UnboundCallNode unboundCallNode) {
             indent();
-            if (unboundCallNode.getNodes().get(0) instanceof RefNode) {
-                out.append(((RefNode) unboundCallNode.getNodes().get(0)).getNode().getName());
-                if (unboundCallNode.getNodes().size() == 1) {
+            if (unboundCallNode.getChildren().get(0) instanceof RefNode) {
+                out.append(((NamedNode) unboundCallNode.getChildren().get(0).getChildren().get(0)).getName());
+                if (unboundCallNode.getChildren().size() == 1) {
                     out.append(" []\n");
                 } else {
                     out.append('\n');
                     indentation++;
-                    unboundCallNode.getNodes()
+                    unboundCallNode.getChildren()
                         .stream()
                         .skip(1)
                         .forEach(item -> item.accept(this));
@@ -144,7 +144,7 @@ public class PrintUtil {
             }
             out.append("]\n");
             indentation++;
-            for (Node node : lambdaNode.getNodes()) {
+            for (Node node : lambdaNode.getChildren()) {
                 node.accept(this);
             }
             indentation--;
@@ -155,12 +155,12 @@ public class PrintUtil {
         public Void visitReturn(ReturnNode returnNode) {
             indent();
             out.append("return");
-            if (returnNode.getValue() != null) {
+            if (returnNode.getChildren().isEmpty()) {
+                out.append('\n');
+            } else {
                 inline = true;
                 out.append(' ');
-                returnNode.getValue().accept(this);
-            } else {
-                out.append('\n');
+                returnNode.getChildren().get(0).accept(this);
             }
             return null;
         }
@@ -170,7 +170,7 @@ public class PrintUtil {
             indent();
             out.append("project ").append(projectNode.getName()).append('\n');
             indentation++;
-            for (Node item : projectNode.getPackages()) {
+            for (Node item : projectNode.getChildren()) {
                 item.accept(this);
             }
             indentation--;
@@ -182,7 +182,7 @@ public class PrintUtil {
             indent();
             out.append("if\n");
             indentation++;
-            for (Node item : ifNode.getNodes()) {
+            for (Node item : ifNode.getChildren()) {
                 item.accept(this);
             }
             indentation--;

@@ -22,13 +22,13 @@ public class PrintUtilTest {
         BoundCallNode boundCallNode = new BoundCallNode();
         boundCallNode.setFunction(functionNode);
         RefNode refNode1 = new RefNode();
-        refNode1.setNode(parameterNode2);
+        refNode1.getChildren().add(parameterNode2);
         RefNode refNode2 = new RefNode();
-        refNode2.setNode(parameterNode1);
+        refNode2.getChildren().add(parameterNode1);
         boundCallNode.getArguments().put(parameterNode1, refNode1);
         boundCallNode.getArguments().put(parameterNode2, refNode2);
-        functionNode.getNodes().add(boundCallNode);
-        packageNode.getItems().add(functionNode);
+        functionNode.getChildren().add(boundCallNode);
+        packageNode.getChildren().add(functionNode);
         assertEquals(
             "package mypackage\n" +
             "  def foo [x y]\n" +
