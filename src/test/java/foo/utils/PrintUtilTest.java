@@ -31,10 +31,10 @@ public class PrintUtilTest {
         packageNode.getChildren().add(functionNode);
         assertEquals(
             "package mypackage\n" +
-            "  def foo [x y]\n" +
-            "    foo\n" +
-            "      x: y\n" +
-            "      y: x\n",
+                "\tdef foo [x y]\n" +
+                "\t\tfoo\n" +
+                "\t\t\tx: y\n" +
+                "\t\t\ty: x\n",
             PrintUtil.toString(packageNode));
     }
 
