@@ -212,7 +212,7 @@ public class Workspace {
             parent.getArguments().put(parameter, node);
         } else if (destination instanceof Position) {
             Position position = (Position) destination;
-            ListLike parent = node(position.getParent());
+            Node parent = node(position.getParent());
 
             Node prev = node(position.getPrev());
             Node next = node(position.getNext());

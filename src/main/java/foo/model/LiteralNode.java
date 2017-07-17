@@ -1,7 +1,8 @@
 package foo.model;
 
 import foo.utils.LiteralParser;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter

@@ -1,14 +1,10 @@
 package foo.model;
 
-import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter @Setter
-public class UnboundCallNode extends Node implements ListLike {
-    private final List<Node> nodes = new ArrayList<>();
-
+public class UnboundCallNode extends Node {
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {
         return visitor.visitUnboundCall(this);
