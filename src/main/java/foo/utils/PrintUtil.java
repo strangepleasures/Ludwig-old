@@ -128,7 +128,7 @@ public class PrintUtil {
                 out.append(param.getName());
             }
             out.append(']');
-            printChildren(lambdaNode, true);
+            printChildren(lambdaNode, false);
             return null;
         }
 
