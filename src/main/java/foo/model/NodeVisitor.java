@@ -32,4 +32,6 @@ public interface NodeVisitor<T> {
     T visitOr(OrNode orNode);
 
     T visitAssignment(AssignmentNode assignmentNode);
+
+    T visitElse(ElseNode elseNode);
 }

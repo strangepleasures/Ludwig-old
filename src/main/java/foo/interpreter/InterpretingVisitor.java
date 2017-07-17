@@ -169,4 +169,25 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     public Object visitAssignment(AssignmentNode assignmentNode) {
         return locals = locals.plus(assignmentNode.getLhs(), assignmentNode.getRhs().accept(this));
     }
+
+    @Override
+    public Object visitElse(ElseNode elseNode) {
+        if (doElse) {
+            doElse = false;
+            Object result = null;
+            for (Node node : elseNode.getChildren()) {
+                result = node.accept(this);
+                if (result instanceof Signal) {
+                    break;
+                }
+            }
+
+            if (result instanceof Return) {
+                return ((Return) result).getValue();
+            }
+
+            return result;
+        }
+        return null;
+    }
 }
