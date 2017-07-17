@@ -212,6 +212,18 @@ public class PrintUtil {
             return null;
         }
 
+        @Override
+        public Void visitElse(ElseNode elseNode) {
+            indent();
+            out.append("else");
+            indentation++;
+            for (Node item : elseNode.getChildren()) {
+                item.accept(this);
+            }
+            indentation--;
+            return null;
+        }
+
         private void indent() {
             if (!inline) {
                 for (int i = 0; i < indentation; i++) {
