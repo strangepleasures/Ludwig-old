@@ -28,10 +28,7 @@ public class ChangeRepositoryTest {
         assertEquals(
             "project My Project\n" +
                 "\tpackage mypackage\n" +
-                "\t\tdef foo [x y]\n" +
-                "\t\t\t+\n" +
-                "\t\t\t\tx\n" +
-                "\t\t\t\ty\n",
+                "\t\tdef foo [x y] [+ [x y]]",
             PrintUtil.toString(myProjectNodeOpt.get()));
     }
 
