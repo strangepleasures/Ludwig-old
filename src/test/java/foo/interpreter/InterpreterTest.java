@@ -13,23 +13,21 @@ public class InterpreterTest {
     @Test
     public void testSimpleFunction() {
         FunctionNode functionNode = new FunctionNode();
-        functionNode.setName("foo");
+        functionNode.name("foo");
         ParameterNode parameterNode1 = new ParameterNode();
-        parameterNode1.setName("x");
-        functionNode.getParameters().add(parameterNode1);
+        parameterNode1.name("x");
+        functionNode.parameters().add(parameterNode1);
         ParameterNode parameterNode2 = new ParameterNode();
-        parameterNode2.setName("y");
-        functionNode.getParameters().add(parameterNode2);
+        parameterNode2.name("y");
+        functionNode.parameters().add(parameterNode2);
         BoundCallNode boundCallNode = new BoundCallNode();
         FunctionNode minus = (FunctionNode) systemPackage.item("-");
-        boundCallNode.getChildren().add(minus);
-        RefNode refNode1 = new RefNode();
-        refNode1.getChildren().add(parameterNode1);
-        RefNode refNode2 = new RefNode();
-        refNode2.getChildren().add(parameterNode2);
-        boundCallNode.getArguments().put(minus.getParameters().get(0), refNode1);
-        boundCallNode.getArguments().put(minus.getParameters().get(1), refNode2);
-        functionNode.getChildren().add(boundCallNode);
+        boundCallNode.add(minus);
+        RefNode refNode1 = new RefNode(parameterNode1);
+        RefNode refNode2 = new RefNode(parameterNode2);
+        boundCallNode.arguments().put(minus.parameters().get(0), refNode1);
+        boundCallNode.arguments().put(minus.parameters().get(1), refNode2);
+        functionNode.add(boundCallNode);
 
 
         Object result = Interpreter.call(functionNode, 50.0, 8.0);
@@ -40,19 +38,18 @@ public class InterpreterTest {
     public void testClosure() {
         LambdaNode lambda = new LambdaNode();
 
-        lambda.getParameters().add(new ParameterNode());
+        lambda.parameters().add(new ParameterNode());
         FunctionNode plus = (FunctionNode) systemPackage.item("+");
         BoundCallNode bcn = new BoundCallNode();
-        bcn.getChildren().add(plus);
-        RefNode refNode = new RefNode();
-        refNode.getChildren().add(lambda.getParameters().get(0));
-        bcn.getArguments().put(plus.getParameters().get(0), refNode);
-        bcn.getArguments().put(plus.getParameters().get(1), LiteralNode.ofValue(3.0));
-        lambda.getChildren().add(bcn);
+        bcn.add(plus);
+        RefNode refNode = new RefNode(lambda.parameters().get(0));
+        bcn.arguments().put(plus.parameters().get(0), refNode);
+        bcn.arguments().put(plus.parameters().get(1), LiteralNode.ofValue(3.0));
+        lambda.add(bcn);
 
         UnboundCallNode ucn = new UnboundCallNode();
-        ucn.getChildren().add(lambda);
-        ucn.getChildren().add(LiteralNode.ofValue(2.0));
+        ucn.add(lambda);
+        ucn.add(LiteralNode.ofValue(2.0));
 
         Object result = Interpreter.eval(ucn, HashTreePMap.empty());
         assertEquals(5.0, result);

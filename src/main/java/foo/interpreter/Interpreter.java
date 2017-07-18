@@ -10,10 +10,10 @@ public class Interpreter {
 
     public static Object call(FunctionNode functionNode, Object... args) {
         BoundCallNode boundCallNode = new BoundCallNode();
-        boundCallNode.getChildren().add(functionNode);
+        boundCallNode.add(functionNode);
 
         for (int i = 0; i < args.length; i++) {
-            boundCallNode.getArguments().put(functionNode.getParameters().get(i), LiteralNode.ofValue(args[i]));
+            boundCallNode.arguments().put(functionNode.parameters().get(i), LiteralNode.ofValue(args[i]));
         }
 
         return eval(boundCallNode, HashTreePMap.empty());

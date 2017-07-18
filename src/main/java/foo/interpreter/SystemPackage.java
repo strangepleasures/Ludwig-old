@@ -13,12 +13,11 @@ public class SystemPackage extends PackageNode {
         } else {
             packageName = clazz.getSimpleName().toLowerCase();
         }
-        setName(packageName);
-        setId(packageName);
+        name(packageName).id(packageName);
 
         for (Method method : clazz.getDeclaredMethods()) {
             if (Modifier.isPublic(method.getModifiers())) {
-                getChildren().add(new NativeFunctionNode(method));
+                children().add(new NativeFunctionNode(method));
             }
         }
     }

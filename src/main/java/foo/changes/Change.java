@@ -1,11 +1,14 @@
 package foo.changes;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.Value;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+@Getter
+@Setter
 public abstract class Change {
     public final String changeId = newId();
 

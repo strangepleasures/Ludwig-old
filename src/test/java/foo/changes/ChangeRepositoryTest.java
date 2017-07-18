@@ -23,18 +23,15 @@ public class ChangeRepositoryTest {
         workspace.apply(changes);
 
         Optional<ProjectNode> myProjectNodeOpt = workspace.getProjects().stream()
-                .filter(n -> n.getName().equals("My Project")).findFirst();
+                .filter(n -> n.name().equals("My Project")).findFirst();
         assertTrue(myProjectNodeOpt.isPresent());
         assertEquals(
             "project My Project\n" +
                 "\tpackage mypackage\n" +
                 "\t\tdef foo [x y]\n" +
                 "\t\t\t+\n" +
-                "\t\t\t\tx: x\n" +
-                "\t\t\t\ty: y\n" +
-                "\t\t\treturn -\n" +
-                "\t\t\t\t\t\t3\n" +
-                "\t\t\t\t\t\t2\n",
+                "\t\t\t\tx\n" +
+                "\t\t\t\ty\n",
             PrintUtil.toString(myProjectNodeOpt.get()));
     }
 

@@ -71,7 +71,7 @@ public class App extends Application {
                 FunctionNode functionNode = (FunctionNode) node;
 
                 signatureView.getItems().add(functionNode);
-                signatureView.getItems().addAll(functionNode.getParameters());
+                signatureView.getItems().addAll(functionNode.parameters());
             }
         });
 
@@ -88,7 +88,7 @@ public class App extends Application {
             PackageNode packageNode = (PackageNode) node;
             functionList.getItems().clear();
 
-            for (Node item: packageNode.getChildren()) {
+            for (Node item: packageNode.children()) {
                 if (item instanceof FunctionNode) {
                     functionList.getItems().add((NamedNode) item);
                 }

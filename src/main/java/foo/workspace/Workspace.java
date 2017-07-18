@@ -1,7 +1,6 @@
 package foo.workspace;
 
 import foo.changes.*;
-import foo.changes.Package;
 import foo.model.*;
 
 import java.util.*;
@@ -18,118 +17,48 @@ public class Workspace {
     }
 
     private final ChangeVisitor<Problem> changeVisitor = new ChangeVisitor<Problem>() {
+
         @Override
-        public Problem visitProject(Project project) {
-            ProjectNode projectNode = new ProjectNode();
-            projectNode.setId(project.getId());
-            projectNode.setName(project.getName());
-            addNode(projectNode);
-            return null;
+        public Problem visitInsertNode(InsertNode insert) {
+             return place(insert.getNode(), insert);
         }
 
         @Override
-        public Problem visitPackage(Package aPackage) {
-            Node parent = node(aPackage.getParent());
-            PackageNode packageNode = new PackageNode();
-            packageNode.setName(aPackage.getName());
-            packageNode.setId(aPackage.getId());
-            addNode(packageNode);
-            if (parent instanceof ProjectNode) {
-                parent.getChildren().add(packageNode);
-            } else if(parent instanceof PackageNode) {
-                parent.getChildren().add(packageNode);
-            }
-            return null;
-        }
-
-        @Override
-        public Problem visitFunction(Function function) {
-            PackageNode parent = node(function.getParent());
-            FunctionNode functionNode = new FunctionNode();
-            functionNode.setName(function.getName());
-            functionNode.setId(function.getId());
-            addNode(functionNode);
-            parent.getChildren().add(functionNode);
-            return null;
-        }
-
-        @Override
-        public Problem visitParameter(Parameter parameter) {
-            ParameterNode parameterNode = new ParameterNode();
-            parameterNode.setName(parameter.getName());
-            parameterNode.setId(parameter.getId());
-            place(parameterNode, parameter.getPosition());
-
-            return null;
-        }
-
-        @Override
-        public Problem visitBoundCall(BoundCall boundCall) {
-            FunctionNode function = node(boundCall.getFunction());
-            BoundCallNode node = new BoundCallNode();
-            node.getChildren().add(function);
-            node.setId(boundCall.getId());
-            place(node, boundCall.getDestination());
-            return null;
-        }
-
-        @Override
-        public Problem visitReference(Reference reference) {
-            RefNode ref = new RefNode();
-            ref.setId(reference.getId());
-            ref.getChildren().add(node(reference.getNode()));
-            place(ref, reference.getDestination());
-            return null;
-        }
-
-        @Override
-        public Problem visitLiteral(Literal literal) {
-            LiteralNode literalNode = new LiteralNode(literal.getValue());
-            literalNode.setId(literal.getId());
-            place(literalNode, literal.getDestination());
-            return null;
-        }
-
-        @Override
-        public Problem visitUnboundCall(UnboundCall unboundCall) {
-            UnboundCallNode node = new UnboundCallNode();
-            node.setId(unboundCall.getId());
-            place(node, unboundCall.getDestination());
-            return null;
-        }
-
-        @Override
-        public Problem visitReturn(Return aReturn) {
-            ReturnNode node = new ReturnNode();
-            node.setId(aReturn.getId());
-            place(node, aReturn.getPosition());
-            return null;
-        }
-
-        @Override
-        public Problem visitLambda(Lambda lambda) {
-            LambdaNode lambdaNode = new LambdaNode();
-            lambdaNode.setId(lambda.getId());
-            place(lambdaNode, lambda.getDestination());
-            return null;
-        }
-
-        @Override
-        public Problem visitAnd(And and) {
-            AndNode andNode = new AndNode();
-            andNode.setId(and.getId());
-            place(andNode, and.getDestination());
-            return null;
-        }
-
-        @Override
-        public Problem visitOr(Or or) {
-            OrNode orNode = new OrNode();
-            orNode.setId(or.getId());
-            place(orNode, or.getDestination());
-            return null;
+        public Problem visitInsertReference(InsertReference insert) {
+            Node ref = new RefNode(node(insert.getRef())).id(insert.getId());
+            return place(ref, insert);
         }
     };
+
+    private Problem place(Node node, Insert insert) {
+        addNode(node);
+        Node parent = node(insert.getParent());
+
+        if (parent != null) {
+            Node prev = node(insert.getPrev());
+            Node next = node(insert.getNext());
+
+            List items = (node instanceof ParameterNode) ? ((Signature) parent).parameters() : parent.children();
+
+            if (next == null) {
+                if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {
+                    items.add(node);
+                }
+            } else if (prev == null) {
+                if (!items.isEmpty() && items.get(0) == next) {
+                    items.add(0, node);
+                }
+            } else {
+                int prevIndex = items.indexOf(prev);
+                int nextIndex = items.indexOf(next);
+
+                if (nextIndex == prevIndex + 1) {
+                    items.add(nextIndex, next);
+                }
+            }
+        }
+        return null;
+    }
 
     public List<ProjectNode> getProjects() {
         return projects;
@@ -170,7 +99,7 @@ public class Workspace {
     }
 
     public void addNode(Node node) {
-        nodes.put(node.getId(), node);
+        nodes.put(node.id(), node);
         if (node instanceof ProjectNode) {
             projects.add((ProjectNode) node);
         }
@@ -178,59 +107,23 @@ public class Workspace {
 
     public void registerProject(ProjectNode projectNode) {
         addNode(projectNode);
-        for (Node packageNode: projectNode.getChildren()) {
+        for (Node packageNode: projectNode.children()) {
             registerPackage((PackageNode) packageNode);
         }
     }
 
     public void registerPackage(PackageNode p) {
         addNode(p);
-        for (Node n: p.getChildren()) {
+        for (Node n: p.children()) {
             if (n instanceof PackageNode) {
                 registerPackage(p);
             } else {
                 addNode(n);
 
                 if (n instanceof FunctionNode) {
-                    for (ParameterNode parameterNode: ((FunctionNode) n).getParameters()) {
+                    for (ParameterNode parameterNode: ((FunctionNode) n).parameters()) {
                         addNode(parameterNode);
                     }
-                }
-            }
-        }
-    }
-
-    private void place(Node node, Destination destination) {
-        addNode(node);
-
-        if (destination instanceof Binding) {
-            Binding binding = (Binding) destination;
-            BoundCallNode parent = node(binding.getParent());
-            ParameterNode parameter = node(binding.getParameter());
-            parent.getArguments().put(parameter, node);
-        } else if (destination instanceof Position) {
-            Position position = (Position) destination;
-            Node parent = node(position.getParent());
-
-            Node prev = node(position.getPrev());
-            Node next = node(position.getNext());
-
-            List items = (node instanceof ParameterNode) ? ((Signature) parent).getParameters() : parent.getChildren();
-
-            if (next == null) {
-                if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {
-                    items.add(node);
-                }
-            } else if (prev == null) {
-                if (!items.isEmpty() && items.get(0) == next) {
-                    items.add(0, node);
-                }
-            } else {
-                int prevIndex = items.indexOf(prev);
-                int nextIndex = items.indexOf(next);
-
-                if (nextIndex == prevIndex + 1) {
-                    items.add(nextIndex, next);
                 }
             }
         }

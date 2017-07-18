@@ -1,65 +1,43 @@
---- !Project
-id: 1
-name: My Project
---- !Package
-id: 2
-name: mypackage
+--- !InsertNode
+node: !ProjectNode
+  id: 1
+  name: My Project
+--- !InsertNode
+node: !PackageNode
+  id: 2
+  name: mypackage
 parent: 1
---- !Function
-id: 3
-name: foo
+--- !InsertNode
+node: !FunctionNode
+  id: 3
+  name: foo
 parent: 2
---- !Parameter
-id: 4
-name: x
-position: !Position
-  parent: 3
---- !Parameter
-id: 5
-name: y
-position: !Position
-  parent: 3
-  prev: 4
---- !BoundCall
+--- !InsertNode
+node: !ParameterNode
+  id: 4
+  name: x
+parent: 3
+--- !InsertNode
+node: !ParameterNode
+  id: 5
+  name: y
+parent: 3
+prev: 4
+--- !InsertNode
+node: !UnboundCallNode
+  id: 6
+parent: 3
+--- !InsertReference
 id: 7
-function: system:+
-destination: !Position
-  parent: 3
---- !Reference
+ref: system:+
+parent: 6
+--- !InsertReference
 id: 8
-node: 4
-destination: !Binding
-  parent: 7
-  parameter: system:+:x
---- !Reference
+ref: 4
+parent: 6
+prev: 7
+--- !InsertReference
 id: 9
-node: 5
-destination: !Binding
-  parent: 7
-  parameter: system:+:y
---- !Return
-id: 101
-position: !Position
-  parent: 3
-  prev: 7
---- !UnboundCall
-id: 10
-destination: !Position
-  parent: 101
---- !Reference
-id: 11
-node: system:-
-destination: !Position
-  parent: 10
---- !Literal
-id: 12
-value: 3
-destination: !Position
-  parent: 10
-  prev: 11
---- !Literal
-id: 13
-value: 2
-destination: !Position
-  parent: 10
-  prev: 12
+ref: 5
+parent: 6
+prev: 8

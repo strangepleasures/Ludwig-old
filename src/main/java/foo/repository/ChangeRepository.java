@@ -1,9 +1,11 @@
 package foo.repository;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.*;
 import foo.changes.*;
-import foo.changes.Package;
+import foo.model.*;
+import org.reflections.Reflections;
 
 import java.io.IOException;
 import java.net.URL;
@@ -15,19 +17,18 @@ public class ChangeRepository {
     private static final ObjectMapper mapper = new ObjectMapper(yamlFactory);
 
     static {
-        mapper.registerSubtypes(
-            Project.class,
-            Package.class,
-            Function.class,
-            Parameter.class,
-            BoundCall.class,
-            UnboundCall.class,
-            Literal.class,
-            Reference.class,
-            Return.class,
+        mapper.setVisibility(mapper.getVisibilityChecker()
+         .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
-            Position.class,
-            Binding.class);
+        new Reflections(Change.class.getPackage().getName())
+            .getSubTypesOf(Change.class)
+            .forEach(mapper::registerSubtypes);
+        new Reflections(Node.class.getPackage().getName())
+            .getSubTypesOf(Node.class)
+            .forEach(mapper::registerSubtypes);
     }
 
     public static List<Change> fetch(URL url) throws IOException {

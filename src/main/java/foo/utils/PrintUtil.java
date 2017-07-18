@@ -17,16 +17,16 @@ public class PrintUtil {
         @Override
         public Void visitBoundCall(BoundCallNode boundCallNode) {
             indent();
-            FunctionNode functionNode = (FunctionNode) boundCallNode.getChildren().get(0);
-            out.append(functionNode.getName()).append("\n");
+            FunctionNode functionNode = (FunctionNode) boundCallNode.children().get(0);
+            out.append(functionNode.name()).append("\n");
             indentation++;
-            for (ParameterNode param : functionNode.getParameters()) {
+            for (ParameterNode param : functionNode.parameters()) {
                 indent();
-                out.append(param.getName()).append(": ");
-                if (boundCallNode.getArguments().containsKey(param)) {
+                out.append(param.name()).append(": ");
+                if (boundCallNode.arguments().containsKey(param)) {
                     inline = true;
                     indentation++;
-                    boundCallNode.getArguments().get(param).accept(this);
+                    boundCallNode.arguments().get(param).accept(this);
                     indentation--;
                 } else {
                     out.append('\n');
@@ -39,14 +39,14 @@ public class PrintUtil {
         @Override
         public Void visitFunction(FunctionNode functionNode) {
             indent();
-            out.append("def ").append(functionNode.getName()).append(" [");
+            out.append("def ").append(functionNode.name()).append(" [");
             boolean first = true;
-            for (ParameterNode param : functionNode.getParameters()) {
+            for (ParameterNode param : functionNode.parameters()) {
                 if (!first) {
                     out.append(' ');
                 }
                 first = false;
-                out.append(param.getName());
+                out.append(param.name());
             }
             out.append("]");
             printChildren(functionNode, false);
@@ -56,7 +56,7 @@ public class PrintUtil {
         @Override
         public Void visitLet(LetNode letNode) {
             indent();
-            out.append("= ").append(letNode.getName());
+            out.append("= ").append(letNode.name());
             printChildren(letNode, true);
             return null;
         }
@@ -72,14 +72,14 @@ public class PrintUtil {
         @Override
         public Void visitLiteral(LiteralNode literalNode) {
             indent();
-            out.append(literalNode.getText()).append('\n');
+            out.append(literalNode.text()).append('\n');
             return null;
         }
 
         @Override
         public Void visitPackage(PackageNode packageNode) {
             indent();
-            out.append("package ").append(packageNode.getName());
+            out.append("package ").append(packageNode.name());
             printChildren(packageNode, false);
             return null;
         }
@@ -92,21 +92,21 @@ public class PrintUtil {
         @Override
         public Void visitRef(RefNode refNode) {
             indent();
-            out.append(((NamedNode)refNode.getChildren().get(0)).getName()).append('\n');
+            out.append(refNode.ref().name()).append('\n');
             return null;
         }
 
         @Override
         public Void visitUnboundCall(UnboundCallNode unboundCallNode) {
             indent();
-            if (unboundCallNode.getChildren().get(0) instanceof RefNode) {
-                out.append(((NamedNode) unboundCallNode.getChildren().get(0).getChildren().get(0)).getName());
-                if (unboundCallNode.getChildren().size() == 1) {
+            if (unboundCallNode.children().get(0) instanceof RefNode) {
+                out.append(((RefNode) unboundCallNode.children().get(0)).ref().name());
+                if (unboundCallNode.children().size() == 1) {
                     out.append(" []\n");
                 } else {
                     out.append('\n');
                     indentation++;
-                    unboundCallNode.getChildren().stream().skip(1).forEach(this::print);
+                    unboundCallNode.children().stream().skip(1).forEach(this::print);
                     indentation--;
                 }
             } else {
@@ -120,12 +120,12 @@ public class PrintUtil {
             indent();
             out.append("lambda [");
             boolean first = true;
-            for (ParameterNode param : lambdaNode.getParameters()) {
+            for (ParameterNode param : lambdaNode.parameters()) {
                 if (!first) {
                     out.append(' ');
                 }
                 first = false;
-                out.append(param.getName());
+                out.append(param.name());
             }
             out.append(']');
             printChildren(lambdaNode, false);
@@ -143,7 +143,7 @@ public class PrintUtil {
         @Override
         public Void visitProject(ProjectNode projectNode) {
             indent();
-            out.append("project ").append(projectNode.getName());
+            out.append("project ").append(projectNode.name());
             printChildren(projectNode, false);
             return null;
         }
@@ -174,7 +174,7 @@ public class PrintUtil {
         @Override
         public Void visitAssignment(AssignmentNode assignmentNode) {
             indent();
-            out.append(":= ").append(((NamedNode)assignmentNode.getChildren().get(0)).getName());
+            out.append(":= ").append(((NamedNode)assignmentNode.children().get(0)).name());
             printChildren(assignmentNode, true);
             return null;
         }
@@ -190,7 +190,7 @@ public class PrintUtil {
         @Override
         public Void visitFor(ForNode forNode) {
             indent();
-            out.append("for ").append(forNode.getName());
+            out.append("for ").append(forNode.name());
             printChildren(forNode, true);
             return null;
         }
@@ -204,18 +204,18 @@ public class PrintUtil {
                 out.append(' ');
                 inline = true;
                 indentation += 2;
-                if (node.getChildren().isEmpty()) {
+                if (node.children().isEmpty()) {
                     out.append('\n');
                 } else {
-                    print(node.getChildren().get(0));
+                    print(node.children().get(0));
                 }
                 indentation--;
-                node.getChildren().stream().skip(1).forEach(this::print);
+                node.children().stream().skip(1).forEach(this::print);
                 indentation--;
             } else {
                 out.append('\n');
                 indentation++;
-                node.getChildren().forEach(this::print);
+                node.children().forEach(this::print);
                 indentation--;
             }
         }

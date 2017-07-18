@@ -17,13 +17,13 @@ public class CallableFunction implements Callable {
         HashPMap<NamedNode, Object> env = HashTreePMap.empty();
 
         for (int i = 0; i < args.length; i++) {
-            env = env.plus(function.getParameters().get(i), args[i]);
+            env = env.plus(function.parameters().get(i), args[i]);
         }
 
         InterpretingVisitor visitor = new InterpretingVisitor(env);
 
         Object result = null;
-        for (Node node : function.getChildren()) {
+        for (Node node : function.children()) {
             result = node.accept(visitor);
             if (result instanceof Signal) {
                 break;

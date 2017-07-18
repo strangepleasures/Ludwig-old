@@ -2,7 +2,6 @@ package foo.interpreter;
 
 import foo.model.FunctionNode;
 import foo.model.ParameterNode;
-import foo.utils.PrintUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,7 +12,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
 
     public NativeFunctionNode(Method method) {
         String methodName = method.isAnnotationPresent(Name.class) ? method.getAnnotation(Name.class).value() : method.getName();
-        setName(methodName);
+        name(methodName);
 
         String packageName;
         if (method.getDeclaringClass().isAnnotationPresent(Name.class)) {
@@ -22,21 +21,21 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
             packageName = method.getDeclaringClass().getSimpleName().toLowerCase();
         }
 
-        setId(packageName + ":" + methodName);
+        id(packageName + ":" + methodName);
 
         if (method.isAnnotationPresent(Description.class)) {
-            setComment(method.getAnnotation(Description.class).value());
+            comment(method.getAnnotation(Description.class).value());
         }
 
         for (Parameter parameter: method.getParameters()) {
             ParameterNode param = new ParameterNode();
             String paramName = parameter.isAnnotationPresent(Name.class) ? parameter.getAnnotation(Name.class).value() : parameter.getName();
-            param.setName(paramName);
-            param.setId(getId() + ":" + paramName);
+            param.name(paramName)
+                .id(id() + ":" + paramName);
             if (parameter.isAnnotationPresent(Description.class)) {
-                param.setComment(parameter.getAnnotation(Description.class).value());
+                param.comment(parameter.getAnnotation(Description.class).value());
             }
-            getParameters().add(param);
+            parameters().add(param);
         }
         this.method = method;
     }

@@ -1,11 +1,7 @@
 package foo.model;
 
 import foo.utils.LiteralParser;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class LiteralNode extends Node {
     private final String text;
     private final Object value;
@@ -17,6 +13,14 @@ public class LiteralNode extends Node {
     private LiteralNode(String text, Object value) {
         this.text = text;
         this.value = LiteralParser.parse(text);
+    }
+
+    public String text() {
+        return text;
+    }
+
+    public Object value() {
+        return value;
     }
 
     @Override

@@ -23,7 +23,7 @@ public class PackageTreeView extends TreeView<NamedNode> {
 
             root.getChildren().add(projectItem);
 
-            for (Node packageNode: projectNode.getChildren()) {
+            for (Node packageNode: projectNode.children()) {
                 processPackage(projectItem, (PackageNode) packageNode);
             }
         }
@@ -35,7 +35,7 @@ public class PackageTreeView extends TreeView<NamedNode> {
         TreeItem<NamedNode> packageItem = new TreeItem<>(packageNode);
         parent.getChildren().add(packageItem);
 
-        for (Node node: packageNode.getChildren()) {
+        for (Node node: packageNode.children()) {
             if (node instanceof PackageNode) {
                 processPackage(packageItem, (PackageNode) node);
             }

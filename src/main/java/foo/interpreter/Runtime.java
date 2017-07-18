@@ -7,11 +7,10 @@ import java.util.Arrays;
 
 public class Runtime extends ProjectNode {
     public Runtime() {
-        setName("Runtime");
-        setId("Runtime");
+        name("Runtime").id("Runtime");
 
         Arrays.asList(StdLib.class)
             .stream()
-            .forEach(c -> getChildren().add(new SystemPackage(c)));
+            .forEach(c -> add(new SystemPackage(c)));
     }
 }

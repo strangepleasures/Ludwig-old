@@ -16,23 +16,23 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     public Object visitBoundCall(BoundCallNode boundCallNode) {
         HashPMap<NamedNode, Object> savedLocals = locals;
         try {
-            FunctionNode functionNode = (FunctionNode) boundCallNode.getChildren().get(0);
+            FunctionNode functionNode = (FunctionNode) boundCallNode.children().get(0);
 
             if (functionNode instanceof NativeFunctionNode) {
                 Object[] args = functionNode
-                    .getParameters()
+                    .parameters()
                     .stream()
-                    .map(param -> boundCallNode.getArguments().get(param).accept(this))
+                    .map(param -> boundCallNode.arguments().get(param).accept(this))
                     .toArray();
                 return ((NativeFunctionNode) functionNode).call(args);
             }
 
-            for (ParameterNode param : functionNode.getParameters()) {
-                locals = locals.plus(param, boundCallNode.getArguments().get(param).accept(this));
+            for (ParameterNode param : functionNode.parameters()) {
+                locals = locals.plus(param, boundCallNode.arguments().get(param).accept(this));
             }
 
             Object result = null;
-            for (Node node : functionNode.getChildren()) {
+            for (Node node : functionNode.children()) {
                 result = node.accept(this);
                 if (result instanceof Signal) {
                     break;
@@ -56,7 +56,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitLet(LetNode letNode) {
-        Object value = letNode.getChildren().get(0).accept(this);
+        Object value = letNode.children().get(0).accept(this);
         locals = locals.plus(letNode, value);
         return value;
     }
@@ -64,7 +64,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     @Override
     public Object visitList(ListNode listNode) {
         TreePVector<Object> list = TreePVector.empty();
-        for (Node item : listNode.getChildren()) {
+        for (Node item : listNode.children()) {
             list = list.plus(item.accept(this));
         }
         return list;
@@ -72,7 +72,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitLiteral(LiteralNode literalNode) {
-        return literalNode.getValue();
+        return literalNode.value();
     }
 
     @Override
@@ -87,7 +87,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitRef(RefNode refNode) {
-        NamedNode node = (NamedNode) refNode.getChildren().get(0);
+        NamedNode node = refNode.ref();
 
         if (node.getClass() == FunctionNode.class) {
             return new CallableFunction((FunctionNode) node);
@@ -98,8 +98,8 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitUnboundCall(UnboundCallNode unboundCallNode) {
-        Callable callable = (Callable) unboundCallNode.getChildren().get(0).accept(this);
-        Object[] args = unboundCallNode.getChildren()
+        Callable callable = (Callable) unboundCallNode.children().get(0).accept(this);
+        Object[] args = unboundCallNode.children()
             .stream()
             .skip(1)
             .map(arg -> arg.accept(this))
@@ -114,7 +114,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitReturn(ReturnNode returnNode) {
-        return returnNode.getChildren().isEmpty() ? Return.EMPTY : new Return(returnNode.getChildren().get(0).accept(this));
+        return returnNode.children().isEmpty() ? Return.EMPTY : new Return(returnNode.children().get(0).accept(this));
     }
 
     @Override
@@ -124,10 +124,10 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitIf(IfNode ifNode) {
-        Boolean test = (Boolean) ifNode.getChildren().get(0).accept(this);
+        Boolean test = (Boolean) ifNode.children().get(0).accept(this);
         if (test) {
             Object result = null;
-            for (Node node : ifNode.getChildren()) {
+            for (Node node : ifNode.children()) {
                 result = node.accept(this);
                 if (result instanceof Signal) {
                     break;
@@ -142,7 +142,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitAnd(AndNode andNode) {
-        for (Node node: andNode.getChildren()) {
+        for (Node node: andNode.children()) {
             if (!(Boolean) node.accept(this)) {
                 return false;
             }
@@ -152,7 +152,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitOr(OrNode orNode) {
-        for (Node node: orNode.getChildren()) {
+        for (Node node: orNode.children()) {
             if ((Boolean) node.accept(this)) {
                 return true;
             }
@@ -162,7 +162,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitAssignment(AssignmentNode assignmentNode) {
-        return locals = locals.plus((NamedNode) assignmentNode.getChildren().get(0), assignmentNode.getChildren().get(1).accept(this));
+        return locals = locals.plus((NamedNode) assignmentNode.children().get(0), assignmentNode.children().get(1).accept(this));
     }
 
     @Override
@@ -170,7 +170,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         if (doElse) {
             doElse = false;
             Object result = null;
-            for (Node node : elseNode.getChildren()) {
+            for (Node node : elseNode.children()) {
                 result = node.accept(this);
                 if (result instanceof Signal) {
                     break;
@@ -184,10 +184,10 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitFor(ForNode forNode) {
-        for (Object var: (Iterable) forNode.getChildren().get(0).accept(this)) {
+        for (Object var: (Iterable) forNode.children().get(0).accept(this)) {
             locals = locals.plus(forNode, var);
-            for (int i = 1; i < forNode.getChildren().size(); i++) {
-                Object value = forNode.getChildren().get(i).accept(this);
+            for (int i = 1; i < forNode.children().size(); i++) {
+                Object value = forNode.children().get(i).accept(this);
                 if (value instanceof Signal) {
                     if (value instanceof Break) {
                         Break br = (Break) value;
