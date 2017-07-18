@@ -9,12 +9,12 @@ public class PrintUtilTest {
 
     @Test
     public void testToString() {
-        Node packageNode = new PackageNode().name("mypackage");
-        FunctionNode functionNode = (FunctionNode) new FunctionNode().name("foo");
-        ParameterNode parameterNode1 = (ParameterNode) new ParameterNode().name("x");
+        Node packageNode = new PackageNode().setName("mypackage");
+        FunctionNode functionNode = (FunctionNode) new FunctionNode().setName("foo");
+        ParameterNode parameterNode1 = (ParameterNode) new ParameterNode().setName("x");
         functionNode.parameters().add(parameterNode1);
         ParameterNode parameterNode2 = new ParameterNode();
-        parameterNode2.name("y");
+        parameterNode2.setName("y");
         functionNode.parameters().add(parameterNode2);
         BoundCallNode boundCallNode = new BoundCallNode();
         boundCallNode.children().add(functionNode);

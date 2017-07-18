@@ -23,7 +23,7 @@ public class ChangeRepositoryTest {
         workspace.apply(changes);
 
         Optional<ProjectNode> myProjectNodeOpt = workspace.getProjects().stream()
-                .filter(n -> n.name().equals("My Project")).findFirst();
+                .filter(n -> n.getName().equals("My Project")).findFirst();
         assertTrue(myProjectNodeOpt.isPresent());
         assertEquals(
             "project My Project\n" +
