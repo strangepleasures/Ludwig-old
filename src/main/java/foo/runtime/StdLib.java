@@ -5,6 +5,7 @@ import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
 import java.util.*;
+import java.util.function.Function;
 
 @Name("system")
 public class StdLib {
@@ -54,7 +55,7 @@ public class StdLib {
         return x.longValue() / y.longValue();
     }
 
-    public static Iterable map(Iterable source, Callable f) {
+    public static Iterable map(Iterable source, Function f) {
         return () -> new Iterator() {
             Iterator it = source.iterator();
 
@@ -65,7 +66,7 @@ public class StdLib {
 
             @Override
             public Object next() {
-                return f.call(it.next());
+                return f.apply(it.next());
             }
         };
     }
