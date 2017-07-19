@@ -6,6 +6,7 @@ import foo.changes.Change;
 import foo.ide.Settings;
 import foo.model.*;
 import foo.repository.ChangeRepository;
+import foo.utils.NodeUtils;
 import foo.workspace.Workspace;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -13,7 +14,6 @@ import javafx.scene.Scene;
 import javafx.scene.web.WebView;
 
 import javax.swing.*;
-import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -21,12 +21,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.Node;
-
 public class App {
     private static final YAMLFactory yamlFactory = new YAMLFactory();
     private static final ObjectMapper mapper = new ObjectMapper(yamlFactory);
     private static final File SETTINGS_FILE = new File("./application.yaml");
+    private static volatile WebView webView;
 
     private static Settings settings;
     private static Workspace workspace = new Workspace();
@@ -53,8 +52,6 @@ public class App {
         JPanel panel = new JPanel();
         topLevelSplitPane.setRightComponent(panel);
         panel.setLayout(new BorderLayout());
-        JTable signatureTable = new JTable();
-        panel.add(signatureTable, BorderLayout.PAGE_START);
         JFXPanel jfxPanel = new JFXPanel();
         panel.add(jfxPanel, BorderLayout.CENTER);
 
@@ -70,11 +67,13 @@ public class App {
 
         functionList.addListSelectionListener(e -> {
             FunctionNode functionNode = (FunctionNode) functionList.getSelectedValue();
-            signatureTable.setModel(new SignatureModel(functionNode));
+            String content = functionNode != null ? NodeUtils.toHtml(functionNode) : "Nothing to display";
+
+            Platform.runLater(() -> webView.getEngine().loadContent(content));
         });
 
         Platform.runLater(() -> {
-            WebView webView = new WebView();
+            webView = new WebView();
             jfxPanel.setScene(new Scene(webView));
         });
 

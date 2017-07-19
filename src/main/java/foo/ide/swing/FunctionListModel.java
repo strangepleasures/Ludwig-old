@@ -11,7 +11,7 @@ class FunctionListModel extends DefaultListModel<NamedNode> {
             .stream()
             .filter(FunctionNode.class::isInstance)
             .map(n -> (NamedNode) n)
-            .sorted(Comparator.comparing(NamedNode::getName))
+            .sorted(Comparator.comparing(NamedNode::name))
             .forEach(child -> addElement(child));
     }
 }

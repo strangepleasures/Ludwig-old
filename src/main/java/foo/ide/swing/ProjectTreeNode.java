@@ -3,7 +3,6 @@ package foo.ide.swing;
 import foo.model.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.MutableTreeNode;
 import java.util.Comparator;
 
 class ProjectTreeNode extends DefaultMutableTreeNode {
@@ -12,7 +11,7 @@ class ProjectTreeNode extends DefaultMutableTreeNode {
         project.children()
             .stream()
             .map(n -> (NamedNode) n)
-            .sorted(Comparator.comparing(NamedNode::getName))
+            .sorted(Comparator.comparing(NamedNode::name))
             .forEach(p -> add(new PackageTreeNode((PackageNode) p)));
     }
 }

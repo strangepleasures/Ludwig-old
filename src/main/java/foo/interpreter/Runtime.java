@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class Runtime extends ProjectNode {
     public Runtime() {
-        setName("Runtime").id("Runtime");
+        name("Runtime").id("Runtime");
 
         Arrays.asList(StdLib.class)
             .stream()

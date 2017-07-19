@@ -9,12 +9,12 @@ public class PrintUtilTest {
 
     @Test
     public void testToString() {
-        Node packageNode = new PackageNode().setName("mypackage");
-        FunctionNode functionNode = (FunctionNode) new FunctionNode().setName("foo");
-        ParameterNode parameterNode1 = (ParameterNode) new ParameterNode().setName("x");
+        Node packageNode = new PackageNode().name("mypackage");
+        FunctionNode functionNode = (FunctionNode) new FunctionNode().name("foo");
+        ParameterNode parameterNode1 = (ParameterNode) new ParameterNode().name("x");
         functionNode.parameters().add(parameterNode1);
         ParameterNode parameterNode2 = new ParameterNode();
-        parameterNode2.setName("y");
+        parameterNode2.name("y");
         functionNode.parameters().add(parameterNode2);
         BoundCallNode boundCallNode = new BoundCallNode();
         boundCallNode.children().add(functionNode);
@@ -30,7 +30,7 @@ public class PrintUtilTest {
                 "\t\tfoo\n" +
                 "\t\t\tx: y\n" +
                 "\t\t\ty: x\n",
-            PrintUtil.toString(packageNode));
+            NodeUtils.toString(packageNode));
     }
 
 }

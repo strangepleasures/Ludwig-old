@@ -9,10 +9,10 @@ class SignatureModel extends DefaultTableModel {
         this.addColumn("Name");
         this.addColumn("Description");
 
-        this.addRow(new Object[] {fn.getName(), fn.getComment()});
+        this.addRow(new Object[] {fn.name(), fn.getComment()});
 
         fn.parameters().forEach(param ->
-            this.addRow(new Object[] {param.getName(), param.getComment()})
+            this.addRow(new Object[] {param.name(), param.getComment()})
         );
     }
 }

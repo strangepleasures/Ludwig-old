@@ -29,15 +29,31 @@ node: !UnboundCallNode
 parent: 3
 --- !InsertReference
 id: 7
-ref: system:+
+ref: system:-
 parent: 6
---- !InsertReference
-id: 8
-ref: 4
+--- !InsertNode
+node: !UnboundCallNode
+  id: 8
 parent: 6
 prev: 7
+
 --- !InsertReference
 id: 9
+ref: system:*
+parent: 8
+--- !InsertReference
+id: 10
+ref: 4
+parent: 8
+prev: 9
+--- !InsertReference
+id: 11
 ref: 5
+parent: 8
+prev: 10
+--- !InsertNode
+node: !LiteralNode
+  id: 12
+  text: 100
 parent: 6
 prev: 8

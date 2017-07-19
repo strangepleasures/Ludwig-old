@@ -15,7 +15,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
         this.paramTypes = method.getParameterTypes();
 
         String methodName = method.isAnnotationPresent(Name.class) ? method.getAnnotation(Name.class).value() : method.getName();
-        setName(methodName);
+        name(methodName);
 
         String packageName;
         if (method.getDeclaringClass().isAnnotationPresent(Name.class)) {
@@ -33,7 +33,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
         for (Parameter parameter : method.getParameters()) {
             ParameterNode param = new ParameterNode();
             String paramName = parameter.isAnnotationPresent(Name.class) ? parameter.getAnnotation(Name.class).value() : parameter.getName();
-            param.setName(paramName)
+            param.name(paramName)
                 .id(id() + ":" + paramName);
             if (parameter.isAnnotationPresent(Description.class)) {
                 param.setComment(parameter.getAnnotation(Description.class).value());

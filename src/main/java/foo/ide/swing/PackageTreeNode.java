@@ -13,7 +13,7 @@ class PackageTreeNode extends DefaultMutableTreeNode {
             .stream()
             .filter(PackageNode.class::isInstance)
             .map(n -> (NamedNode) n)
-            .sorted(Comparator.comparing(NamedNode::getName))
+            .sorted(Comparator.comparing(NamedNode::name))
             .forEach(child -> add(new PackageTreeNode((PackageNode) child)));
     }
 }

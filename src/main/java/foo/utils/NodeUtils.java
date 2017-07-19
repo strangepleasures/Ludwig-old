@@ -1,9 +1,16 @@
 package foo.utils;
 
+import foo.model.Node;
 import org.apache.commons.lang.StringEscapeUtils;
 
-public class LiteralParser {
-    public static Object parse(String s) {
+public class NodeUtils {
+    public static String toString(Node node) {
+        PrintVisitor visitor = new PrintVisitor();
+        node.accept(visitor);
+        return visitor.toString();
+    }
+
+    public static Object parseLiteral(String s) {
         switch (s) {
             case "true":
                 return true;
@@ -24,10 +31,14 @@ public class LiteralParser {
         }
     }
 
-    public static String toString(Object o) {
+    public static String formatLiteral(Object o) {
         if (o instanceof String) {
             return StringEscapeUtils.escapeJavaScript(o.toString());
         }
         return String.valueOf(o);
+    }
+
+    public static String toHtml(Node node) {
+        return node.accept(new HtmlGenerator()).render();
     }
 }
