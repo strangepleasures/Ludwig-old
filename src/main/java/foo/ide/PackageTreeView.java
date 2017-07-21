@@ -7,7 +7,6 @@ import javafx.scene.control.TreeView;
 
 public class PackageTreeView extends TreeView<NamedNode> {
     private final Workspace workspace;
-    private final TreeItem<NamedNode> root = new TreeItem<>();
 
     public PackageTreeView(Workspace workspace) {
         super(createRoot(workspace));

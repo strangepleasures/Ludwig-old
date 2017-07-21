@@ -60,9 +60,8 @@ public class App extends Application {
         signatureView.setFixedCellSize(25);
 
         signatureView.prefHeightProperty().bind(Bindings.size(signatureView.getItems()).multiply(signatureView.getFixedCellSize()).add(30));
-
-        WebView bodyEditor = new WebView();
-        methodPane.getChildren().add(bodyEditor);
+        signatureView.minHeightProperty().bind(signatureView.prefHeightProperty());
+        signatureView.maxHeightProperty().bind(signatureView.prefHeightProperty());
 
         functionList.getSelectionModel().selectedItemProperty().addListener(observable -> {
             signatureView.getItems().clear();
@@ -72,6 +71,9 @@ public class App extends Application {
 
                 signatureView.getItems().add(functionNode);
                 signatureView.getItems().addAll(functionNode.parameters());
+
+                signatureView.refresh();
+
             }
         });
 
@@ -88,7 +90,7 @@ public class App extends Application {
             PackageNode packageNode = (PackageNode) node;
             functionList.getItems().clear();
 
-            for (Node item: packageNode.children()) {
+            for (Node item : packageNode.children()) {
                 if (item instanceof FunctionNode) {
                     functionList.getItems().add((NamedNode) item);
                 }
