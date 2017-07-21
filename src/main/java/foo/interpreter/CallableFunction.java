@@ -1,7 +1,7 @@
 package foo.interpreter;
 
 import foo.model.*;
-import foo.utils.PrintUtil;
+import foo.utils.NodeUtils;
 import org.pcollections.HashPMap;
 import org.pcollections.HashTreePMap;
 
@@ -39,6 +39,6 @@ public class CallableFunction implements Callable {
 
     @Override
     public String toString() {
-        return PrintUtil.toString(function);
+        return NodeUtils.toString(function);
     }
 }

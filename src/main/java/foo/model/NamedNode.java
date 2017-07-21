@@ -3,11 +3,11 @@ package foo.model;
 public abstract class NamedNode extends Node {
     private String name;
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public NamedNode setName(String name) {
+    public NamedNode name(String name) {
         this.name = name;
         return this;
     }

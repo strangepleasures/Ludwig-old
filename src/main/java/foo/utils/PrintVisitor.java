@@ -13,11 +13,11 @@ class PrintVisitor implements NodeVisitor<Void> {
     public Void visitBoundCall(BoundCallNode node) {
         indent(node);
         FunctionNode functionNode = (FunctionNode) node.children().get(0);
-        out.append(functionNode.getName());
+        out.append(functionNode.name());
         indentation++;
         for (ParameterNode param : functionNode.parameters()) {
             indent(param);
-            out.append(param.getName()).append(": ");
+            out.append(param.name()).append(": ");
             if (node.arguments().containsKey(param)) {
                 inline = true;
                 indentation++;
@@ -34,14 +34,14 @@ class PrintVisitor implements NodeVisitor<Void> {
     @Override
     public Void visitFunction(FunctionNode node) {
         indent(node);
-        out.append("def ").append(node.getName()).append(" [");
+        out.append("def ").append(node.name()).append(" [");
         boolean first = true;
         for (ParameterNode param : node.parameters()) {
             if (!first) {
                 out.append(' ');
             }
             first = false;
-            out.append(param.getName());
+            out.append(param.name());
         }
         out.append("]");
         printChildren(node, false);
@@ -51,7 +51,7 @@ class PrintVisitor implements NodeVisitor<Void> {
     @Override
     public Void visitLet(LetNode node) {
         indent(node);
-        out.append("= ").append(node.getName());
+        out.append("= ").append(node.name());
         printChildren(node, true);
         return null;
     }
@@ -74,7 +74,7 @@ class PrintVisitor implements NodeVisitor<Void> {
     @Override
     public Void visitPackage(PackageNode node) {
         indent(node);
-        out.append("package ").append(node.getName());
+        out.append("package ").append(node.name());
         printChildren(node, false);
         return null;
     }
@@ -87,7 +87,7 @@ class PrintVisitor implements NodeVisitor<Void> {
     @Override
     public Void visitRef(RefNode node) {
         indent(node);
-        out.append(node.ref().getName());
+        out.append(node.ref().name());
         return null;
     }
 
@@ -95,7 +95,7 @@ class PrintVisitor implements NodeVisitor<Void> {
     public Void visitUnboundCall(UnboundCallNode node) {
         indent(node);
         if (node.children().get(0) instanceof RefNode) {
-            out.append(((RefNode) node.children().get(0)).ref().getName());
+            out.append(((RefNode) node.children().get(0)).ref().name());
             boolean expand = level(node) > 3;
                 out.append(expand ? "\n" : " [");
                 indentation++;
@@ -126,7 +126,7 @@ class PrintVisitor implements NodeVisitor<Void> {
                 out.append(' ');
             }
             first = false;
-            out.append(param.getName());
+            out.append(param.name());
         }
         out.append(']');
         printChildren(node, false);
@@ -144,7 +144,7 @@ class PrintVisitor implements NodeVisitor<Void> {
     @Override
     public Void visitProject(ProjectNode node) {
         indent(node);
-        out.append("project ").append(node.getName());
+        out.append("project ").append(node.name());
         printChildren(node, false);
         return null;
     }
@@ -175,7 +175,7 @@ class PrintVisitor implements NodeVisitor<Void> {
     @Override
     public Void visitAssignment(AssignmentNode node) {
         indent(node);
-        out.append(":= ").append(((NamedNode)node.children().get(0)).getName());
+        out.append(":= ").append(((NamedNode)node.children().get(0)).name());
         printChildren(node, true);
         return null;
     }
@@ -191,7 +191,7 @@ class PrintVisitor implements NodeVisitor<Void> {
     @Override
     public Void visitFor(ForNode node) {
         indent(node);
-        out.append("for ").append(node.getName());
+        out.append("for ").append(node.name());
         printChildren(node, true);
         return null;
     }

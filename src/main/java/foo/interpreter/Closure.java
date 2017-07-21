@@ -1,7 +1,7 @@
 package foo.interpreter;
 
 import foo.model.*;
-import foo.utils.PrintUtil;
+import foo.utils.NodeUtils;
 import org.pcollections.HashPMap;
 
 public class Closure implements Callable {
@@ -39,6 +39,6 @@ public class Closure implements Callable {
 
     @Override
     public String toString() {
-        return PrintUtil.toString(lambda);
+        return NodeUtils.toString(lambda);
     }
 }

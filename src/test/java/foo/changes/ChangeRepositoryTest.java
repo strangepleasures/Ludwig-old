@@ -2,7 +2,7 @@ package foo.changes;
 
 import foo.model.ProjectNode;
 import foo.repository.ChangeRepository;
-import foo.utils.PrintUtil;
+import foo.utils.NodeUtils;
 import foo.workspace.Workspace;
 import org.junit.Test;
 
@@ -23,13 +23,14 @@ public class ChangeRepositoryTest {
         workspace.apply(changes);
 
         Optional<ProjectNode> myProjectNodeOpt = workspace.getProjects().stream()
-                .filter(n -> n.getName().equals("My Project")).findFirst();
+                .filter(n -> n.name().equals("My Project")).findFirst();
         assertTrue(myProjectNodeOpt.isPresent());
         assertEquals(
             "project My Project\n" +
                 "\tpackage mypackage\n" +
-                "\t\tdef foo [x y] [+ [x y]]",
-            PrintUtil.toString(myProjectNodeOpt.get()));
+                "\t\tdef foo [x y]\n" +
+                "\t\t\t- [* [x y] 100]",
+            NodeUtils.toString(myProjectNodeOpt.get()));
     }
 
 }

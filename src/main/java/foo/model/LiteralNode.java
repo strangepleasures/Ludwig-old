@@ -1,18 +1,21 @@
 package foo.model;
 
-import foo.utils.LiteralParser;
+import foo.utils.NodeUtils;
 
 public class LiteralNode extends Node {
-    private final String text;
-    private final Object value;
+    private String text;
+    private Object value;
+
+    public LiteralNode() {
+    }
 
     public LiteralNode(String text) {
-        this(text, LiteralParser.parse(text));
+        this(text, NodeUtils.parseLiteral(text));
     }
 
     private LiteralNode(String text, Object value) {
         this.text = text;
-        this.value = LiteralParser.parse(text);
+        this.value = value;
     }
 
     public String text() {
@@ -29,6 +32,6 @@ public class LiteralNode extends Node {
     }
 
     public static LiteralNode ofValue(Object value) {
-        return new LiteralNode(LiteralParser.toString(value), value);
+        return new LiteralNode(NodeUtils.formatLiteral(value), value);
     }
 }
