@@ -55,6 +55,11 @@ else
     = value 5
 ```
 
+For the easy of typing variable names should be all lowercase with words separated by hyphens:
+```
+= my-xml-parser create-new-parser default-xml-parser-factory
+``` 
+
 TBD: Do we need a handful of ++, --, +=, *=, etc?
 
 ##Function calls
@@ -73,6 +78,12 @@ There's actually no difference between function and method call, they look exact
 Methods and functions are pretty similar, they're just dispatched in a slightly different way.
 Technically, methods are just single-dispatch polymorphic functions. 
 IDE can make this difference visible by displaying them in different colors.
+
+##Object creation
+```
+= order Order customer product quantity
+```
+Class names should be in capitalized camel case. 
 
 ##Operators!
 There's no operators! All kind of operators are mere regular functions! There's no precedence rules.
@@ -105,75 +116,94 @@ That can be done with a special `@` symbol:
 
 calls function `foo` with two arguments, first of which is a reference to function `foo`.
 
-A function reference can be then called at any time with `!`. Given a function reference `= f @ foo`,
-`! f x` calls `foo x`, `!! f x y` calls `foo x y`, `!!! f x y z` calls `foo x y z`, etc.
-The need to type `^` for each argument can look annoying at the first look,
-however, most of functional references in languages like Lisp or Scheme have only one argument.
-More than that, `!` is actually Curry operator allowing partial application of functions!
-If `foo` has three argument, then calling `! f x` returns a new function of two arguments 
-and `!! f x y` returns a function of one argument.
+A function reference can be then called at any time with `!`:
+``` 
+= plus @ +
+= result ! plus 2 3
+assert == 5 result
+``` 
 
-It's worth to mention that `!` is not a special operator, but just a method of the function reference object.
-
-Partial application make it possible to bind a method reference to a particular object:
+##Currying
+A function or method or method reference can be partially applied (curried):
 ```
-= draw-red-circle ! & draw red-circle 
+= plus3 with 3 plus
+```
+
+```
+= draw-red-circle with red-circle & draw 
 ```
 ##Lambdas
 
 Lambdas are single argument anonymous functions defined within another function or lambda.
+Lambda definition has the following format:
+ 
+ `λ <arg*> : <stmt*>`
+ 
+ 
+`λ : println "Hello World!"` returns a reference to an anonymous function without arguments which prints a string.
 
-`λ x * 2 x` defines an anonymous function which returns it's argument multiplied by two.
-The `λ` can be entered by pressing backslash key.
+`λ x : * 2 x` returns a reference to an anonymous function which returns it's argument multiplied by two.
 
-Lambda function can contain multiple statements:
+`λ x y : + x y` returns a reference to an anonymous function which returns a sum of its arguments.
+
+The `λ` symbol can be entered by pressing backslash key.
+
+This syntax is eager, it consumes the all the expressions to the right of `λ`. 
+
 ```
-λ x
+λ x :
     = u sin x
     = v exp x
     + * u - 1 v
 ```
 
-
-How to define an anonymous function with multiple arguments?
-By definition, λ-functions always have a single argument.
-However, you can easily model multi-argument anonymous by defining a lambda returning another lambda:
-
-`= multiply-xyz λ x λ y λ z * x * y z`
-
-Nonetheless, it's typically not a good idea to use anonymous functions with more than two arguments.
-
-To define an anonymous function without arguments create a lambda which ignores its argument.
-By convention the ignored argument should be called `_`:.
-Definition of an anonymous function without arguments looks a bit complicated but there's no magic here:
-`with` is just a function and _ is just a conventional name of ignored argument.
-
+Use indentation synatx to pass multiple lambdas to one function:
 ```
-= task with null λ _ println "Hello world"
-! task
-``` 
+! compose
+       λ x : * x x
+       λ x : + x 2
+    3  
+```
+Returns (3 + 2)^2 = 25
+
 
 Lambdas inherit their parent lexical scope but cannot modify variables in it. 
 However, lambdas can locally override variables without affecting the parent scope:
 
 ```
 = a 1
-= f λ _
+= f λ :
   = a + a 1
   assert == a 2
-! f 0 
+! f 
 assert == a 1
 ```
 
-## Lists
+##Lists, Sets and Maps
 Immutable lists can be defined in this way:
 
-`= my-list : 1 : 2 : 3 ;`
+```
+= my-list : 1 : 2 : 3 ;
+```
 
 It's not actually a special syntax again: `;` is actually a constant returning an empty list and `:` is a function with two arguments 
 which prepends a list passed as a second argument with a value from the first.
 
-## if, else, elif
+Immutable set:
+
+```
+= my-set to-set : 1 : 2 : 3 ;
+```
+
+Immutable map:
+
+```
+= my-map :: k1 v1 :: k2 v2 :: k3 v3 ;
+```
+
+TBD: Do we need a better syntax? 
+
+##if, else, elif
 ```
 = sign if > x 0
         1
@@ -203,6 +233,18 @@ while has-next it
 
 ##return, break, continue
 
+```
+for i range 1 n
+	for j range 1 n
+		if == 0
+		        get matrix i j
+		    println "Found a zero"    
+		    break i
+```
+
+##throw, try, catch
+
+##match
 
 ## There's nothing more!
 No more syntax is needed.
