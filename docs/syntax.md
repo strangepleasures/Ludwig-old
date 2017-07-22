@@ -1,168 +1,212 @@
-#### Literals
-- Integer (long) values:
-`123456`
-- Real (double) values: `123.456`
-- Boolean: `true` and `false`
-- `null`
-- Strings: `"blah\nblah""` No string interpolation (Let's keep it simple)
-- Binary literals ?
-- Characters ?
-#### Variable declaration
-```
-= var value
-```
-Declares a new variable in the current scope.
-#### Assignment
-```
-:= var value
-```
-Changes the value of a variable in the current or outer lexical scope.
-It's slightly more difficult to change variable's value than to declare a variable because static single assignment is a good thing.
-The language softly forces you to avoid mutation.
+# Syntax
 
-There's no way to declare a variable without assigning a value, but you can assign `null`:
-```
-= result null
-if [and [> x 0] [< x 1]
-    := result 1
-else
-    := result 0
-```
-or even
-```
-= result null
-if useNames
-    := result "five"
-else
-    := result 5
-```
-The inferred type is now `Either String  Integer`
+## There's the syntax?
+The syntax is nearly invisible, there's no reserved words, precedence rules, commas, semicolons, parenthesis, curly or square brackets.
+There's only a few special forms, such as assignment. 
+Polish notation is used for everything, however, smart indentation automatically provided by IDE makes code easy to read.
 
-More assignments:
- `+=  -=  *=  /=  &=  |=` _Do we really need them?_
-#### Function call
-```
-function arg1 arg2 arg3
-[function-without-arguments]
-```
-Whenever needed and possible IDE displays arguments' names, but you don't need to type them:
- ```
-move-to x: 100 y: 200
-withdraw order: current-order amount: payment
-```
-It should be possible to declare argument with a default value.
-On the call site arguments with default values can be hidden for brevity and better readability.
-Nested calls
-```
-foo [bar [baz x]]
-```
-So far it's pretty similar to Lisp's S-expressions except to using square brackets instead of parenthesis and omitting brackets for top level forms.
-The latter is to reduce "syntactic noise", but why [] instead of () ? I think, brackets are more readable and easy to match; they are also easier to type: you don't have to press `Shift`.
-Don't be mistaken, this is not Lisp!
+## Literals
+Standard literal types are strings, signed integers and real numbers:
 
-Too many nested calls? Here comes indentation-based syntax:
-```
-head
-    filter
-        map
-            items
-            lambda [x] [+ x 1]	 
-        lambda [x] [> x 0]					
+`123`
+`0xFF`
+`1.23E-4`
+`"It's a string"`
 
-```
-#### Method calls
-Method calls look exactly like function calls, they are just dispatched in a slightly different way.
+Number literals are not typed, i.e. there's no syntax like `1.23f`.
 
-`cancel order` - calls method `cancel` of object `order`
+`true`, `false` and `null` are just constant names, not actually a part of the syntax.
 
-Q: What if I have both method and function called `cancel`, which will be called?
+Multiline strings can be represented by IDE in compact and expanded forms.
+Everything is an object, there's no distinction between primitives and "real" objects.
+String, numbers and booleans are immutable and are always compared by value.
+(For optimization purposes, on the implementation level there can be multiple instances 
+of a string or an integer with the same value, but it should be completely invisible on the the level 
+on which the language operates).
+There's no such thing as object identity for immutable objects!
+There's no way to distinguish between two instances of integers with the same value. 
+There's one and only one 42 in this world!
 
-A: Code is not text! Everything including functions and methods is referenced not by name but by object reference. At the moment you type `cancel` you will be prompted to pick one method or function called `cancel`.
- A reference to the chosen method or function will determine what should be called. The same is true for functions from different packages.
+TBD: 
+- Do we need special literals for characters and binary values?
+- Multilingual string literals?
 
-#### Arithmetic and relational operators
-They're just functions
-- `+ - * / < > == != >= <=`
-- `\` _or `div`?_ integer division 
-- `%` _or `mod`?_ remainder
+There's no need to have a special syntax regular expressions, dates, etc.  
 
-#### Boolean operators
-In contrast, boolean operators are not mere functions. All boolean operators are short-circuited and use lazy evaluation.
-_Should we support lazy evaluation of function parameters for "normal" functions?_
-The only exception is `!` (not) - it's just a simple eager function.
-So, here are boolean operators: 
-`& | ^ !` _or maybe `and or xor not`?_
+##Assignments
 
-For example:
-```
-= in-range lambda [x x1 x2]
-   & [< x1 x] [<= x x2]
-```
-### Bitwise operators
-They are just functions with names like `bitand32`
-#### return
+Variable declarations and assignments are as simple as this:
 
-```
-return <value>
-```
-or just
-```
-return
-```
-(returns `null`)
-_Should we use inlined `return + 2 3` instead of `return [+ 2 3]`?_
+`= x 1`
 
+or
  
-#### if, else and elif
+`= x + x 1`
+
+Assignments are always local to the parent function, method or lambda.
+There's no need for a special variable declaration syntax.
+There's no way to declare a variable without assigning it a value but you can always assign `null`:
+
 ```
-if <condition>
-    <statement>
-    ...
-    <statement>
-elif <condition>
-    <statement>
-    ...
-    <statement>
+= value null
+if use-names
+    = value "five"
 else
-    <statement>
-    ...
-    <statement>
+    = value 5
 ```
-#### cond
-cond is a simplified form of if-else:
-`= sign cond [> x 0] 1 [< x 0] -1 0`
-#### while
+
+TBD: Do we need a handful of ++, --, +=, *=, etc?
+
+##Function calls
+
+Function calls have the form of `foo arg1 arg2 arg3`. No parenthesis or commas are needed.
+Nested calls also don't require parenthesis, because the interpreter always knows how many arguments each function takes,
+so it can always figure out if `foo bar x y` means `foo(bar(x, y))`, `foo(bar(x), y)`, `foo(bar(), x, y)`.
+All functions have fixed arity, there's no error-prone `varargs` syntax.
+The IDE is also able to pretty-print complex expressions with nested calls. 
+
+Novice users should be able to turn on explicit parenthesising provided by IDE, but it's needed to actually type parenthesis. 
+Similarly, IDE should show display argument names when possible/needed, but users don't have to type them. 
+
+##Method calls
+There's actually no difference between function and method call, they look exactly the same, so `foo arg1 arg2 arg3` can be either a method of object `arg1` or a function with three arguments defined somewhere else.
+Methods and functions are pretty similar, they're just dispatched in a slightly different way.
+Technically, methods are just single-dispatch polymorphic functions. 
+IDE can make this difference visible by displaying them in different colors.
+
+##Operators!
+There's no operators! All kind of operators are mere regular functions! There's no precedence rules.
+
+`* + a b - a b` -> `(a + b) * (a - b)`
+
+Unary minus (negation) is `neg` to distinguish it from binary `-`.
+
+Boolean operators `and`, `or`, `xor` are short-circuit and use lazy evaluation of arguments.
+
+`and != s null > length s 0` is equivalent to `(s != null) && (s.length() > 0)` in Java.
+
+Not is (logically) `not`.
+
+`==` and `!=` are null-safe and check object identity for mutable objects and equality by value for immutable objects.
+
+Again:
+- There's no such thing as object identity for immutable objects!
+- There's no way to distinguish between two instances of integers with the same value. 
+- There's one and only one 42 in this world!
+
+Mutable classes may define domain specific equality-like methods, e.g. `same-content`.
+
+##Function & method references
+Functional paradigm presumes that functions are firest-class objects and can be passed to other functions as arguments or returned from a function.
+This means that there must be a way to obtain a reference to a function or a method without immediately applying it.
+That can be done with a special `@` symbol:
+
+`foo @ bar 10` 
+
+calls function `foo` with two arguments, first of which is a reference to function `foo`.
+
+A function reference can be then called at any time with `!`:
+``` 
+= plus @ +
+= result ! plus 2 3
+assert == 5 result
+``` 
+
+##Currying
+A function or method or method reference can be partially applied (curried):
 ```
-while <condition>
-    <statement>
-    ...
-    <statement>
+= plus3 with 3 plus
 ```
-#### for
+
 ```
-for <variable> <iterable>
-   <statement>
-   ...
-   <statement>
+= draw-red-circle with red-circle & draw 
+```
+##Lambdas
+
+Lambdas are single argument anonymous functions defined within another function or lambda.
+
+`λ x * 2 x` defines an anonymous function which returns it's argument multiplied by two.
+The `λ` can be entered by pressing backslash key.
+
+Lambda function can contain multiple statements:
+```
+λ x
+    = u sin x
+    = v exp x
+    + * u - 1 v
+```
+
+
+How to define an anonymous function with multiple arguments?
+By definition, λ-functions always have a single argument.
+However, you can easily model multi-argument anonymous by defining a lambda returning another lambda:
+
+`= multiply-xyz λ x λ y λ z * x * y z`
+
+Nonetheless, it's typically not a good idea to use anonymous functions with more than two arguments.
+
+To define an anonymous function without arguments create a lambda which ignores its argument.
+By convention the ignored argument should be called `_`:.
+Definition of an anonimous function without arguments looks a bit complicated but there's no magic here:
+`with` is just a function and _ is just a conventional name of ignored argument.
+
+```
+= task with null λ _ println "Hello world"
+! task
+``` 
+
+Lambdas inherit their parent lexical scope but cannot modify variables in it. 
+However, lambdas can locally override variables without affecting the parent scope:
+
+```
+= a 1
+= f λ _
+  = a + a 1
+  assert == a 2
+! f 0 
+assert == a 1
+```
+
+## Lists
+Immutable lists can be defined in this way:
+
+`= my-list : 1 : 2 : 3 ;`
+
+It's not actually a special syntax again: `;` is actually a constant returning an empty list and `:` is a function with two arguments 
+which prepends a list passed as a second argument with a value from the first.
+
+## if, else, elif
+```
+= sign if > x 0
+        1
+    elif < x 0
+        -1
+    else
+        0    
+```
+
+##for
+```
+for shape shapes
+    draw shape 
 ```
 
 ```
 for i range 0 n
-   print i
+   = t * i i
+   println t
 ```
-#### break, continue
-#### throw, try, catch, finall
-#### Lambdas
+
+##while
 ```
-lambda [<argument>...]
-    <statement>
-    ...
-    <statement>
+while has-next it
+    print next it
 ```
-_Should we mayby use λ for lambdas? Could be typed with `\`_
-#### case
-TBD
-#### No more synatx!
+
+##return, break, continue
+
+
+## There's nothing more!
 No more syntax is needed.
 Packages, function and method declarations, comments, visibility modifiers, imports, etc are all done by IDE. 
 
