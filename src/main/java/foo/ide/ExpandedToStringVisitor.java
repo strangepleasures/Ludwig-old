@@ -71,17 +71,17 @@ public class ExpandedToStringVisitor implements NodeVisitor<String> {
 
     @Override
     public String visitAnd(AndNode andNode) {
-        return "&";
+        return "and";
     }
 
     @Override
     public String visitOr(OrNode orNode) {
-        return "|";
+        return "or";
     }
 
     @Override
     public String visitAssignment(AssignmentNode assignmentNode) {
-        return ":=";
+        return "=";
     }
 
     @Override

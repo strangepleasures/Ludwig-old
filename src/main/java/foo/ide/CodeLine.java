@@ -3,13 +3,21 @@ package foo.ide;
 import foo.model.Node;
 import lombok.Getter;
 
-@Getter
 public class CodeLine {
-    private final Node node;
-    private final String string;
+    @Getter
+    private Node node;
+    private StringBuilder builder = new StringBuilder();
 
-    public CodeLine(Node node, String string) {
+    public CodeLine(Node node) {
         this.node = node;
-        this.string = string;
+    }
+
+    public void append(String s) {
+        builder.append(s);
+    }
+
+    @Override
+    public String toString() {
+        return builder.toString();
     }
 }

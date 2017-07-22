@@ -8,6 +8,7 @@ import foo.repository.ChangeRepository;
 import foo.workspace.Workspace;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -62,9 +63,10 @@ public class App extends Application {
         signatureView.minHeightProperty().bind(signatureView.prefHeightProperty());
         signatureView.maxHeightProperty().bind(signatureView.prefHeightProperty());
 
-        CodeTreeView codeTreeView = new CodeTreeView();
-        codeTreeView.setPrefHeight(1E9);
-        methodPane.getChildren().add(codeTreeView);
+        ListView<CodeLine> codeView = new ListView<>();
+        codeView.prefHeight(1E6);
+        methodPane.getChildren().add(codeView);
+
 
         functionList.getSelectionModel().selectedItemProperty().addListener(observable -> {
             signatureView.getItems().clear();
@@ -74,7 +76,12 @@ public class App extends Application {
 
                 signatureView.getItems().add(functionNode);
                 signatureView.getItems().addAll(functionNode.parameters());
-                codeTreeView.setFunction(functionNode);
+
+                CodeFormatter codeFormatter = new CodeFormatter();
+                functionNode.accept(codeFormatter);
+
+                List<CodeLine> lines = codeFormatter.getLines();
+                codeView.setItems(FXCollections.observableList(lines));
             }
         });
 
