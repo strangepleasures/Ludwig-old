@@ -121,16 +121,6 @@ class HtmlGenerator implements NodeVisitor<ContainerTag> {
     }
 
     @Override
-    public ContainerTag visitAnd(AndNode andNode) {
-        return null;
-    }
-
-    @Override
-    public ContainerTag visitOr(OrNode orNode) {
-        return null;
-    }
-
-    @Override
     public ContainerTag visitAssignment(AssignmentNode assignmentNode) {
         return null;
     }

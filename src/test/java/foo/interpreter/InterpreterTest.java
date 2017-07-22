@@ -5,7 +5,7 @@ import foo.runtime.StdLib;
 import org.junit.Test;
 import org.pcollections.HashTreePMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class InterpreterTest {
     private SystemPackage systemPackage = new SystemPackage(StdLib.class);
@@ -55,4 +55,14 @@ public class InterpreterTest {
         assertEquals(5.0, result);
     }
 
+
+    @Test
+    public void testDelayed() {
+        FunctionNode or = (FunctionNode) systemPackage.item("or");
+        assertEquals(true, Interpreter.call(or, true, true));
+        assertEquals(true, Interpreter.call(or, true, false));
+        assertEquals(true, Interpreter.call(or, false, true));
+        assertEquals(false, Interpreter.call(or, false, false));
+        assertEquals(true, Interpreter.call(or, true, null));
+    }
 }

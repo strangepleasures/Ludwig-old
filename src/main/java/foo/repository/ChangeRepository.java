@@ -2,9 +2,10 @@ package foo.repository;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.*;
-import foo.changes.*;
-import foo.model.*;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+import foo.changes.Change;
+import foo.model.Node;
 import org.reflections.Reflections;
 
 import java.io.IOException;
@@ -18,10 +19,10 @@ public class ChangeRepository {
 
     static {
         mapper.setVisibility(mapper.getVisibilityChecker()
-         .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-        .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-        .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+            .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+            .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+            .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
         new Reflections(Change.class.getPackage().getName())
             .getSubTypesOf(Change.class)

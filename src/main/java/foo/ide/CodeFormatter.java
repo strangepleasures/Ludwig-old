@@ -107,22 +107,6 @@ public class CodeFormatter implements NodeVisitor<Void> {
     }
 
     @Override
-    public Void visitAnd(AndNode andNode) {
-        print("and");
-        boolean inline = level(andNode) < 4;
-        andNode.children().forEach(node -> child(node, inline));
-        return null;
-    }
-
-    @Override
-    public Void visitOr(OrNode orNode) {
-        print("or");
-        boolean inline = level(orNode) < 4;
-        orNode.children().forEach(node -> child(node, inline));
-        return null;
-    }
-
-    @Override
     public Void visitAssignment(AssignmentNode assignmentNode) {
         print("= ");
         child(assignmentNode.children().get(0), true);

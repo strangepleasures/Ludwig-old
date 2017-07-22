@@ -3,8 +3,6 @@ package foo.utils;
 import foo.model.*;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class PrintUtilTest {
 
     @Test

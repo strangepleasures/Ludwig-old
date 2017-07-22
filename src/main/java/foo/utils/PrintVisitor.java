@@ -89,18 +89,18 @@ class PrintVisitor implements NodeVisitor<Void> {
         if (node.children().get(0) instanceof RefNode) {
             out.append(((RefNode) node.children().get(0)).ref().getName());
             boolean expand = level(node) > 3;
-                out.append(expand ? "\n" : " [");
-                indentation++;
-                for (int i = 1; i < node.children().size(); i++) {
-                    if (i > 1) {
-                        out.append(expand ? '\n' : ' ');
-                    }
-                    print(node.children().get(i));
+            out.append(expand ? "\n" : " [");
+            indentation++;
+            for (int i = 1; i < node.children().size(); i++) {
+                if (i > 1) {
+                    out.append(expand ? '\n' : ' ');
                 }
-                indentation--;
-                if (!expand) {
-                    out.append("]");
-                }
+                print(node.children().get(i));
+            }
+            indentation--;
+            if (!expand) {
+                out.append("]");
+            }
 
         } else {
             // TODO: Support ?
@@ -150,24 +150,9 @@ class PrintVisitor implements NodeVisitor<Void> {
     }
 
     @Override
-    public Void visitAnd(AndNode andNode) {
-        out.append("&");
-        printChildren(andNode, false);
-        return null;
-    }
-
-    @Override
-    public Void visitOr(OrNode node) {
-        indent(node);
-        out.append("|");
-        printChildren(node, false);
-        return null;
-    }
-
-    @Override
     public Void visitAssignment(AssignmentNode node) {
         indent(node);
-        out.append(":= ").append(((NamedNode)node.children().get(0)).getName());
+        out.append(":= ").append(((NamedNode) node.children().get(0)).getName());
         printChildren(node, true);
         return null;
     }

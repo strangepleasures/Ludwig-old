@@ -25,10 +25,6 @@ public interface NodeVisitor<T> {
 
     T visitIf(IfNode ifNode);
 
-    T visitAnd(AndNode andNode);
-
-    T visitOr(OrNode orNode);
-
     T visitAssignment(AssignmentNode assignmentNode);
 
     T visitElse(ElseNode elseNode);

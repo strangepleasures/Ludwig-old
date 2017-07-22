@@ -20,7 +20,7 @@ public class Workspace {
 
         @Override
         public Problem visitInsertNode(InsertNode insert) {
-             return place(insert.getNode(), insert);
+            return place(insert.getNode(), insert);
         }
 
         @Override
@@ -67,7 +67,7 @@ public class Workspace {
     public List<Problem> apply(List<Change> changes) {
         List<Problem> problems = new ArrayList<>();
 
-        for (Change change: changes) {
+        for (Change change : changes) {
             Problem problem = change.accept(changeVisitor);
             if (problem != null) {
                 problems.add(problem);
@@ -80,7 +80,7 @@ public class Workspace {
         if (problems.isEmpty()) { // TODO: Make a distinction between warnings and errors
             appliedChanges.addAll(changes);
         } else {
-           restore();
+            restore();
         }
         return problems;
     }
@@ -107,21 +107,21 @@ public class Workspace {
 
     public void registerProject(ProjectNode projectNode) {
         addNode(projectNode);
-        for (Node packageNode: projectNode.children()) {
+        for (Node packageNode : projectNode.children()) {
             registerPackage((PackageNode) packageNode);
         }
     }
 
     public void registerPackage(PackageNode p) {
         addNode(p);
-        for (Node n: p.children()) {
+        for (Node n : p.children()) {
             if (n instanceof PackageNode) {
                 registerPackage(p);
             } else {
                 addNode(n);
 
                 if (n instanceof FunctionNode) {
-                    for (ParameterNode parameterNode: ((FunctionNode) n).parameters()) {
+                    for (ParameterNode parameterNode : ((FunctionNode) n).parameters()) {
                         addNode(parameterNode);
                     }
                 }

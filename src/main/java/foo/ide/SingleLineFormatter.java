@@ -16,7 +16,7 @@ public class SingleLineFormatter implements NodeVisitor<String> {
         }
         FunctionNode fn = (FunctionNode) boundCallNode.children().get(0);
 
-        for (ParameterNode p: fn.parameters()) {
+        for (ParameterNode p : fn.parameters()) {
             if (boundCallNode.arguments().containsKey(p)) {
                 out.append(' ').append(p.getName()).append(": ");
                 boundCallNode.arguments().get(p).accept(this);
@@ -114,28 +114,6 @@ public class SingleLineFormatter implements NodeVisitor<String> {
     public String visitIf(IfNode ifNode) {
         out.append("[if");
         ifNode.children().forEach(node -> {
-            out.append(' ');
-            node.accept(this);
-        });
-        out.append(']');
-        return null;
-    }
-
-    @Override
-    public String visitAnd(AndNode andNode) {
-        out.append("[|");
-        andNode.children().forEach(node -> {
-            out.append(' ');
-            node.accept(this);
-        });
-        out.append(']');
-        return null;
-    }
-
-    @Override
-    public String visitOr(OrNode orNode) {
-        out.append("[&");
-        orNode.children().forEach(node -> {
             out.append(' ');
             node.accept(this);
         });

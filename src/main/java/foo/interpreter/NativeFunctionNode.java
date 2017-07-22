@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 public class NativeFunctionNode extends FunctionNode implements Callable {
     private final Method method;
     private final Class[] paramTypes;
+    private final boolean delayed;
+    private static final Object[] EMPTY = {};
 
     public NativeFunctionNode(Method method) {
         this.method = method;
@@ -40,6 +42,8 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
             }
             parameters().add(param);
         }
+
+        delayed = method.isAnnotationPresent(Delayed.class);
     }
 
     @Override
@@ -74,6 +78,9 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
                 .get();
             return Proxy.newProxyInstance(Callable.class.getClassLoader(), new Class[]{type}, (proxy, method, args) -> {
                 if (method.equals(theMethod)) {
+                    if (args == null) {
+                        args = EMPTY;
+                    }
                     return callable.call(args);
                 } else {
                     return method.invoke(callable, args);
@@ -82,5 +89,10 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
         }
 
         return type.cast(o);
+    }
+
+    @Override
+    public boolean isDelayed() {
+        return delayed;
     }
 }

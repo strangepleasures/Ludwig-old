@@ -6,6 +6,7 @@ import org.pcollections.TreePVector;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Name("system")
 public class StdLib {
@@ -65,10 +66,6 @@ public class StdLib {
         return x.longValue() / y.longValue();
     }
 
-    public static boolean not(boolean b) {
-        return !b;
-    }
-
     public static Iterable map(Iterable source, Function f) {
         return () -> new Iterator() {
             Iterator it = source.iterator();
@@ -110,7 +107,32 @@ public class StdLib {
         return x.compareTo(y) >= 0;
     }
 
-//    @Name("list")
+    @Delayed
+    public static boolean and(Supplier<Boolean> x, Supplier<Boolean> y) {
+        return x.get() && y.get();
+    }
+
+    @Delayed
+    public static boolean or(Supplier<Boolean> x, Supplier<Boolean> y) {
+        return x.get() || y.get();
+    }
+
+    public static boolean xor(boolean x, boolean y) {
+        return x ^ y;
+    }
+
+    public static boolean not(boolean b) {
+        return !b;
+    }
+
+    @Delayed
+    @Name("?")
+    public static Object iff(Supplier<Boolean> condition, Supplier<?> option1, Supplier<?> option2) {
+        return condition.get() ? option1.get() : option2.get();
+    }
+
+
+//    @Name("list")§
 //    public static PVector<?> $(Object... args) {
 //        return TreePVector.from(Arrays.asList(args));
 //    }
@@ -122,6 +144,7 @@ public class StdLib {
     public static List tail(List list) {
         return list.subList(1, list.size());
     }
+
     @Name("empty?")
     public static boolean empty(Iterable x) {
         return !x.iterator().hasNext();
@@ -146,7 +169,7 @@ public class StdLib {
             return (PVector) source;
         }
         PVector v = TreePVector.empty();
-        for (Object x: source) {
+        for (Object x : source) {
             v = v.plus(x);
         }
         return v;

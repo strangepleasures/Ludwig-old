@@ -1,7 +1,8 @@
 package foo.interpreter;
 
 import foo.model.*;
-import org.pcollections.*;
+import org.pcollections.HashPMap;
+import org.pcollections.HashTreePMap;
 
 public class Interpreter {
     public static Object eval(Node node, HashPMap<NamedNode, Object> locals) {

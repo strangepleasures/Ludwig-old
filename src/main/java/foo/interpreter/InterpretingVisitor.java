@@ -2,7 +2,6 @@ package foo.interpreter;
 
 import foo.model.*;
 import org.pcollections.HashPMap;
-import org.pcollections.TreePVector;
 
 class InterpretingVisitor implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
@@ -18,13 +17,19 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         try {
             FunctionNode functionNode = (FunctionNode) boundCallNode.children().get(0);
 
+
             if (functionNode instanceof NativeFunctionNode) {
+                NativeFunctionNode fn = (NativeFunctionNode) functionNode;
+                boolean delayed = fn.isDelayed();
+
                 Object[] args = functionNode
                     .parameters()
                     .stream()
-                    .map(param -> boundCallNode.arguments().get(param).accept(this))
+                    .map(param -> boundCallNode.arguments().get(param))
+                    .map(node -> delayed ? toClosure(node) : node.accept(this))
                     .toArray();
-                return ((NativeFunctionNode) functionNode).call(args);
+
+                return fn.call(args);
             }
 
             for (ParameterNode param : functionNode.parameters()) {
@@ -90,10 +95,13 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     @Override
     public Object visitUnboundCall(UnboundCallNode unboundCallNode) {
         Callable callable = (Callable) unboundCallNode.children().get(0).accept(this);
+
+        boolean delayed = callable.isDelayed();
+
         Object[] args = unboundCallNode.children()
             .stream()
             .skip(1)
-            .map(arg -> arg.accept(this))
+            .map(node -> delayed ? toClosure(node) : node.accept(this))
             .toArray();
         return callable.call(args);
     }
@@ -132,26 +140,6 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     }
 
     @Override
-    public Object visitAnd(AndNode andNode) {
-        for (Node node: andNode.children()) {
-            if (!(Boolean) node.accept(this)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public Object visitOr(OrNode orNode) {
-        for (Node node: orNode.children()) {
-            if ((Boolean) node.accept(this)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public Object visitAssignment(AssignmentNode assignmentNode) {
         return locals = locals.plus((NamedNode) assignmentNode.children().get(0), assignmentNode.children().get(1).accept(this));
     }
@@ -175,7 +163,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitFor(ForNode forNode) {
-        for (Object var: (Iterable) forNode.children().get(0).accept(this)) {
+        for (Object var : (Iterable) forNode.children().get(0).accept(this)) {
             locals = locals.plus(forNode, var);
             for (int i = 1; i < forNode.children().size(); i++) {
                 Object value = forNode.children().get(i).accept(this);
@@ -196,5 +184,11 @@ class InterpretingVisitor implements NodeVisitor<Object> {
             }
         }
         return null;
+    }
+
+    private Closure toClosure(Node node) {
+        LambdaNode lambdaNode = new LambdaNode();
+        lambdaNode.children().add(node);
+        return new Closure(locals, lambdaNode);
     }
 }

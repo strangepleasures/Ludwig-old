@@ -10,7 +10,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ChangeRepositoryTest {
     private Workspace workspace = new Workspace();
@@ -23,7 +24,7 @@ public class ChangeRepositoryTest {
         workspace.apply(changes);
 
         Optional<ProjectNode> myProjectNodeOpt = workspace.getProjects().stream()
-                .filter(n -> n.getName().equals("My Project")).findFirst();
+            .filter(n -> n.getName().equals("My Project")).findFirst();
         assertTrue(myProjectNodeOpt.isPresent());
         assertEquals(
             "project My Project\n" +

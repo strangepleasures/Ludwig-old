@@ -17,12 +17,12 @@ public class PackageTreeView extends TreeView<NamedNode> {
     private static TreeItem<NamedNode> createRoot(Workspace workspace) {
         TreeItem<NamedNode> root = new TreeItem<>();
 
-        for (ProjectNode projectNode: workspace.getProjects()) {
+        for (ProjectNode projectNode : workspace.getProjects()) {
             TreeItem<NamedNode> projectItem = new TreeItem<>(projectNode);
 
             root.getChildren().add(projectItem);
 
-            for (Node packageNode: projectNode.children()) {
+            for (Node packageNode : projectNode.children()) {
                 processPackage(projectItem, (PackageNode) packageNode);
             }
         }
@@ -34,7 +34,7 @@ public class PackageTreeView extends TreeView<NamedNode> {
         TreeItem<NamedNode> packageItem = new TreeItem<>(packageNode);
         parent.getChildren().add(packageItem);
 
-        for (Node node: packageNode.children()) {
+        for (Node node : packageNode.children()) {
             if (node instanceof PackageNode) {
                 processPackage(packageItem, (PackageNode) node);
             }

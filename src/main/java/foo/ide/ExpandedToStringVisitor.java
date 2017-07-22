@@ -70,16 +70,6 @@ public class ExpandedToStringVisitor implements NodeVisitor<String> {
     }
 
     @Override
-    public String visitAnd(AndNode andNode) {
-        return "and";
-    }
-
-    @Override
-    public String visitOr(OrNode orNode) {
-        return "or";
-    }
-
-    @Override
     public String visitAssignment(AssignmentNode assignmentNode) {
         return "=";
     }

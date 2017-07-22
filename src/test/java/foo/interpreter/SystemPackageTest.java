@@ -4,7 +4,7 @@ import foo.model.FunctionNode;
 import foo.runtime.StdLib;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class SystemPackageTest {
 

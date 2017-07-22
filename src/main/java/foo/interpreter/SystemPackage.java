@@ -20,7 +20,7 @@ public class SystemPackage extends PackageNode {
             }
         }
 
-        for (Field field: clazz.getDeclaredFields()) {
+        for (Field field : clazz.getDeclaredFields()) {
             if (Modifier.isPublic(field.getModifiers())) {
                 children().add(new NativeLetNode(field));
             }

@@ -92,7 +92,7 @@ There's no operators! All kind of operators are mere regular functions! There's 
 
 Unary minus (negation) is `neg` to distinguish it from binary `-`.
 
-Boolean operators `and`, `or`, `xor` are short-circuit and use lazy evaluation of arguments.
+Boolean operators `and`, `or` are short-circuit and use lazy evaluation of arguments.
 
 `and != s null > length s 0` is equivalent to `(s != null) && (s.length() > 0)` in Java.
 
