@@ -137,14 +137,10 @@ public class StdLib {
         return condition.get() ? option1.get() : option2.get();
     }
 
+    @Description("Returns -x")
     public static Number neg(Number x) {
         return (x instanceof Long) ? -x.longValue() : -x.doubleValue();
     }
-
-//    @Name("list")§
-//    public static PVector<?> $(Object... args) {
-//        return TreePVector.from(Arrays.asList(args));
-//    }
 
     public static Object head(Iterable it) {
         return it.iterator().next();

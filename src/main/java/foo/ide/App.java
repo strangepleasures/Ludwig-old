@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 
 public class App extends Application {
@@ -46,7 +47,7 @@ public class App extends Application {
         functionList.setMinWidth(120);
 
         packageTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            fillFunctionList(functionList, newValue);
+            fillMembers(functionList, newValue);
         });
 
         VBox methodPane = new VBox();
@@ -97,19 +98,20 @@ public class App extends Application {
         primaryStage.show();
     }
 
-    private void fillFunctionList(ListView<NamedNode> functionList, TreeItem<NamedNode> newValue) {
+    private void fillMembers(ListView<NamedNode> memberList, TreeItem<NamedNode> newValue) {
         NamedNode node = newValue.getValue();
 
         if (node instanceof PackageNode) {
             PackageNode packageNode = (PackageNode) node;
-            functionList.getItems().clear();
+            memberList.getItems().clear();
 
-            for (Node item : packageNode.children()) {
-                if (!(item instanceof PackageNode)) {
-                    functionList.getItems().add((NamedNode) item);
-                }
-            }
-        }
+            packageNode.children()
+                .stream()
+                .filter(item -> !(item instanceof PackageNode))
+                .map(item -> (NamedNode) item)
+                .sorted(Comparator.comparing(NamedNode::getName))
+                .forEach(memberList.getItems()::add);
+          }
     }
 
     @Override
