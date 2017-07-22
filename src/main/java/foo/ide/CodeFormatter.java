@@ -153,7 +153,7 @@ public class CodeFormatter implements NodeVisitor<Void> {
         return null;
     }
 
-    void child(Node node, boolean inline) {
+    public void child(Node node, boolean inline) {
         indentation++;
         if (!inline) {
             lines.add(new CodeLine(node));

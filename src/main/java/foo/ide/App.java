@@ -64,26 +64,30 @@ public class App extends Application {
         signatureView.maxHeightProperty().bind(signatureView.prefHeightProperty());
 
         ListView<CodeLine> codeView = new ListView<>();
-        codeView.prefHeight(1E6);
+        codeView.setPrefHeight(1E6);
         methodPane.getChildren().add(codeView);
 
 
         functionList.getSelectionModel().selectedItemProperty().addListener(observable -> {
             signatureView.getItems().clear();
+            codeView.getItems().clear();
+
             NamedNode node = functionList.getSelectionModel().getSelectedItem();
-            if (node instanceof FunctionNode) {
-                FunctionNode functionNode = (FunctionNode) node;
-
-                signatureView.getItems().add(functionNode);
-                signatureView.getItems().addAll(functionNode.parameters());
-
+            if (node != null) {
+                signatureView.getItems().add(node);
                 CodeFormatter codeFormatter = new CodeFormatter();
-                functionNode.accept(codeFormatter);
 
+                if (node instanceof FunctionNode) {
+                    FunctionNode functionNode = (FunctionNode) node;
+                    signatureView.getItems().addAll(functionNode.parameters());
+                }
+
+                node.children().forEach(n -> codeFormatter.child(n, false));
                 List<CodeLine> lines = codeFormatter.getLines();
                 codeView.setItems(FXCollections.observableList(lines));
             }
         });
+
 
         splitPane.getItems().addAll(packageTree, functionList, methodPane);
 
@@ -99,7 +103,7 @@ public class App extends Application {
             functionList.getItems().clear();
 
             for (Node item : packageNode.children()) {
-                if (item instanceof FunctionNode) {
+                if (!(item instanceof PackageNode)) {
                     functionList.getItems().add((NamedNode) item);
                 }
             }

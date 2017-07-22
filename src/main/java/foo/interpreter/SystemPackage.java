@@ -2,8 +2,7 @@ package foo.interpreter;
 
 import foo.model.PackageNode;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 
 public class SystemPackage extends PackageNode {
     public SystemPackage(Class<?> clazz) {
@@ -18,6 +17,12 @@ public class SystemPackage extends PackageNode {
         for (Method method : clazz.getDeclaredMethods()) {
             if (Modifier.isPublic(method.getModifiers())) {
                 children().add(new NativeFunctionNode(method));
+            }
+        }
+
+        for (Field field: clazz.getDeclaredFields()) {
+            if (Modifier.isPublic(field.getModifiers())) {
+                children().add(new NativeLetNode(field));
             }
         }
     }

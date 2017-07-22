@@ -9,6 +9,16 @@ import java.util.function.Function;
 
 @Name("system")
 public class StdLib {
+    public static final double pi = Math.PI;
+    @Name("true")
+    public static final boolean TRUE = true;
+    @Name("false")
+    public static final boolean FALSE = true;
+    @Name("null")
+    public static final Object NULL = null;
+    @Name(";")
+    public static final TreePVector EMPTY = TreePVector.empty();
+
     public static String str(Object x) {
         return String.valueOf(x);
     }
@@ -47,12 +57,16 @@ public class StdLib {
         return x.doubleValue() / y.doubleValue();
     }
 
-    @Name("\\")
+    @Name("div")
     public static long intdiv(Number x, Number y) {
         if (x instanceof Double || y instanceof Double) {
             return Math.round(x.doubleValue() / y.doubleValue());
         }
         return x.longValue() / y.longValue();
+    }
+
+    public static boolean not(boolean b) {
+        return !b;
     }
 
     public static Iterable map(Iterable source, Function f) {
@@ -96,10 +110,10 @@ public class StdLib {
         return x.compareTo(y) >= 0;
     }
 
-    @Name("list")
-    public static PVector<?> $(Object... args) {
-        return TreePVector.from(Arrays.asList(args));
-    }
+//    @Name("list")
+//    public static PVector<?> $(Object... args) {
+//        return TreePVector.from(Arrays.asList(args));
+//    }
 
     public static Object head(Iterable it) {
         return it.iterator().next();
@@ -108,12 +122,12 @@ public class StdLib {
     public static List tail(List list) {
         return list.subList(1, list.size());
     }
-
     @Name("empty?")
     public static boolean empty(Iterable x) {
         return !x.iterator().hasNext();
     }
 
+    @Name(":")
     public static PVector prepend(Object x, PVector list) {
         return list.plus(0, x);
     }
