@@ -22,7 +22,7 @@ class HtmlGenerator implements NodeVisitor<ContainerTag> {
         return
             html(
                 head(
-                    title("Function " + functionNode.name()),
+                    title("Function " + functionNode.getName()),
                     link().withRel("stylesheet").withHref("/css/function.css")
                 ),
                 body(
@@ -33,11 +33,11 @@ class HtmlGenerator implements NodeVisitor<ContainerTag> {
                                 td("Description")
                             ),
                             tr(
-                                td(functionNode.name()),
+                                td(functionNode.getName()),
                                 td(defaultString(functionNode.getComment()))
                             ),
                             each(functionNode.parameters(), param -> tr(
-                                td(param.name()),
+                                td(param.getName()),
                                 td(defaultString(param.getComment()))
                             ))
                         )
@@ -51,11 +51,6 @@ class HtmlGenerator implements NodeVisitor<ContainerTag> {
 
     @Override
     public ContainerTag visitLet(LetNode letNode) {
-        return null;
-    }
-
-    @Override
-    public ContainerTag visitList(ListNode listNode) {
         return null;
     }
 
@@ -76,7 +71,7 @@ class HtmlGenerator implements NodeVisitor<ContainerTag> {
 
     @Override
     public ContainerTag visitRef(RefNode refNode) {
-        return withNode(refNode, a(refNode.ref().name())
+        return withNode(refNode, a(refNode.ref().getName())
             .withHref(refNode.ref().id()));
     }
 

@@ -62,15 +62,6 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     }
 
     @Override
-    public Object visitList(ListNode listNode) {
-        TreePVector<Object> list = TreePVector.empty();
-        for (Node item : listNode.children()) {
-            list = list.plus(item.accept(this));
-        }
-        return list;
-    }
-
-    @Override
     public Object visitLiteral(LiteralNode literalNode) {
         return literalNode.value();
     }

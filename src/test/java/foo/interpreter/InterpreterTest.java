@@ -13,12 +13,12 @@ public class InterpreterTest {
     @Test
     public void testSimpleFunction() {
         FunctionNode functionNode = new FunctionNode();
-        functionNode.name("foo");
+        functionNode.setName("foo");
         ParameterNode parameterNode1 = new ParameterNode();
-        parameterNode1.name("x");
+        parameterNode1.setName("x");
         functionNode.parameters().add(parameterNode1);
         ParameterNode parameterNode2 = new ParameterNode();
-        parameterNode2.name("y");
+        parameterNode2.setName("y");
         functionNode.parameters().add(parameterNode2);
         BoundCallNode boundCallNode = new BoundCallNode();
         FunctionNode minus = (FunctionNode) systemPackage.item("-");

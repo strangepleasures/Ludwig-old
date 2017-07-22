@@ -12,7 +12,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -63,6 +62,10 @@ public class App extends Application {
         signatureView.minHeightProperty().bind(signatureView.prefHeightProperty());
         signatureView.maxHeightProperty().bind(signatureView.prefHeightProperty());
 
+        CodeTreeView codeTreeView = new CodeTreeView();
+        codeTreeView.setPrefHeight(1E9);
+        methodPane.getChildren().add(codeTreeView);
+
         functionList.getSelectionModel().selectedItemProperty().addListener(observable -> {
             signatureView.getItems().clear();
             NamedNode node = functionList.getSelectionModel().getSelectedItem();
@@ -71,9 +74,7 @@ public class App extends Application {
 
                 signatureView.getItems().add(functionNode);
                 signatureView.getItems().addAll(functionNode.parameters());
-
-                signatureView.refresh();
-
+                codeTreeView.setFunction(functionNode);
             }
         });
 

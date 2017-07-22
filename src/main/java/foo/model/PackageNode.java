@@ -7,6 +7,6 @@ public class PackageNode extends NamedNode {
     }
 
     public NamedNode item(String name) {
-        return children().stream().map(n -> (NamedNode) n).filter(it -> it.name().equals(name)).findFirst().orElse(null);
+        return children().stream().map(n -> (NamedNode) n).filter(it -> it.getName().equals(name)).findFirst().orElse(null);
     }
 }
