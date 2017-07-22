@@ -105,21 +105,19 @@ That can be done with a special `@` symbol:
 
 calls function `foo` with two arguments, first of which is a reference to function `foo`.
 
-A function reference can be then called at any time with `!`:
-``` 
-= plus @ +
-= result ! plus 2 3
-assert == 5 result
-``` 
+A function reference can be then called at any time with `!`. Given a function reference `= f @ foo`,
+`! f x` calls `foo x`, `!! f x y` calls `foo x y`, `!!! f x y z` calls `foo x y z`, etc.
+The need to type `^` for each argument can look annoying at the first look,
+however, most of functional references in languages like Lisp or Scheme have only one argument.
+More than that, `!` is actually Curry operator allowing partial application of functions!
+If `foo` has three argument, then calling `! f x` returns a new function of two arguments 
+and `!! f x y` returns a function of one argument.
 
-##Currying
-A function or method or method reference can be partially applied (curried):
-```
-= plus3 with 3 plus
-```
+It's worth to mention that `!` is not a special operator, but just a method of the function reference object.
 
+Partial application make it possible to bind a method reference to a particular object:
 ```
-= draw-red-circle with red-circle & draw 
+= draw-red-circle ! & draw red-circle 
 ```
 ##Lambdas
 
@@ -147,7 +145,7 @@ Nonetheless, it's typically not a good idea to use anonymous functions with more
 
 To define an anonymous function without arguments create a lambda which ignores its argument.
 By convention the ignored argument should be called `_`:.
-Definition of an anonimous function without arguments looks a bit complicated but there's no magic here:
+Definition of an anonymous function without arguments looks a bit complicated but there's no magic here:
 `with` is just a function and _ is just a conventional name of ignored argument.
 
 ```
