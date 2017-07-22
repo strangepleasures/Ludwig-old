@@ -24,7 +24,7 @@ node: !ParameterNode
 parent: 3
 prev: 4
 --- !InsertNode
-node: !UnboundCallNode
+node: !BoundCallNode
   id: 6
 parent: 3
 --- !InsertReference
@@ -32,11 +32,10 @@ id: 7
 ref: system:-
 parent: 6
 --- !InsertNode
-node: !UnboundCallNode
+node: !BoundCallNode
   id: 8
 parent: 6
-prev: 7
-
+param: system:-:x
 --- !InsertReference
 id: 9
 ref: system:*
@@ -45,15 +44,15 @@ parent: 8
 id: 10
 ref: 4
 parent: 8
-prev: 9
+param: system:*:x
 --- !InsertReference
 id: 11
 ref: 5
 parent: 8
-prev: 10
+param: system:*:y
 --- !InsertNode
 node: !LiteralNode
   id: 12
   text: 100
 parent: 6
-prev: 8
+param: system:-:y

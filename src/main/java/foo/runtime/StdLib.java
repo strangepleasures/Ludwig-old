@@ -58,12 +58,18 @@ public class StdLib {
         return x.doubleValue() / y.doubleValue();
     }
 
-    @Name("div")
-    public static long intdiv(Number x, Number y) {
+    public static long div(Number x, Number y) {
         if (x instanceof Double || y instanceof Double) {
             return Math.round(x.doubleValue() / y.doubleValue());
         }
         return x.longValue() / y.longValue();
+    }
+
+    public static long mod(Number x, Number y) {
+        if (x instanceof Double || y instanceof Double) {
+            return Math.round(x.doubleValue() % y.doubleValue());
+        }
+        return x.longValue() % y.longValue();
     }
 
     public static Iterable map(Iterable source, Function f) {
@@ -131,6 +137,9 @@ public class StdLib {
         return condition.get() ? option1.get() : option2.get();
     }
 
+    public static Number neg(Number x) {
+        return (x instanceof Long) ? -x.longValue() : -x.doubleValue();
+    }
 
 //    @Name("list")§
 //    public static PVector<?> $(Object... args) {

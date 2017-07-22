@@ -1,4 +1,4 @@
-package foo.ide;
+package foo.utils;
 
 import foo.model.Node;
 import lombok.Getter;

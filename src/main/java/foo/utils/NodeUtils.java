@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 public class NodeUtils {
     public static String toString(Node node) {
-        PrintVisitor visitor = new PrintVisitor();
+        CodeFormatter visitor = new CodeFormatter();
         node.accept(visitor);
         return visitor.toString();
     }

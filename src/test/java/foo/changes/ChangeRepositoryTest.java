@@ -4,6 +4,7 @@ import foo.model.ProjectNode;
 import foo.repository.ChangeRepository;
 import foo.utils.NodeUtils;
 import foo.workspace.Workspace;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.URL;
@@ -16,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class ChangeRepositoryTest {
     private Workspace workspace = new Workspace();
 
+    @Ignore
     @Test
     public void fetch() throws Exception {
         URL url = ChangeRepositoryTest.class.getResource("/changes.yaml");

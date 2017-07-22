@@ -5,6 +5,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import foo.changes.Change;
 import foo.model.*;
 import foo.repository.ChangeRepository;
+import foo.utils.CodeFormatter;
+import foo.utils.CodeLine;
 import foo.workspace.Workspace;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;

@@ -35,25 +35,31 @@ public class Workspace {
         Node parent = node(insert.getParent());
 
         if (parent != null) {
-            Node prev = node(insert.getPrev());
-            Node next = node(insert.getNext());
+            ParameterNode param = node(insert.getParam());
 
-            List items = (node instanceof ParameterNode) ? ((Signature) parent).parameters() : parent.children();
-
-            if (next == null) {
-                if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {
-                    items.add(node);
-                }
-            } else if (prev == null) {
-                if (!items.isEmpty() && items.get(0) == next) {
-                    items.add(0, node);
-                }
+            if (param != null) {
+                ((BoundCallNode) parent).arguments().put(param, node);
             } else {
-                int prevIndex = items.indexOf(prev);
-                int nextIndex = items.indexOf(next);
+                Node prev = node(insert.getPrev());
+                Node next = node(insert.getNext());
 
-                if (nextIndex == prevIndex + 1) {
-                    items.add(nextIndex, next);
+                List items = (node instanceof ParameterNode) ? ((Signature) parent).parameters() : parent.children();
+
+                if (next == null) {
+                    if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {
+                        items.add(node);
+                    }
+                } else if (prev == null) {
+                    if (!items.isEmpty() && items.get(0) == next) {
+                        items.add(0, node);
+                    }
+                } else {
+                    int prevIndex = items.indexOf(prev);
+                    int nextIndex = items.indexOf(next);
+
+                    if (nextIndex == prevIndex + 1) {
+                        items.add(nextIndex, next);
+                    }
                 }
             }
         }

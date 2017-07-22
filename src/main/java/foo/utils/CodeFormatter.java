@@ -1,9 +1,10 @@
-package foo.ide;
+package foo.utils;
 
 import foo.model.*;
 import lombok.Getter;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CodeFormatter implements NodeVisitor<Void> {
     @Getter
@@ -13,7 +14,7 @@ public class CodeFormatter implements NodeVisitor<Void> {
 
     @Override
     public Void visitBoundCall(BoundCallNode boundCallNode) {
-        FunctionNode fn = (FunctionNode) boundCallNode.children().get(0);
+        FunctionNode fn = (FunctionNode) ((RefNode)boundCallNode.children().get(0)).ref();
         print(fn.getName());
         boolean inline = level(fn) < 4;
         fn.parameters().forEach(param -> {
@@ -160,4 +161,8 @@ public class CodeFormatter implements NodeVisitor<Void> {
         return node.children().stream().map(CodeFormatter::level).max(Comparator.naturalOrder()).orElse(0) + 1;
     }
 
+    @Override
+    public String toString() {
+        return lines.stream().map(CodeLine::toString).collect(Collectors.joining("\n"));
+    }
 }
