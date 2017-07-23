@@ -70,7 +70,7 @@ so it can always figure out if `foo bar x y` means `foo(bar(x, y))`, `foo(bar(x)
 All functions have fixed arity, there's no error-prone `varargs` syntax.
 The IDE is also able to pretty-print complex expressions with nested calls. 
 
-Novice users should be able to turn on explicit parenthesising provided by IDE, but it's needed to actually type parenthesis. 
+Novice users should be able to turn on explicit parenthesising provided by IDE, but it's not needed to type parenthesis. 
 Similarly, IDE should show display argument names when possible/needed, but users don't have to type them. 
 
 ##Method calls
@@ -206,11 +206,11 @@ TBD: Do we need a better syntax?
 ##if, else, elif
 ```
 = sign if > x 0
-        1
-    elif < x 0
-        -1
-    else
-        0    
+          1
+       elif < x 0
+            -1
+       else
+            0    
 ```
 
 ##for
