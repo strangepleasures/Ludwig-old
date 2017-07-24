@@ -6,4 +6,6 @@ public interface Callable {
     default boolean isDelayed() {
         return false;
     }
+
+    int argCount();
 }

@@ -95,4 +95,9 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
     public boolean isDelayed() {
         return delayed;
     }
+
+    @Override
+    public int argCount() {
+        return paramTypes.length;
+    }
 }

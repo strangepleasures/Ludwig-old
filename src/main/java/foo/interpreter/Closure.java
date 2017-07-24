@@ -38,6 +38,11 @@ public class Closure implements Callable {
     }
 
     @Override
+    public int argCount() {
+        return lambda.parameters().size();
+    }
+
+    @Override
     public String toString() {
         return NodeUtils.toString(lambda);
     }

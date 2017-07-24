@@ -38,6 +38,11 @@ public class CallableFunction implements Callable {
     }
 
     @Override
+    public int argCount() {
+        return function.parameters().size();
+    }
+
+    @Override
     public String toString() {
         return NodeUtils.toString(function);
     }

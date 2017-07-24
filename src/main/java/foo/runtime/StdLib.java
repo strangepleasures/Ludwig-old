@@ -14,7 +14,7 @@ public class StdLib {
     @Name("true")
     public static final boolean TRUE = true;
     @Name("false")
-    public static final boolean FALSE = true;
+    public static final boolean FALSE = false;
     @Name("null")
     public static final Object NULL = null;
     @Name(";")
