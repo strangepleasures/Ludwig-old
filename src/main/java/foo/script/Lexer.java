@@ -8,26 +8,12 @@ import java.io.Reader;
 import java.util.*;
 
 public class Lexer {
-    public static final Object BEGIN = new Object() {
-        @Override
-        public String toString() {
-            return "(";
-        }
-    };
-    public static final Object END = new Object() {
-        @Override
-        public String toString() {
-            return ")";
-        }
-    };
-
     public static List<Object> read(Reader reader) throws IOException {
         StringBuilder builder = new StringBuilder();
         List<Object> tokens = new ArrayList<>();
         Deque<Integer> levelsStack = new ArrayDeque<>();
         boolean start = true;
         int level = 0;
-        int balance = 0;
 
         while (true) {
             int c = reader.read();
@@ -47,9 +33,6 @@ public class Lexer {
                         level = 0;
                     }
                     if (c == -1) {
-                        for (; balance > 0; balance--) {
-                            tokens.add(END);
-                        }
                         return tokens;
                     }
                     break;
@@ -66,19 +49,14 @@ public class Lexer {
                             } else {
                                 while (!levelsStack.isEmpty() && levelsStack.peekLast() > level) {
                                     levelsStack.removeLast();
-                                    tokens.add(END);
-                                    balance--;
+                                    tokens.add(":");
                                 }
                                 if (levelsStack.isEmpty() || levelsStack.peekLast() < level) {
                                     throw new RuntimeException("Invalid indentation");
                                 }
-                                tokens.add(END);
-                                balance--;
-
+                                tokens.add(":");
                             }
                         }
-                        tokens.add(BEGIN);
-                        balance++;
                         start = false;
                     }
 
@@ -97,12 +75,7 @@ public class Lexer {
             tokens.add(new Str(StringEscapeUtils.unescapeJavaScript(builder.toString())));
         } else if (builder.length() > 0) {
             String token = builder.toString();
-            if (token.equals(":")) {
-                tokens.add(END);
-                tokens.add(BEGIN);
-            } else {
-                tokens.add(parseToken(token, string));
-            }
+            tokens.add(parseToken(token, string));
         }
         builder.setLength(0);
     }
@@ -122,7 +95,6 @@ public class Lexer {
             }
         }
     }
-
 
     private static void readEscapedString(Reader reader, StringBuilder builder) throws IOException {
         boolean escaped = false;
