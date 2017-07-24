@@ -6,9 +6,13 @@ import foo.utils.CodeLine;
 import foo.workspace.Workspace;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Comparator;
 import java.util.List;
@@ -16,6 +20,10 @@ import java.util.List;
 public class EditorPane extends SplitPane {
     private final Workspace workspace;
     private final Settings settings;
+
+    @Getter
+    @Setter
+    private EditorPane anotherPane;
 
     public EditorPane(Workspace workspace, Settings settings) {
         this.workspace = workspace;
@@ -30,6 +38,14 @@ public class EditorPane extends SplitPane {
         packageTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             fillMembers(membersList, newValue);
         });
+
+        VBox memberListPane = new VBox();
+        ToolBar memberListToolBar = new ToolBar();
+        memberListPane.getChildren().addAll(memberListToolBar, membersList);
+        membersList.setPrefHeight(1E6);
+
+        Button addMethodButton = new Button("+M");
+        memberListToolBar.getItems().add(addMethodButton);
 
         VBox methodPane = new VBox();
         TableView<NamedNode> signatureView = new TableView<>();
@@ -73,7 +89,22 @@ public class EditorPane extends SplitPane {
         });
 
 
-        getItems().addAll(packageTree, membersList, methodPane);
+        getItems().addAll(packageTree, memberListPane, methodPane);
+
+        membersList.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (event.getClickCount() == 2
+                && membersList.getSelectionModel().selectedItemProperty().getValue() != null
+                && anotherPane != null) {
+                anotherPane.insertNode(membersList.getSelectionModel().selectedItemProperty().getValue());
+            }
+        });
+
+
+        ContextMenu codeContextMenu = new ContextMenu();
+    }
+
+    private void insertNode(NamedNode value) {
+
     }
 
 

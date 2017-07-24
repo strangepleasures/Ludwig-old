@@ -35,6 +35,8 @@ public class App extends Application {
 
         EditorPane leftEditorPane = new EditorPane(workspace, settings);
         EditorPane rightEditorPane = new EditorPane(workspace, settings);
+        leftEditorPane.setAnotherPane(rightEditorPane);
+        rightEditorPane.setAnotherPane(leftEditorPane);
         splitPane.getItems().addAll(leftEditorPane, rightEditorPane);
 
         primaryStage.setScene(new Scene(splitPane, 1024, 768));
