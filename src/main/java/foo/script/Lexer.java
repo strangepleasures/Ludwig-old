@@ -1,19 +1,17 @@
 package foo.script;
 
-
-import org.apache.commons.lang.StringEscapeUtils;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.util.*;
 
 public class Lexer {
-    public static List<Object> read(Reader reader) throws IOException {
+    public static List<String> read(Reader reader) throws IOException, LexerException {
         StringBuilder builder = new StringBuilder();
-        List<Object> tokens = new ArrayList<>();
+        List<String> tokens = new ArrayList<>();
         Deque<Integer> levelsStack = new ArrayDeque<>();
         boolean start = true;
         int level = 0;
+        int balance = 0;
 
         while (true) {
             int c = reader.read();
@@ -22,17 +20,20 @@ public class Lexer {
                     if (start) {
                         level++;
                     } else {
-                        applyToken(builder, tokens, false);
+                        applyToken(builder, tokens);
                     }
                     break;
                 case -1:
                 case '\n':
                     if (!start) {
-                        applyToken(builder, tokens, false);
+                        applyToken(builder, tokens);
                         start = true;
                         level = 0;
                     }
                     if (c == -1) {
+                        for (; balance > 0; balance--) {
+                            tokens.add(")");
+                        }
                         return tokens;
                     }
                     break;
@@ -40,7 +41,7 @@ public class Lexer {
                     if (start) {
                         if (levelsStack.isEmpty()) {
                             if (level > 0) {
-                                throw new RuntimeException("Invalid indentation");
+                                throw new LexerException("Invalid indentation");
                             }
                             levelsStack.addLast(0);
                         } else {
@@ -49,20 +50,25 @@ public class Lexer {
                             } else {
                                 while (!levelsStack.isEmpty() && levelsStack.peekLast() > level) {
                                     levelsStack.removeLast();
-                                    tokens.add(":");
+                                    tokens.add(")");
+                                    balance--;
                                 }
                                 if (levelsStack.isEmpty() || levelsStack.peekLast() < level) {
-                                    throw new RuntimeException("Invalid indentation");
+                                    throw new LexerException("Invalid indentation");
                                 }
-                                tokens.add(":");
+                                tokens.add(")");
+                                balance--;
+
                             }
                         }
+                        tokens.add("(");
+                        balance++;
                         start = false;
                     }
 
                     if (c == '"') {
                         readEscapedString(reader, builder);
-                        applyToken(builder, tokens, true);
+                        applyToken(builder, tokens);
                     } else {
                         builder.append((char) c);
                     }
@@ -70,39 +76,42 @@ public class Lexer {
         }
     }
 
-    private static void applyToken(StringBuilder builder, List<Object> tokens, boolean string) {
-        if (string) {
-            tokens.add(new Str(StringEscapeUtils.unescapeJavaScript(builder.toString())));
-        } else if (builder.length() > 0) {
+    public static boolean isLiteral(String token) {
+        if (token.startsWith("\"")) {
+            return true;
+        }
+        try {
+            Double.parseDouble(token);
+            return true;
+        } catch (NumberFormatException ignore) {
+            return false;
+        }
+    }
+
+    private static void applyToken(StringBuilder builder, List<String> tokens) {
+        if (builder.length() > 0) {
             String token = builder.toString();
-            tokens.add(parseToken(token, string));
+            if (token.equals(":")) {
+                tokens.add(")");
+                tokens.add("(");
+            } else {
+                tokens.add(token);
+            }
         }
         builder.setLength(0);
     }
 
 
-    private static Object parseToken(String s, boolean string) {
-        if (string) {
-            return new Str(StringEscapeUtils.unescapeJavaScript(s));
-        }
-        try {
-            return Long.parseLong(s);
-        } catch (NumberFormatException e1) {
-            try {
-                return Double.parseDouble(s);
-            } catch (NumberFormatException e2) {
-                return s;
-            }
-        }
-    }
-
-    private static void readEscapedString(Reader reader, StringBuilder builder) throws IOException {
+    private static void readEscapedString(Reader reader, StringBuilder builder) throws IOException, LexerException {
+        builder.append('"');
         boolean escaped = false;
         while (true) {
             int c = reader.read();
             if (c == -1) {
-                throw new RuntimeException("Unterminated string");
+                throw new LexerException("Unterminated string");
             }
+
+            builder.append((char) c);
 
             if (escaped) {
                 escaped = false;
@@ -112,8 +121,6 @@ public class Lexer {
                 }
                 escaped = c == '\\';
             }
-
-            builder.append((char) c);
         }
     }
 }
