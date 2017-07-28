@@ -17,6 +17,7 @@ public class Lexer {
             int c = reader.read();
             switch (c) {
                 case ' ':
+                case '\t':
                     if (start) {
                         level++;
                     } else {
