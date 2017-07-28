@@ -15,7 +15,8 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     public Object visitBoundCall(BoundCallNode boundCallNode) {
         HashPMap<NamedNode, Object> savedLocals = locals;
         try {
-            FunctionNode functionNode = (FunctionNode) boundCallNode.children().get(0);
+            RefNode ref = (RefNode) boundCallNode.children().get(0);
+            FunctionNode functionNode = (FunctionNode) ref.ref();
 
 
             if (functionNode instanceof NativeFunctionNode) {
@@ -141,7 +142,8 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitAssignment(AssignmentNode assignmentNode) {
-        return locals = locals.plus((NamedNode) assignmentNode.children().get(0), assignmentNode.children().get(1).accept(this));
+        RefNode ref = (RefNode) assignmentNode.children().get(0);
+        return locals = locals.plus(ref.ref() , assignmentNode.children().get(1).accept(this));
     }
 
     @Override

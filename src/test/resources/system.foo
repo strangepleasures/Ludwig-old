@@ -1,0 +1,51 @@
+package system
+
+def not x :
+	? x false true
+
+def xor x y :
+	? x
+		not y
+		y
+
+def empty? seq :
+	has-next iterator seq
+
+def head seq :
+	next iterator seq
+
+def neg x :
+	* -1 x
+
+def abs x :
+	? < x 0 
+		neg x 
+		x 
+
+def fact n :
+	if < n 2
+		1
+	else
+		* n fact - n 1
+
+def compose f g :
+	λ x : ! f ! g x
+
+def null? x :
+	== x null
+
+def fold seq seed op :
+	= result seed
+	for x seq
+		= result ! op result x
+	result
+
+def sum seq :
+	fold seq 0 @ +
+
+def max seq :
+	fold seq
+		λ x y :
+			? or < x y null? x
+				y
+				x

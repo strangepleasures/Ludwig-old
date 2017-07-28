@@ -7,6 +7,7 @@ import org.pcollections.TreePVector;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 
 @Name("system")
 public class StdLib {
@@ -17,8 +18,6 @@ public class StdLib {
     public static final boolean FALSE = false;
     @Name("null")
     public static final Object NULL = null;
-    @Name(";")
-    public static final TreePVector EMPTY = TreePVector.empty();
 
     public static String str(Object x) {
         return String.valueOf(x);
@@ -93,6 +92,11 @@ public class StdLib {
         return Objects.equals(x, y);
     }
 
+    @Name("!=")
+    public static boolean notEquals(Object x, Object y) {
+        return !Objects.equals(x, y);
+    }
+
     @Name("<")
     public static boolean less(Comparable x, Comparable y) {
         return x.compareTo(y) < 0;
@@ -123,36 +127,25 @@ public class StdLib {
         return x.get() || y.get();
     }
 
-    public static boolean xor(boolean x, boolean y) {
-        return x ^ y;
-    }
-
-    public static boolean not(boolean b) {
-        return !b;
-    }
-
     @Delayed
     @Name("?")
     public static Object iff(Supplier<Boolean> condition, Supplier<?> option1, Supplier<?> option2) {
         return condition.get() ? option1.get() : option2.get();
     }
 
-    @Description("Returns -x")
-    public static Number neg(Number x) {
-        return (x instanceof Long) ? -x.longValue() : -x.doubleValue();
-    }
-
-    public static Object head(Iterable it) {
-        return it.iterator().next();
-    }
-
-    public static List tail(List list) {
-        return list.subList(1, list.size());
-    }
-
-    @Name("empty?")
-    public static boolean empty(Iterable x) {
-        return !x.iterator().hasNext();
+    public static Iterable tail(Iterable seq) {
+        if (seq instanceof List) {
+            List list = (List) seq;
+            return list.subList(1, list.size());
+        } else {
+            return () -> {
+                Iterator i = seq.iterator();
+                if (i.hasNext()) {
+                    i.next();
+                }
+                return i;
+            };
+        }
     }
 
     @Name(":")
@@ -178,5 +171,27 @@ public class StdLib {
             v = v.plus(x);
         }
         return v;
+    }
+
+    public static Iterator iterator(Iterable it) {
+        return it.iterator();
+    }
+
+    @Name("has-next")
+    public static boolean hasNext(Iterator it) {
+        return it.hasNext();
+    }
+
+
+    @Name("next")
+    public static Object next(Iterator it) {
+        return it.next();
+    }
+
+    public static Object at(Integer n, Iterable seq) {
+        if (seq instanceof List) {
+            return ((List)seq).get(n);
+        }
+        return StreamSupport.stream(seq.spliterator(), false).skip(n - 1).findFirst().get();
     }
 }

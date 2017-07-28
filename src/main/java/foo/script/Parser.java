@@ -104,7 +104,6 @@ public class Parser {
         String token  = nextToken();
         switch (token) {
             case "def": {
-
                 FunctionNode node = (FunctionNode) packageNode.item(nextToken());
                 locals.clear();
                 node.parameters().forEach(p -> locals.put(p.getName(), p));
@@ -117,7 +116,9 @@ public class Parser {
                     node.children().add(parseNode());
                 }
 
-                nextToken();
+                if (pos < tokens.size()) {
+                    nextToken();
+                }
             }
         }
     }
