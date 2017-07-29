@@ -1,5 +1,6 @@
 package foo.script;
 
+import foo.changes.Change;
 import foo.model.*;
 import foo.workspace.Workspace;
 
@@ -42,28 +43,31 @@ public class Parser {
 
         String packageName = nextToken();
         PackageNode packageNode = new PackageNode();
-
-        packageNode.setName(packageName);
+        packageNode.setName(packageName).id(projectNode.id() + ":" + packageName);
         consume(")");
 
         projectNode.children().add(packageNode);
 
         while (pos < tokens.size()) {
-            packageNode.children().add(parseSignature());
+            packageNode.children().add(parseSignature(packageNode.id()));
         }
 
         return packageNode;
     }
 
-    private Node parseSignature() throws ParserException {
+    private Node parseSignature(String packageId) throws ParserException {
         consume("(");
         String token  = nextToken();
         switch (token) {
             case "def": {
                 FunctionNode node = new FunctionNode();
                 node.setName(nextToken());
+                node.id(packageId + ":" + node.id());
                 while (!currentToken().equals(")")) {
-                    node.parameters().add((ParameterNode) new ParameterNode().setName(nextToken()));
+                    ParameterNode param = new ParameterNode();
+                    param.setName(nextToken());
+                    param.id(node.id() + ":" + param.getName());
+                    node.parameters().add(param);
                 }
                 consume(")");
                 consume("(");
@@ -92,7 +96,6 @@ public class Parser {
 
         nextToken();
         consume(")");
-
 
         while (pos < tokens.size()) {
            parseBody(packageNode);
@@ -140,6 +143,7 @@ public class Parser {
                 case "return":
                 case "list":   {
                     Node node = createSpecial(head);
+                    node.id(Change.newId());
                     while (!currentToken().equals(")")) {
                         node.children().add(parseNode());
                     }
@@ -148,6 +152,7 @@ public class Parser {
                 case "for": {
                     ForNode node = new ForNode();
                     node.setName(nextToken());
+                    node.id(Change.newId());
                     while (!currentToken().equals(")")) {
                         node.children().add(parseNode());
                     }
@@ -157,24 +162,30 @@ public class Parser {
                     String name = nextToken();
                     if (locals.containsKey(name)) {
                         AssignmentNode node = new AssignmentNode();
-                        node.children().add(new RefNode(locals.get(name)));
+                        node.id(Change.newId());
+                        RefNode var = new RefNode(locals.get(name));
+                        var.id(Change.newId());
+                        node.children().add(var);
                         node.children().add(parseNode());
                         return node;
                     } else {
-                        LetNode node = (LetNode) new LetNode().setName(name);
+                        LetNode node = (LetNode) new LetNode().setName(name).id(Change.newId());
                         locals.put(name, node);
                         node.children().add(parseNode());
                         return node;
                     }
                 }
                 case "ref": {
-                    return new RefNode(find(nextToken()));
+                    RefNode node = new RefNode(find(nextToken()));
+                    node.id(Change.newId());
+                    return node;
                 }
                 case "λ":
                 case "\\": {
                     LambdaNode node = new LambdaNode();
+                    node.id(Change.newId());
                     while (!currentToken().equals(")")) {
-                        ParameterNode param = (ParameterNode) new ParameterNode().setName(nextToken());
+                        ParameterNode param = (ParameterNode) new ParameterNode().setName(nextToken()).id(Change.newId());
                         locals.put(param.getName(), param);
                         node.parameters().add(param);
                     }
@@ -188,7 +199,7 @@ public class Parser {
 
                 default: {
                     if (locals.containsKey(head)) {
-                        return new RefNode(locals.get(head));
+                        return new RefNode(locals.get(head)).id(Change.newId());
                     }
 
                     NamedNode headNode = find(head);
@@ -196,7 +207,10 @@ public class Parser {
                         if (headNode instanceof FunctionNode) {
                             FunctionNode fn = (FunctionNode) headNode;
                             BoundCallNode node = new BoundCallNode();
-                            node.children().add(new RefNode(fn));
+                            node.id(Change.newId());
+                            RefNode r = new RefNode(fn);
+                            r.id(Change.newId());
+                            node.children().add(r);
                             for (ParameterNode param : fn.parameters()) {
                                 node.arguments().put(param, parseNode());
                             }
@@ -205,7 +219,7 @@ public class Parser {
                             return new RefNode(headNode);
                         }
                     } else if (Lexer.isLiteral(head)) {
-                        return new LiteralNode(head);
+                        return new LiteralNode(head).id(Change.newId());
                     }
                 }
             }
