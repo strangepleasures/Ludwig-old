@@ -128,7 +128,6 @@ public class StdLib {
     }
 
     @Delayed
-    @Name("?")
     public static Object iff(Supplier<Boolean> condition, Supplier<?> option1, Supplier<?> option2) {
         return condition.get() ? option1.get() : option2.get();
     }
@@ -148,7 +147,6 @@ public class StdLib {
         }
     }
 
-    @Name(":")
     public static PVector prepend(Object x, PVector list) {
         return list.plus(0, x);
     }

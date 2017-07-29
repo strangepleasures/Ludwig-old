@@ -134,7 +134,7 @@ public class Parser {
             String head = nextToken();
 
             switch (head) {
-                case "!":
+                case "call":
                 case "if":
                 case "else":
                 case "return": {
@@ -166,7 +166,7 @@ public class Parser {
                         return node;
                     }
                 }
-                case "@": {
+                case "ref": {
                     return new RefNode(find(nextToken()));
                 }
                 case "λ":
@@ -249,7 +249,7 @@ public class Parser {
 
     private Node createSpecial(String token) {
         switch (token) {
-            case "!":
+            case "call":
                 return new UnboundCallNode();
             case "if":
                 return new IfNode();

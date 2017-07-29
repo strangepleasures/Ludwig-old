@@ -1,10 +1,10 @@
 package system
 
 def not x :
-	? x false true
+	cond x false true
 
 def xor x y :
-	? x
+	cond x
 		not y
 		y
 
@@ -18,7 +18,7 @@ def neg x :
 	* -1 x
 
 def abs x :
-	? < x 0 
+	cond < x 0
 		neg x 
 		x 
 
@@ -29,7 +29,7 @@ def fact n :
 		* n fact - n 1
 
 def compose f g :
-	λ x : ! f ! g x
+	λ x : call f call g x
 
 def null? x :
 	== x null
@@ -37,15 +37,15 @@ def null? x :
 def fold seq seed op :
 	= result seed
 	for x seq
-		= result ! op result x
+		= result call op result x
 	result
 
 def sum seq :
-	fold seq 0 @ +
+	fold seq 0 ref +
 
 def max seq :
 	fold seq
 		λ x y :
-			? or < x y null? x
+			cond or < x y null? x
 				y
 				x

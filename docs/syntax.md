@@ -110,16 +110,16 @@ Mutable classes may define domain specific equality-like methods, e.g. `same-con
 ##Function & method references
 Functional paradigm presumes that functions are firest-class objects and can be passed to other functions as arguments or returned from a function.
 This means that there must be a way to obtain a reference to a function or a method without immediately applying it.
-That can be done with a special `@` symbol:
+That can be done with a special `ref` meta-symbol:
 
-`foo @ bar 10` 
+`foo ref bar 10` 
 
 calls function `foo` with two arguments, first of which is a reference to function `foo`.
 
-A function reference can be then called at any time with `!`:
+A function reference can be then called at any time with `call`:
 ``` 
-= plus @ +
-= result ! plus 2 3
+= plus ref +
+= result call plus 2 3
 assert == 5 result
 ``` 
 
@@ -159,7 +159,7 @@ This syntax is eager, it consumes the all the expressions to the right of `λ`.
 
 Use indentation synatx to pass multiple lambdas to one function:
 ```
-! compose
+call compose
        λ x : * x x
        λ x : + x 2
     3  
@@ -175,7 +175,7 @@ However, lambdas can locally override variables without affecting the parent sco
 = f λ :
   = a + a 1
   assert == a 2
-! f 
+call f 
 assert == a 1
 ```
 
