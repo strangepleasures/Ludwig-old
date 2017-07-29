@@ -24,9 +24,22 @@ public class StdLib {
     }
 
     @Description("Exponent")
-    public static double exp(Number x) {
-        return Math.exp(x.doubleValue());
+    public static double exp(double x) {
+        return Math.exp(x);
     }
+
+    public static double sin(double x) {
+        return Math.sin(x);
+    }
+
+    public static double cos(double x) {
+        return Math.cos(x);
+    }
+
+    public static double tan(double x) {
+        return Math.tan(x);
+    }
+
 
     @Name("+")
     public static Number plus(Number x, Number y) {
@@ -92,9 +105,8 @@ public class StdLib {
         return Objects.equals(x, y);
     }
 
-    @Name("!=")
-    public static boolean notEquals(Object x, Object y) {
-        return !Objects.equals(x, y);
+    public static int compare(Comparable x, Comparable y) {
+        return x.compareTo(y);
     }
 
     @Name("<")
@@ -128,7 +140,7 @@ public class StdLib {
     }
 
     @Delayed
-    public static Object iff(Supplier<Boolean> condition, Supplier<?> option1, Supplier<?> option2) {
+    public static Object cond(Supplier<Boolean> condition, Supplier<?> option1, Supplier<?> option2) {
         return condition.get() ? option1.get() : option2.get();
     }
 
@@ -186,7 +198,7 @@ public class StdLib {
         return it.next();
     }
 
-    public static Object at(Integer n, Iterable seq) {
+    public static Object get(Iterable seq, Integer n) {
         if (seq instanceof List) {
             return ((List)seq).get(n);
         }

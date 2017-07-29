@@ -37,8 +37,4 @@ public class NodeUtils {
         }
         return String.valueOf(o);
     }
-
-    public static String toHtml(Node node) {
-        return node.accept(new HtmlGenerator()).render();
-    }
 }

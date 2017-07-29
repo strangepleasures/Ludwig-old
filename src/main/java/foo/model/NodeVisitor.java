@@ -7,6 +7,8 @@ public interface NodeVisitor<T> {
 
     T visitLet(LetNode letNode);
 
+    T visitList(ListNode listNode);
+
     T visitLiteral(LiteralNode literalNode);
 
     T visitPackage(PackageNode packageNode);

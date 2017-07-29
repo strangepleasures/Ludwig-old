@@ -137,7 +137,8 @@ public class Parser {
                 case "call":
                 case "if":
                 case "else":
-                case "return": {
+                case "return":
+                case "list":   {
                     Node node = createSpecial(head);
                     while (!currentToken().equals(")")) {
                         node.children().add(parseNode());
@@ -257,6 +258,8 @@ public class Parser {
                 return new ElseNode();
             case "return":
                 return new ReturnNode();
+            case "list":
+                return new ListNode();
         }
         return null;
     }

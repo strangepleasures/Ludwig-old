@@ -27,6 +27,16 @@ public class CodeFormatter implements NodeVisitor<Void> {
     }
 
     @Override
+    public Void visitList(ListNode node) {
+        print("list");
+        boolean inline = level(node) < 4;
+        for (Node n: node.children()) {
+            child(n, inline);
+        }
+        return null;
+    }
+
+    @Override
     public Void visitFunction(FunctionNode functionNode) {
         functionNode.children().forEach(n -> child(n, false));
         return null;

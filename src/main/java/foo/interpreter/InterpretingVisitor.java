@@ -2,6 +2,7 @@ package foo.interpreter;
 
 import foo.model.*;
 import org.pcollections.HashPMap;
+import org.pcollections.TreePVector;
 
 class InterpretingVisitor implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
@@ -65,6 +66,15 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         Object value = letNode.children().get(0).accept(this);
         locals = locals.plus(letNode, value);
         return value;
+    }
+
+    @Override
+    public Object visitList(ListNode listNode) {
+        TreePVector<Object> list = TreePVector.empty();
+        for (Node item : listNode.children()) {
+            list = list.plus(item.accept(this));
+        }
+        return list;
     }
 
     @Override

@@ -25,6 +25,11 @@ public class ExpandedToStringVisitor implements NodeVisitor<String> {
     }
 
     @Override
+    public String visitList(ListNode listNode) {
+        return "list";
+    }
+
+    @Override
     public String visitLiteral(LiteralNode literalNode) {
         return literalNode.text();
     }

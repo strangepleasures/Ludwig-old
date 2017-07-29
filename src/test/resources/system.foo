@@ -3,12 +3,15 @@ package system
 def not x :
 	cond x false true
 
+def != x y:
+	not == x y
+
 def xor x y :
 	cond x
 		not y
 		y
 
-def empty? seq :
+def is-empty seq :
 	has-next iterator seq
 
 def head seq :
@@ -23,15 +26,14 @@ def abs x :
 		x 
 
 def fact n :
-	if < n 2
+	cond < n 2
 		1
-	else
 		* n fact - n 1
 
 def compose f g :
 	λ x : call f call g x
 
-def null? x :
+def is-null x :
 	== x null
 
 def fold seq seed op :
@@ -46,6 +48,18 @@ def sum seq :
 def max seq :
 	fold seq
 		λ x y :
-			cond or < x y null? x
+			cond or < x y is-null x
 				y
 				x
+
+def any seq predicate:
+	for x seq
+		if call predicate x
+			return true
+	false
+
+def all seq predicate:
+	for x seq
+		if not call predicate x
+			return false
+	true
