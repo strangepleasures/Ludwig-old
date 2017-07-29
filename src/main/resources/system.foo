@@ -3,7 +3,7 @@ package system
 def not x :
 	cond x false true
 
-def != x y:
+def != x y :
 	not == x y
 
 def xor x y :
@@ -47,19 +47,27 @@ def sum seq :
 
 def max seq :
 	fold seq
+		null
 		λ x y :
 			cond or < x y is-null x
 				y
 				x
 
-def any seq predicate:
+def any seq predicate :
 	for x seq
 		if call predicate x
 			return true
 	false
 
-def all seq predicate:
+def all seq predicate :
 	for x seq
 		if not call predicate x
 			return false
 	true
+
+def concat seq :
+	join seq "" "" ""
+
+= infinity / 1.0 0.0
+
+= nan / 0.0 0.0

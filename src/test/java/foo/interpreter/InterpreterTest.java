@@ -5,6 +5,8 @@ import foo.runtime.StdLib;
 import org.junit.Test;
 import org.pcollections.HashTreePMap;
 
+import java.util.HashMap;
+
 import static org.junit.Assert.assertEquals;
 
 public class InterpreterTest {
@@ -51,7 +53,7 @@ public class InterpreterTest {
         ucn.add(lambda);
         ucn.add(LiteralNode.ofValue(2.0));
 
-        Object result = Interpreter.eval(ucn, HashTreePMap.empty());
+        Object result = Interpreter.eval(ucn, HashTreePMap.empty(), new HashMap<>());
         assertEquals(5.0, result);
     }
 

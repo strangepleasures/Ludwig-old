@@ -5,11 +5,15 @@ import foo.utils.NodeUtils;
 import org.pcollections.HashPMap;
 import org.pcollections.HashTreePMap;
 
+import java.util.Map;
+
 public class CallableFunction implements Callable {
     private final FunctionNode function;
+    private final Map<NamedNode, Object> globals;
 
-    public CallableFunction(FunctionNode function) {
+    public CallableFunction(FunctionNode function, Map<NamedNode, Object> globals) {
         this.function = function;
+        this.globals = globals;
     }
 
     @Override
@@ -20,7 +24,7 @@ public class CallableFunction implements Callable {
             env = env.plus(function.parameters().get(i), args[i]);
         }
 
-        InterpretingVisitor visitor = new InterpretingVisitor(env);
+        InterpretingVisitor visitor = new InterpretingVisitor(env, globals);
 
         Object result = null;
         for (Node node : function.children()) {

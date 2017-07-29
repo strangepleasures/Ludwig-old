@@ -7,6 +7,7 @@ import org.pcollections.TreePVector;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Name("system")
@@ -203,5 +204,9 @@ public class StdLib {
             return ((List)seq).get(n);
         }
         return StreamSupport.stream(seq.spliterator(), false).skip(n - 1).findFirst().get();
+    }
+
+    public static String join(Iterable<?> it, String prefix, String separator, String suffix) {
+        return StreamSupport.stream(it.spliterator(), false).map(String::valueOf).collect(Collectors.joining(prefix, separator, suffix));
     }
 }

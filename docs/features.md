@@ -1,0 +1,11 @@
+- Minimalistic but easy to read syntax with first-class support for functional and object-oriented programming
+It's not just another multi-paradigm language, it's a language unifying functional and object-oriented paradigms
+- Easy to learn. Simple than Lisp, simpler than Smalltalk, easier to read than Forth
+- No distraction! No reserved words, precedence rules, commas, semicolons, parenthesis, curly or square brackets
+- Code in database, structural editing, first-class refactorings
+- Version control and dependency management out of the box
+- Replayable editing history
+- Optional static typing
+- Tail recursion
+- Side effects tracking, automatic memoization of pure functions
+- Built-in web-server, first-class support for REST APIs

@@ -4,12 +4,16 @@ import foo.model.*;
 import org.pcollections.HashPMap;
 import org.pcollections.TreePVector;
 
+import java.util.Map;
+
 class InterpretingVisitor implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
+    private Map<NamedNode, Object> globals ;
     private boolean doElse;
 
-    InterpretingVisitor(HashPMap<NamedNode, Object> locals) {
+    InterpretingVisitor(HashPMap<NamedNode, Object> locals, Map<NamedNode, Object> globals) {
         this.locals = locals;
+        this.globals = globals;
     }
 
     @Override
@@ -96,11 +100,27 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     public Object visitRef(RefNode refNode) {
         NamedNode node = refNode.ref();
 
-        if (node.getClass() == FunctionNode.class) {
-            return new CallableFunction((FunctionNode) node);
+        if (locals.containsKey(node)) {
+            return locals.get(node);
         }
 
-        return locals.getOrDefault(node, node);
+        if (globals.containsKey(node)) {
+            return globals.get(node);
+        }
+
+        if (node.getClass() == FunctionNode.class) {
+            CallableFunction callableFunction = new CallableFunction((FunctionNode) node, globals);
+            globals.put(node, callableFunction);
+            return callableFunction;
+        }
+
+        if (node.getClass() == LetNode.class) {
+            Object value = node.children().get(0).accept(this);
+            globals.put(node, value);
+            return value;
+        }
+
+        return node;
     }
 
     @Override
@@ -119,7 +139,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitLambda(LambdaNode lambdaNode) {
-        return new Closure(locals, lambdaNode);
+        return new Closure(locals, globals, lambdaNode);
     }
 
     @Override
@@ -201,6 +221,6 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     private Closure toClosure(Node node) {
         LambdaNode lambdaNode = new LambdaNode();
         lambdaNode.children().add(node);
-        return new Closure(locals, lambdaNode);
+        return new Closure(locals, globals, lambdaNode);
     }
 }

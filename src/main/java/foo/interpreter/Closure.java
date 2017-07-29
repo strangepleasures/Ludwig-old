@@ -4,12 +4,16 @@ import foo.model.*;
 import foo.utils.NodeUtils;
 import org.pcollections.HashPMap;
 
+import java.util.Map;
+
 public class Closure implements Callable {
     private final HashPMap<NamedNode, Object> locals;
+    private final Map<NamedNode, Object> globals;
     private final LambdaNode lambda;
 
-    public Closure(HashPMap<NamedNode, Object> locals, LambdaNode lambda) {
+    public Closure(HashPMap<NamedNode, Object> locals, Map<NamedNode, Object> globals, LambdaNode lambda) {
         this.locals = locals;
+        this.globals = globals;
         this.lambda = lambda;
     }
 
@@ -20,7 +24,7 @@ public class Closure implements Callable {
             env = env.plus(lambda.parameters().get(i), args[i]);
         }
 
-        InterpretingVisitor visitor = new InterpretingVisitor(env);
+        InterpretingVisitor visitor = new InterpretingVisitor(env, globals);
 
         Object result = null;
         for (Node node : lambda.children()) {

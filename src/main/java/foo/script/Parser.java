@@ -62,7 +62,7 @@ public class Parser {
             case "def": {
                 FunctionNode node = new FunctionNode();
                 node.setName(nextToken());
-                node.id(packageId + ":" + node.id());
+                node.id(packageId + ":" + node.getName());
                 while (!currentToken().equals(")")) {
                     ParameterNode param = new ParameterNode();
                     param.setName(nextToken());
@@ -71,6 +71,24 @@ public class Parser {
                 }
                 consume(")");
                 consume("(");
+                int level = 1;
+                while (level != 0 && pos < tokens.size()) {
+                    switch (nextToken()) {
+                        case "(":
+                            level++;
+                            break;
+                        case ")":
+                            level--;
+                            break;
+                    }
+                }
+                return node;
+            }
+            case "=": {
+                LetNode node = new LetNode();
+                node.setName(nextToken());
+                node.id(packageId + ":" + node.id());
+
                 int level = 1;
                 while (level != 0 && pos < tokens.size()) {
                     switch (nextToken()) {
@@ -110,10 +128,7 @@ public class Parser {
                 FunctionNode node = (FunctionNode) packageNode.item(nextToken());
                 locals.clear();
                 node.parameters().forEach(p -> locals.put(p.getName(), p));
-                while (!currentToken().equals(")")) {
-                    nextToken();
-                }
-                consume(")");
+                while (!nextToken().equals(")"));
                 consume("(");
                 while (pos < tokens.size() && !currentToken().equals(")")) {
                     node.children().add(parseNode());
@@ -122,6 +137,13 @@ public class Parser {
                 if (pos < tokens.size()) {
                     nextToken();
                 }
+                break;
+            }
+            case "=": {
+                LetNode node = (LetNode) packageNode.item(nextToken());
+                node.children().add(parseNode());
+                consume(")");
+                break;
             }
         }
     }
