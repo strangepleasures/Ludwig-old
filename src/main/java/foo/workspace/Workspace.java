@@ -1,8 +1,12 @@
 package foo.workspace;
 
 import foo.changes.*;
+import foo.interpreter.Runtime;
 import foo.model.*;
+import foo.script.Parser;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.*;
 
 public class Workspace {
@@ -13,7 +17,16 @@ public class Workspace {
     private final List<ProjectNode> projects = new ArrayList<>();
 
     public Workspace() {
-        registerProject(new foo.interpreter.Runtime());
+        Runtime runtime = new Runtime();
+        registerProject(runtime);
+
+        try {
+            try (Reader reader = new InputStreamReader(Workspace.class.getResourceAsStream("/system.foo"))) {
+                Parser.parse(reader, this, runtime);
+            }
+        } catch (Exception e) {
+
+        }
     }
 
     private final ChangeVisitor<Problem> changeVisitor = new ChangeVisitor<Problem>() {

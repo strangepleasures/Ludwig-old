@@ -42,11 +42,17 @@ public class Parser {
         consume("package");
 
         String packageName = nextToken();
-        PackageNode packageNode = new PackageNode();
-        packageNode.setName(packageName).id(projectNode.id() + ":" + packageName);
+        PackageNode packageNode = projectNode.children().stream().map(n -> (PackageNode) n)
+            .filter(n -> n.getName().equals(packageName)).findFirst().orElseGet(() -> {
+                PackageNode pn = new PackageNode();
+                pn.setName(packageName).id(projectNode.id() + ":" + packageName);
+                projectNode.children().add(pn);
+                return pn;
+            });
+
         consume(")");
 
-        projectNode.children().add(packageNode);
+
 
         while (pos < tokens.size()) {
             packageNode.children().add(parseSignature(packageNode.id()));

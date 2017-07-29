@@ -68,6 +68,15 @@ def all seq predicate :
 def concat seq :
 	join seq "" "" ""
 
+def each seq consumer :
+	for x seq
+		call consumer x
+
+def println x :
+	print concat list x "\n"
+
+= pi 3.14159265358979323846
+
 = infinity / 1.0 0.0
 
 = nan / 0.0 0.0

@@ -12,7 +12,6 @@ import java.util.stream.StreamSupport;
 
 @Name("system")
 public class StdLib {
-    public static final double pi = Math.PI;
     @Name("true")
     public static final boolean TRUE = true;
     @Name("false")
@@ -160,7 +159,7 @@ public class StdLib {
         }
     }
 
-    public static PVector prepend(Object x, PVector list) {
+    public static PVector prepend(PVector list, Object x) {
         return list.plus(0, x);
     }
 
@@ -168,8 +167,8 @@ public class StdLib {
         return list.plus(x);
     }
 
-    public static void println(Object o) {
-        System.out.println(o);
+    public static void print(Object o) {
+        System.out.print(o);
     }
 
     @Name("to-list")
@@ -193,13 +192,11 @@ public class StdLib {
         return it.hasNext();
     }
 
-
-    @Name("next")
     public static Object next(Iterator it) {
         return it.next();
     }
 
-    public static Object get(Iterable seq, Integer n) {
+    public static Object get(Iterable seq, int n) {
         if (seq instanceof List) {
             return ((List)seq).get(n);
         }
@@ -208,5 +205,25 @@ public class StdLib {
 
     public static String join(Iterable<?> it, String prefix, String separator, String suffix) {
         return StreamSupport.stream(it.spliterator(), false).map(String::valueOf).collect(Collectors.joining(prefix, separator, suffix));
+    }
+
+    public static long size(Iterable seq) {
+        if (seq instanceof Collection) {
+            return ((Collection) seq).size();
+        }
+        long result = 0;
+        for (Object x: seq) {
+            result++;
+        }
+        return result;
+    }
+
+    public static Var var(Object value) {
+        return new Var(value);
+    }
+
+    public static Object set(Var var, Object value) {
+        var.setValue(value);
+        return value;
     }
 }
