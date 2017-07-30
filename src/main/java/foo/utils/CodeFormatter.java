@@ -16,7 +16,7 @@ public class CodeFormatter implements NodeVisitor<Void> {
     public Void visitBoundCall(BoundCallNode boundCallNode) {
         FunctionNode fn = (FunctionNode) ((RefNode)boundCallNode.children().get(0)).ref();
         print(fn.getName());
-        boolean inline = level(fn) < 4;
+        boolean inline = level(fn) < 3;
         fn.parameters().forEach(param -> {
             if (boundCallNode.arguments().containsKey(param)) {
                 child(boundCallNode.arguments().get(param), inline);
@@ -68,13 +68,16 @@ public class CodeFormatter implements NodeVisitor<Void> {
 
     @Override
     public Void visitRef(RefNode refNode) {
+        if (refNode.ref() instanceof FunctionNode) {
+            print("ref ");
+        }
         print(refNode.ref().getName());
         return null;
     }
 
     @Override
     public Void visitUnboundCall(UnboundCallNode unboundCallNode) {
-        print("!");
+        print("call");
         child(unboundCallNode.children().get(0), true);
         boolean inline = level(unboundCallNode) < 4;
         for (int i = 1; i < unboundCallNode.children().size(); i++) {
@@ -110,9 +113,8 @@ public class CodeFormatter implements NodeVisitor<Void> {
     public Void visitIf(IfNode ifNode) {
         print("if");
         child(ifNode.children().get(0), true);
-        boolean inline = level(ifNode) < 4;
         for (int i = 1; i < ifNode.children().size(); i++) {
-            child(ifNode.children().get(i), inline);
+            child(ifNode.children().get(i), false);
         }
         return null;
     }
@@ -141,9 +143,8 @@ public class CodeFormatter implements NodeVisitor<Void> {
         print("for ");
         print(forNode.getName());
         child(forNode.children().get(0), true);
-        boolean inline = level(forNode) < 4;
         for (int i = 1; i < forNode.children().size(); i++) {
-            child(forNode.children().get(i), inline);
+            child(forNode.children().get(i), false);
         }
         return null;
     }
