@@ -1,4 +1,4 @@
-group 'foo'
+group 'ludwig'
 version '0.0.1-SNAPSHOT'
 
 apply plugin: 'java'
