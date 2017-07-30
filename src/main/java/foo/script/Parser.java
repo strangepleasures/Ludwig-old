@@ -181,9 +181,11 @@ public class Parser {
                     ForNode node = new ForNode();
                     node.setName(nextToken());
                     node.id(Change.newId());
+                    locals.put(node.getName(), node);
                     while (!currentToken().equals(")")) {
                         node.children().add(parseNode());
                     }
+                    locals.remove(node.getName());
                     return node;
                 }
                 case "=": {
