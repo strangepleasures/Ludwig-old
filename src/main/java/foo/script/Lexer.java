@@ -5,13 +5,24 @@ import java.io.Reader;
 import java.util.*;
 
 public class Lexer {
+    private final Reader reader;
+    private final StringBuilder builder = new StringBuilder();
+    private final List<String> tokens = new ArrayList<>();
+    private final Deque<Integer> levelsStack = new ArrayDeque<>();
+    private int balance = 0;
+
+    private Lexer(Reader reader) {
+        this.reader = reader;
+    }
+
     public static List<String> read(Reader reader) throws IOException, LexerException {
-        StringBuilder builder = new StringBuilder();
-        List<String> tokens = new ArrayList<>();
-        Deque<Integer> levelsStack = new ArrayDeque<>();
+        return new Lexer(reader).read();
+    }
+
+    private List<String> read() throws IOException, LexerException {
+
         boolean start = true;
         int level = 0;
-        int balance = 0;
 
         while (true) {
             int c = reader.read();
@@ -21,13 +32,13 @@ public class Lexer {
                     if (start) {
                         level++;
                     } else {
-                        applyToken(builder, tokens);
+                        applyToken();
                     }
                     break;
                 case -1:
                 case '\n':
                     if (!start) {
-                        applyToken(builder, tokens);
+                        applyToken();
                         start = true;
                         level = 0;
                     }
@@ -51,15 +62,12 @@ public class Lexer {
                             } else {
                                 while (!levelsStack.isEmpty() && levelsStack.peekLast() > level) {
                                     levelsStack.removeLast();
-                                    tokens.add(")");
-                                    balance--;
+
                                 }
-                                if (levelsStack.isEmpty() || levelsStack.peekLast() < level) {
-                                    throw new LexerException("Invalid indentation");
-                                }
+                            }
+                            for (int i = balance; i > levelsStack.peekLast(); i--) {
                                 tokens.add(")");
                                 balance--;
-
                             }
                         }
                         tokens.add("(");
@@ -68,8 +76,8 @@ public class Lexer {
                     }
 
                     if (c == '"') {
-                        readEscapedString(reader, builder);
-                        applyToken(builder, tokens);
+                        readEscapedString();
+                        applyToken();
                     } else {
                         builder.append((char) c);
                     }
@@ -89,9 +97,13 @@ public class Lexer {
         }
     }
 
-    private static void applyToken(StringBuilder builder, List<String> tokens) {
+    private void applyToken() {
         if (builder.length() > 0) {
             String token = builder.toString();
+            if (token.equals("call")) {
+                tokens.add("(");
+                balance++;
+            }
             if (token.equals(":")) {
                 tokens.add(")");
                 tokens.add("(");
@@ -103,7 +115,7 @@ public class Lexer {
     }
 
 
-    private static void readEscapedString(Reader reader, StringBuilder builder) throws IOException, LexerException {
+    private void readEscapedString() throws IOException, LexerException {
         builder.append('"');
         boolean escaped = false;
         while (true) {
