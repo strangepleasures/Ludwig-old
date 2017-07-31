@@ -80,3 +80,43 @@ def println x :
 = infinity / 1.0 0.0
 
 = nan / 0.0 0.0
+
+def map seq f :
+	λ :
+		= i iterator seq
+		cond has-next i
+			cons
+				call f next i
+				i
+			eof
+
+def filter seq p :
+	λ :
+		= i iterator seq
+		while has-next i
+			= r next i
+			if call p r
+				return cons r i
+		eof
+
+def ints start :
+	λ : cons start iterator ints + start 1
+
+def keep seq count :
+	λ :
+		= i iterator seq
+		cond > count 0
+			cons
+				i
+				keep
+					\ : i
+					- count 1
+			eof
+
+def range start end :
+	keep
+		ints start
+		- end start
+
+def series f :
+	map ints 0 f

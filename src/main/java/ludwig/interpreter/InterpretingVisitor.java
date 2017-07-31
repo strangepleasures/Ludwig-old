@@ -26,7 +26,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
             if (functionNode instanceof NativeFunctionNode) {
                 NativeFunctionNode fn = (NativeFunctionNode) functionNode;
-                boolean delayed = fn.isDelayed();
+                boolean delayed = fn.isLazy();
 
                 Object[] args = functionNode
                     .parameters()
@@ -127,7 +127,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     public Object visitUnboundCall(UnboundCallNode unboundCallNode) {
         Callable callable = (Callable) unboundCallNode.children().get(0).accept(this);
 
-        boolean delayed = callable.isDelayed();
+        boolean delayed = callable.isLazy();
 
         Object[] args = unboundCallNode.children()
             .stream()

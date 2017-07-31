@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 public class NativeFunctionNode extends FunctionNode implements Callable {
     private final Method method;
     private final Class[] paramTypes;
-    private final boolean delayed;
+    private final boolean lazy;
     private static final Object[] EMPTY = {};
 
     public NativeFunctionNode(Method method) {
@@ -43,7 +43,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
             parameters().add(param);
         }
 
-        delayed = method.isAnnotationPresent(Delayed.class);
+        lazy = method.isAnnotationPresent(Lazy.class);
     }
 
     @Override
@@ -92,8 +92,8 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
     }
 
     @Override
-    public boolean isDelayed() {
-        return delayed;
+    public boolean isLazy() {
+        return lazy;
     }
 
     @Override

@@ -1,13 +1,16 @@
 package ludwig.runtime;
 
-import ludwig.interpreter.*;
+import ludwig.interpreter.Lazy;
+import ludwig.interpreter.Description;
+import ludwig.interpreter.Name;
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Name("system")
@@ -18,6 +21,18 @@ public class StdLib {
     public static final boolean FALSE = false;
     @Name("null")
     public static final Object NULL = null;
+
+    public static final Iterator eof = new Iterator() {
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public Object next() {
+            return null;
+        }
+    };
 
     public static String str(Object x) {
         return String.valueOf(x);
@@ -129,19 +144,28 @@ public class StdLib {
         return x.compareTo(y) >= 0;
     }
 
-    @Delayed
+    @Lazy
     public static boolean and(Supplier<Boolean> x, Supplier<Boolean> y) {
         return x.get() && y.get();
     }
 
-    @Delayed
+    @Lazy
     public static boolean or(Supplier<Boolean> x, Supplier<Boolean> y) {
         return x.get() || y.get();
     }
 
-    @Delayed
+    @Lazy
     public static Object cond(Supplier<Boolean> condition, Supplier<?> option1, Supplier<?> option2) {
         return condition.get() ? option1.get() : option2.get();
+    }
+
+    @Name("is-empty")
+    public static boolean isEmpty(Iterable seq) {
+        return !seq.iterator().hasNext();
+    }
+
+    public static Object head(Iterable seq) {
+        return seq.iterator().next();
     }
 
     public static Iterable tail(Iterable seq) {
@@ -198,32 +222,40 @@ public class StdLib {
 
     public static Object get(Iterable seq, int n) {
         if (seq instanceof List) {
-            return ((List)seq).get(n);
+            return ((List) seq).get(n);
         }
         return StreamSupport.stream(seq.spliterator(), false).skip(n - 1).findFirst().get();
     }
 
-    public static String join(Iterable<?> it, String prefix, String separator, String suffix) {
-        return StreamSupport.stream(it.spliterator(), false).map(String::valueOf).collect(Collectors.joining(prefix, separator, suffix));
-    }
 
-    public static long size(Iterable seq) {
-        if (seq instanceof Collection) {
-            return ((Collection) seq).size();
-        }
-        long result = 0;
-        for (Object x: seq) {
-            result++;
-        }
-        return result;
-    }
+    @Lazy
+    public static <T> Iterator<T> cons(Supplier<T> head, Supplier<Iterator<T>> tail) {
+        return new Iterator<>() {
+            private boolean first = true;
+            private Iterator<T> it;
 
-    public static Var var(Object value) {
-        return new Var(value);
-    }
+            @Override
+            public boolean hasNext() {
+                if (first) {
+                    return true;
+                }
+                if (it == null) {
+                    it = tail.get();
+                }
+                return it.hasNext();
+            }
 
-    public static Object set(Var var, Object value) {
-        var.setValue(value);
-        return value;
+            @Override
+            public T next() {
+                if (first) {
+                    first = false;
+                    return head.get();
+                }
+                if (it == null) {
+                    it = tail.get();
+                }
+                return it.next();
+            }
+        };
     }
 }
