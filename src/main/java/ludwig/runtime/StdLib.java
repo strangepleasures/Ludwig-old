@@ -230,7 +230,7 @@ public class StdLib {
 
     @Lazy
     public static <T> Iterator<T> cons(Supplier<T> head, Supplier<Iterator<T>> tail) {
-        return new Iterator<>() {
+        return new Iterator<T>() {
             private boolean first = true;
             private Iterator<T> it;
 
