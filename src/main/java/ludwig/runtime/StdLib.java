@@ -3,6 +3,8 @@ package ludwig.runtime;
 import ludwig.interpreter.Lazy;
 import ludwig.interpreter.Description;
 import ludwig.interpreter.Name;
+import org.pcollections.OrderedPSet;
+import org.pcollections.POrderedSet;
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
@@ -21,18 +23,6 @@ public class StdLib {
     public static final boolean FALSE = false;
     @Name("null")
     public static final Object NULL = null;
-
-    public static final Iterator eof = new Iterator() {
-        @Override
-        public boolean hasNext() {
-            return false;
-        }
-
-        @Override
-        public Object next() {
-            return null;
-        }
-    };
 
     public static String str(Object x) {
         return String.valueOf(x);
@@ -115,33 +105,10 @@ public class StdLib {
         };
     }
 
-    @Name("==")
-    public static boolean equals(Object x, Object y) {
-        return Objects.equals(x, y);
-    }
-
-    public static int compare(Comparable x, Comparable y) {
-        return x.compareTo(y);
-    }
-
-    @Name("<")
-    public static boolean less(Comparable x, Comparable y) {
-        return x.compareTo(y) < 0;
-    }
-
-    @Name(">")
-    public static boolean greater(Comparable x, Comparable y) {
-        return x.compareTo(y) > 0;
-    }
-
     @Name("<=")
-    public static boolean le(Comparable x, Comparable y) {
-        return x.compareTo(y) <= 0;
-    }
-
-    @Name(">=")
-    public static boolean ge(Comparable x, Comparable y) {
-        return x.compareTo(y) >= 0;
+    public static boolean ordered(Object x, Object y) {
+        return Objects.equals(x, y)
+                || x instanceof Comparable && y instanceof Comparable && ((Comparable) x).compareTo(y) <= 0;
     }
 
     @Lazy
@@ -168,19 +135,25 @@ public class StdLib {
         return seq.iterator().next();
     }
 
-    public static Iterable tail(Iterable seq) {
+    public static <E> Iterable<E> tail(Iterable<E> seq) {
         if (seq instanceof List) {
-            List list = (List) seq;
+            List<E> list = (List<E>) seq;
             return list.subList(1, list.size());
-        } else {
+        } if (seq instanceof Cons) {
+            return ((Cons<E>) seq).tail.get();
+        }  else {
             return () -> {
-                Iterator i = seq.iterator();
+                Iterator<E> i = seq.iterator();
                 if (i.hasNext()) {
                     i.next();
                 }
                 return i;
             };
         }
+    }
+
+    public static PVector plus(PVector list, int index, Object x) {
+        return list.plus(index, x);
     }
 
     public static PVector prepend(PVector list, Object x) {
@@ -207,17 +180,16 @@ public class StdLib {
         return v;
     }
 
-    public static Iterator iterator(Iterable it) {
-        return it.iterator();
-    }
-
-    @Name("has-next")
-    public static boolean hasNext(Iterator it) {
-        return it.hasNext();
-    }
-
-    public static Object next(Iterator it) {
-        return it.next();
+    @Name("to-set")
+    public static <E> POrderedSet<E> toSet(Iterable<E> source) {
+        if (source instanceof POrderedSet) {
+            return (POrderedSet<E>) source;
+        }
+        POrderedSet<E> result = OrderedPSet.empty();
+        for (E i: source) {
+            result = result.plus(i);
+        }
+        return result;
     }
 
     public static Object get(Iterable seq, int n) {
@@ -229,33 +201,88 @@ public class StdLib {
 
 
     @Lazy
-    public static <T> Iterator<T> cons(Supplier<T> head, Supplier<Iterator<T>> tail) {
-        return new Iterator<T>() {
-            private boolean first = true;
-            private Iterator<T> it;
+    public static <T> Iterable<T> cons(Supplier<T> head, Supplier<Iterable<T>> tail) {
+        return new Cons<>(head, tail);
+    }
 
+    @Lazy
+    @Name("lazy-seq")
+    public static <T> Iterable<T> lazySequence(Supplier<Iterable<T>> seq) {
+        return new Iterable<T>() {
+            Iterable<T> inner;
             @Override
-            public boolean hasNext() {
-                if (first) {
-                    return true;
+            public Iterator<T> iterator() {
+                if (inner == null) {
+                    inner = seq.get();
                 }
-                if (it == null) {
-                    it = tail.get();
-                }
-                return it.hasNext();
-            }
-
-            @Override
-            public T next() {
-                if (first) {
-                    first = false;
-                    return head.get();
-                }
-                if (it == null) {
-                    it = tail.get();
-                }
-                return it.next();
+                return inner.iterator();
             }
         };
+    }
+
+    private static class Cons<T> implements Iterable<T> {
+        private final Supplier<T> head;
+        private final Supplier<Iterable<T>>tail;
+
+        private Cons(Supplier<T> head, Supplier<Iterable<T>> tail) {
+            this.head = head;
+            this.tail = tail;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return new ConsIterator<>(head, tail);
+        }
+    }
+
+    private static  class ConsIterator<T> implements Iterator<T> {
+        private Supplier<T> head;
+        private Supplier<Iterable<T>>tail;
+        private boolean first = true;
+        private Iterator<T> it;
+
+        private ConsIterator(Supplier<T> head, Supplier<Iterable<T>> tail) {
+            this.head = head;
+            this.tail = tail;
+        }
+
+
+        @Override
+        public boolean hasNext() {
+            if (first) {
+                return true;
+            }
+            if (it == null) {
+                Iterator<T> i = tail.get().iterator();
+                if (i instanceof ConsIterator) {
+                    ConsIterator<T> ci = (ConsIterator<T>) i;
+                    first = true;
+                    head = ci.head;
+                    tail = ci.tail;
+                    return true;
+                }
+                it = i;
+            }
+            return it.hasNext();
+        }
+
+        @Override
+        public T next() {
+            if (first) {
+                first = false;
+                return head.get();
+            }
+            if (it == null) {
+                Iterator<T> i = tail.get().iterator();
+                if (i instanceof ConsIterator) {
+                    ConsIterator<T> ci = (ConsIterator<T>) i;
+                    head = ci.head;
+                    tail = ci.tail;
+                    return head.get();
+                }
+                it = i;
+            }
+            return it.next();
+        }
     }
 }

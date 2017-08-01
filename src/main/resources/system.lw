@@ -26,9 +26,12 @@ def abs x :
 		x 
 
 def fact n :
-	cond < n 2
-		1
-		* n fact - n 1
+	fact0 1 n
+
+def fact0 m n :
+	cond == n 0
+		m
+		fact0 * m n - n 1
 
 def compose f g :
 	λ x : call f call g x
@@ -82,36 +85,28 @@ def println x :
 = nan / 0.0 0.0
 
 def map seq f :
-	λ :
-		= i iterator seq
-		cond has-next i
-			cons
-				call f next i
-				i
-			eof
+	if is-empty seq
+		return seq
+	cons
+		call f head seq
+		map tail seq
 
 def filter seq p :
-	λ :
-		= i iterator seq
-		while has-next i
-			= r next i
-			if call p r
-				return cons r i
-		eof
+	if is-empty seq
+		return seq
+	lazy-seq
+		cond call f h
+			cons h
+				filter tail seq p
+			filter tail seq p
 
 def ints start :
 	λ : cons start iterator ints + start 1
 
 def keep seq count :
-	λ :
-		= i iterator seq
-		cond > count 0
-			cons
-				i
-				keep
-					\ : i
-					- count 1
-			eof
+	cond or == count 0 is-empty seq
+		list
+		cons head seq keep tail seq - count 1
 
 def range start end :
 	keep
@@ -120,3 +115,24 @@ def range start end :
 
 def series f :
 	map ints 0 f
+
+def >= a b :
+	<= b a
+
+def == a b :
+	and <= a b <= b a
+
+def != a b :
+	not == a b
+
+def > a b :
+	not <= a b
+
+def < a b :
+	not >= b a
+
+def append l x :
+	plus l size l x
+
+def prepend l x :
+	plus l 0 x
