@@ -10,7 +10,7 @@ public class Var implements Callable {
     private Object value;
 
     @Override
-    public Object call(Object... args) {
+    public Object tail(Object... args) {
         return value;
     }
 

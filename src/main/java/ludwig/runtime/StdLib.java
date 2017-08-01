@@ -95,13 +95,13 @@ public class StdLib {
     }
 
     @Lazy
-    public static boolean and(Supplier<Boolean> x, Supplier<Boolean> y) {
-        return x.get() && y.get();
+    public static Object and(Supplier<Boolean> x, Supplier<Boolean> y) {
+        return x.get() ? y : false;
     }
 
     @Lazy
-    public static boolean or(Supplier<Boolean> x, Supplier<Boolean> y) {
-        return x.get() || y.get();
+    public static Object or(Supplier<Boolean> x, Supplier<Boolean> y) {
+        return x.get() ? true : y;
     }
 
     @Lazy

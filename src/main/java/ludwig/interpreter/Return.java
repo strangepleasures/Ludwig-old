@@ -1,15 +1,33 @@
 package ludwig.interpreter;
 
-public class Return implements Signal {
-    public static final Return EMPTY = new Return(null);
+import lombok.Value;
+import ludwig.model.NamedNode;
+import ludwig.model.Node;
+import org.pcollections.HashPMap;
 
-    private final Object value;
+import java.util.Map;
+import java.util.function.Supplier;
 
-    public Return(Object value) {
-        this.value = value;
-    }
+@Value
+public class Return<T> implements Signal, Supplier<T> {
+    Node node;
+    HashPMap<NamedNode, Object> locals;
+    Map<NamedNode, Object> globals;
 
-    public Object getValue() {
-        return value;
+    public T get() {
+        Node n = node;
+        HashPMap<NamedNode, Object> l = locals;
+        Map<NamedNode, Object> g = globals;
+
+        while (true) {
+            Object r = n.accept(new InterpretingVisitor(l, g));
+            if (r instanceof Return) {
+                Return inner = (Return) r;
+                n = inner.node;
+                l = inner.locals;
+            } else {
+                return (T) r;
+            }
+        }
     }
 }

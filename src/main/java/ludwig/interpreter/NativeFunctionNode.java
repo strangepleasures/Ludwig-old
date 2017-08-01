@@ -47,7 +47,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
     }
 
     @Override
-    public Object call(Object[] args) {
+    public Object tail(Object[] args) {
         try {
             for (int i = 0; i < args.length; i++) {
                 args[i] = cast(args[i], paramTypes[i]);
@@ -72,10 +72,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
 
         if (o instanceof Callable) {
             Callable callable = (Callable) o;
-            Method theMethod = Stream.of(type.getDeclaredMethods())
-                .filter(m -> !m.isDefault())
-                .findFirst()
-                .get();
+            Method theMethod = functionalMethod(type);
             return Proxy.newProxyInstance(Callable.class.getClassLoader(), new Class[]{type}, (proxy, method, args) -> {
                 if (method.equals(theMethod)) {
                     if (args == null) {
@@ -99,5 +96,19 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
     @Override
     public int argCount() {
         return paramTypes.length;
+    }
+
+    private static Method functionalMethod(Class type) {
+        if (type.isInterface()) {
+            while (type != null) {
+                for (Method m : type.getDeclaredMethods()) {
+                    if (!m.isDefault()) {
+                        return m;
+                    }
+                }
+                type = type.getSuperclass();
+            }
+        }
+        throw new RuntimeException("Cannot find a functional method in " + type);
     }
 }

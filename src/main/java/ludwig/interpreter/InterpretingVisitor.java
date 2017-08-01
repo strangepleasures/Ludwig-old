@@ -8,7 +8,7 @@ import java.util.Map;
 
 class InterpretingVisitor implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
-    private Map<NamedNode, Object> globals ;
+    private Map<NamedNode, Object> globals;
     private boolean doElse;
 
     InterpretingVisitor(HashPMap<NamedNode, Object> locals, Map<NamedNode, Object> globals) {
@@ -23,7 +23,6 @@ class InterpretingVisitor implements NodeVisitor<Object> {
             RefNode ref = (RefNode) boundCallNode.children().get(0);
             FunctionNode functionNode = (FunctionNode) ref.ref();
 
-
             if (functionNode instanceof NativeFunctionNode) {
                 NativeFunctionNode fn = (NativeFunctionNode) functionNode;
                 boolean delayed = fn.isLazy();
@@ -32,10 +31,10 @@ class InterpretingVisitor implements NodeVisitor<Object> {
                     .parameters()
                     .stream()
                     .map(param -> boundCallNode.arguments().get(param))
-                    .map(node -> delayed ? toClosure(node) : node.accept(this))
+                    .map(node -> delayed ? new Return(node, locals, globals) : node.accept(this))
                     .toArray();
 
-                return fn.call(args);
+                return untail(fn.tail(args));
             }
 
             for (ParameterNode param : functionNode.parameters()) {
@@ -50,15 +49,12 @@ class InterpretingVisitor implements NodeVisitor<Object> {
                 }
             }
 
-            if (result instanceof Return) {
-                return ((Return) result).getValue();
-            }
-
-            return result;
+            return untail(result);
         } finally {
             locals = savedLocals;
         }
     }
+
 
     @Override
     public Object visitFunction(FunctionNode functionNode) {
@@ -132,9 +128,10 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         Object[] args = unboundCallNode.children()
             .stream()
             .skip(1)
-            .map(node -> delayed ? toClosure(node) : node.accept(this))
+            .map(node -> delayed ? new Return(node, locals, globals) : node.accept(this))
             .toArray();
-        return callable.call(args);
+
+       return untail(callable.tail(args));
     }
 
     @Override
@@ -144,7 +141,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitReturn(ReturnNode returnNode) {
-        return returnNode.children().isEmpty() ? Return.EMPTY : new Return(returnNode.children().get(0).accept(this));
+        return new Return(returnNode.children().get(0), locals, globals);
     }
 
     @Override
@@ -218,9 +215,17 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         return null;
     }
 
-    private Closure toClosure(Node node) {
-        LambdaNode lambdaNode = new LambdaNode();
-        lambdaNode.children().add(node);
-        return new Closure(locals, globals, lambdaNode);
+    private Object untail(Object result) {
+        while (result instanceof Return) {
+            Return tail = (Return) result;
+            HashPMap<NamedNode, Object> state = locals;
+            try {
+                locals = tail.getLocals();
+                result = tail.getNode().accept(this);
+            } finally {
+                locals = state;
+            }
+        }
+        return result;
     }
 }

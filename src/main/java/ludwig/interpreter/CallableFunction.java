@@ -18,6 +18,17 @@ public class CallableFunction implements Callable {
 
     @Override
     public Object call(Object[] args) {
+        Object result = tail(args);
+
+        if (result instanceof Return) {
+            return ((Return) result).get();
+        }
+
+        return result;
+    }
+
+    @Override
+    public Object tail(Object... args) {
         HashPMap<NamedNode, Object> env = HashTreePMap.empty();
 
         for (int i = 0; i < args.length; i++) {
@@ -27,15 +38,12 @@ public class CallableFunction implements Callable {
         InterpretingVisitor visitor = new InterpretingVisitor(env, globals);
 
         Object result = null;
+
         for (Node node : function.children()) {
             result = node.accept(visitor);
             if (result instanceof Signal) {
                 break;
             }
-        }
-
-        if (result instanceof Return) {
-            return ((Return) result).getValue();
         }
 
         return result;

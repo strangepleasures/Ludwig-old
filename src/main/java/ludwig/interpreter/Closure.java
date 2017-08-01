@@ -18,7 +18,7 @@ public class Closure implements Callable {
     }
 
     @Override
-    public Object call(Object[] args) {
+    public Object tail(Object[] args) {
         HashPMap<NamedNode, Object> env = locals;
         for (int i = 0; i < args.length; i++) {
             env = env.plus(lambda.parameters().get(i), args[i]);
@@ -32,10 +32,6 @@ public class Closure implements Callable {
             if (result instanceof Signal) {
                 break;
             }
-        }
-
-        if (result instanceof Return) {
-            return ((Return) result).getValue();
         }
 
         return result;
