@@ -156,8 +156,9 @@ public class Parser {
 
 
     private Node parseNode() throws ParserException {
-        boolean isForm = currentToken().equals("(");
-        if (isForm) {
+        int level = 0;
+        while (currentToken().equals("(")) {
+            level++;
             nextToken();
         }
 
@@ -250,12 +251,13 @@ public class Parser {
                         }
                     } else if (Lexer.isLiteral(head)) {
                         return new LiteralNode(head).id(Change.newId());
+                    } else {
+                        throw new ParserException("Unknown symbol: " + head);
                     }
                 }
             }
-            return null;
         } finally {
-            if (isForm) {
+            for (int i = 0; i < level; i++) {
                 consume(")");
             }
         }

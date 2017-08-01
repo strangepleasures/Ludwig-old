@@ -8,11 +8,10 @@ import org.pcollections.POrderedSet;
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Name("system")
@@ -89,22 +88,6 @@ public class StdLib {
         return x.longValue() % y.longValue();
     }
 
-    public static Iterable map(Iterable source, Function f) {
-        return () -> new Iterator() {
-            Iterator it = source.iterator();
-
-            @Override
-            public boolean hasNext() {
-                return it.hasNext();
-            }
-
-            @Override
-            public Object next() {
-                return f.apply(it.next());
-            }
-        };
-    }
-
     @Name("<=")
     public static boolean ordered(Object x, Object y) {
         return Objects.equals(x, y)
@@ -156,25 +139,17 @@ public class StdLib {
         return list.plus(index, x);
     }
 
-    public static PVector prepend(PVector list, Object x) {
-        return list.plus(0, x);
-    }
-
-    public static PVector append(PVector list, Object x) {
-        return list.plus(x);
-    }
-
     public static void print(Object o) {
         System.out.print(o);
     }
 
     @Name("to-list")
-    public static PVector tolist(Iterable source) {
+    public static <E> PVector<E> tolist(Iterable<E> source) {
         if (source instanceof PVector) {
-            return (PVector) source;
+            return (PVector<E>) source;
         }
-        PVector v = TreePVector.empty();
-        for (Object x : source) {
+        PVector<E> v = TreePVector.empty();
+        for (E x : source) {
             v = v.plus(x);
         }
         return v;
@@ -218,6 +193,21 @@ public class StdLib {
                 return inner.iterator();
             }
         };
+    }
+
+    public static String join(Iterable<?> it, String prefix, String delimiter, String suffix) {
+        return StreamSupport.stream(it.spliterator(), false).map(String::valueOf).collect(Collectors.joining(delimiter, prefix, suffix));
+    }
+
+    public static int size(Iterable<?> it) {
+        if (it instanceof Collection) {
+            return ((Collection) it).size();
+        }
+        int result = 0;
+        for (Object x : it) {
+            result++;
+        }
+        return result;
     }
 
     private static class Cons<T> implements Iterable<T> {

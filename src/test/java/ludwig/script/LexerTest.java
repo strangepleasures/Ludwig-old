@@ -21,6 +21,11 @@ public class LexerTest {
             "\t\t1\n" +
             "\t\t* n fact - n 1",
             "( def fact n ) ( ( cond < n 2 ( 1 ) ( * n fact - n 1 ) ) )");
+
+        test("def each seq consumer :\n" +
+            "\tfor x seq\n" +
+            "\t\tcall consumer x",
+            "( def each seq consumer ) ( ( for x seq ( ( call consumer x ) ) ) )");
     }
 
     private void test(String src, String tokens) throws IOException, LexerException {

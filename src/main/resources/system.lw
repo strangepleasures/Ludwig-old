@@ -3,19 +3,10 @@ package system
 def not x :
 	cond x false true
 
-def != x y :
-	not == x y
-
 def xor x y :
 	cond x
 		not y
 		y
-
-def is-empty seq :
-	has-next iterator seq
-
-def head seq :
-	next iterator seq
 
 def neg x :
 	* -1 x
@@ -89,19 +80,19 @@ def map seq f :
 		return seq
 	cons
 		call f head seq
-		map tail seq
+		map tail seq f
 
-def filter seq p :
+def filter seq pred :
 	if is-empty seq
 		return seq
 	lazy-seq
-		cond call f h
-			cons h
-				filter tail seq p
-			filter tail seq p
+		cond call pred head seq
+			cons head seq
+				filter tail seq pred
+			filter tail seq pred
 
 def ints start :
-	λ : cons start iterator ints + start 1
+	cons start ints + start 1
 
 def keep seq count :
 	cond or == count 0 is-empty seq
