@@ -15,13 +15,13 @@ public class PrintUtilTest {
         parameterNode2.setName("y");
         functionNode.parameters().add(parameterNode2);
         BoundCallNode boundCallNode = new BoundCallNode();
-        boundCallNode.children().add(functionNode);
+        boundCallNode.add(functionNode);
         RefNode refNode1 = new RefNode(parameterNode2);
         RefNode refNode2 = new RefNode(parameterNode1);
         boundCallNode.arguments().put(parameterNode1, refNode1);
         boundCallNode.arguments().put(parameterNode2, refNode2);
-        functionNode.children().add(boundCallNode);
-        packageNode.children().add(functionNode);
+        functionNode.add(boundCallNode);
+        packageNode.add(functionNode);
 //        assertEquals(
 //            "package mypackage\n" +
 //                "\tdef foo [x y]\n" +

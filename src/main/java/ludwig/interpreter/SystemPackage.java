@@ -16,13 +16,13 @@ public class SystemPackage extends PackageNode {
 
         for (Method method : clazz.getDeclaredMethods()) {
             if (Modifier.isPublic(method.getModifiers())) {
-                children().add(new NativeFunctionNode(method));
+                add(new NativeFunctionNode(method));
             }
         }
 
         for (Field field : clazz.getDeclaredFields()) {
             if (Modifier.isPublic(field.getModifiers())) {
-                children().add(new NativeLetNode(field));
+                add(new NativeLetNode(field));
             }
         }
     }

@@ -20,7 +20,7 @@ public class NativeLetNode extends LetNode {
         id(packageName + ":" + name);
 
         try {
-            children().add(LiteralNode.ofValue(field.get(null)));
+            add(LiteralNode.ofValue(field.get(null)));
         } catch (IllegalAccessException e) {
         }
     }

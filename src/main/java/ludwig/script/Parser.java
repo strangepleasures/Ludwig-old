@@ -46,7 +46,7 @@ public class Parser {
             .filter(n -> n.getName().equals(packageName)).findFirst().orElseGet(() -> {
                 PackageNode pn = new PackageNode();
                 pn.setName(packageName).id(projectNode.id() + ":" + packageName);
-                projectNode.children().add(pn);
+                projectNode.add(pn);
                 return pn;
             });
 
@@ -55,7 +55,7 @@ public class Parser {
 
 
         while (pos < tokens.size()) {
-            packageNode.children().add(parseSignature(packageNode.id()));
+            packageNode.add(parseSignature(packageNode.id()));
         }
 
         return packageNode;
@@ -137,7 +137,7 @@ public class Parser {
                 while (!nextToken().equals(")"));
                 consume("(");
                 while (pos < tokens.size() && !currentToken().equals(")")) {
-                    node.children().add(parseNode());
+                    node.add(parseNode());
                 }
 
                 if (pos < tokens.size()) {
@@ -147,7 +147,7 @@ public class Parser {
             }
             case "=": {
                 LetNode node = (LetNode) packageNode.item(nextToken());
-                node.children().add(parseNode());
+                node.add(parseNode());
                 consume(")");
                 break;
             }
@@ -174,7 +174,7 @@ public class Parser {
                     Node node = createSpecial(head);
                     node.id(Change.newId());
                     while (!currentToken().equals(")")) {
-                        node.children().add(parseNode());
+                        node.add(parseNode());
                     }
                     return node;
                 }
@@ -184,7 +184,7 @@ public class Parser {
                     node.id(Change.newId());
                     locals.put(node.getName(), node);
                     while (!currentToken().equals(")")) {
-                        node.children().add(parseNode());
+                        node.add(parseNode());
                     }
                     locals.remove(node.getName());
                     return node;
@@ -196,13 +196,13 @@ public class Parser {
                         node.id(Change.newId());
                         RefNode var = new RefNode(locals.get(name));
                         var.id(Change.newId());
-                        node.children().add(var);
-                        node.children().add(parseNode());
+                        node.add(var);
+                        node.add(parseNode());
                         return node;
                     } else {
                         LetNode node = (LetNode) new LetNode().setName(name).id(Change.newId());
                         locals.put(name, node);
-                        node.children().add(parseNode());
+                        node.add(parseNode());
                         return node;
                     }
                 }
@@ -223,7 +223,7 @@ public class Parser {
                     consume(")");
                     consume("(");
                     while (!currentToken().equals(")")) {
-                        node.children().add(parseNode());
+                        node.add(parseNode());
                     }
                     return node;
                 }
@@ -241,7 +241,7 @@ public class Parser {
                             node.id(Change.newId());
                             RefNode r = new RefNode(fn);
                             r.id(Change.newId());
-                            node.children().add(r);
+                            node.add(r);
                             for (ParameterNode param : fn.parameters()) {
                                 node.arguments().put(param, parseNode());
                             }
