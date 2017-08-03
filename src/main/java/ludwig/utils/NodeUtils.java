@@ -3,6 +3,9 @@ package ludwig.utils;
 import ludwig.model.Node;
 import org.apache.commons.lang.StringEscapeUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class NodeUtils {
     public static String toString(Node node) {
         CodeFormatter visitor = new CodeFormatter();
@@ -36,5 +39,20 @@ public class NodeUtils {
             return StringEscapeUtils.escapeJavaScript(o.toString());
         }
         return String.valueOf(o);
+    }
+
+    private static List<Node> expandNode(Node node) {
+        List<Node> nodes = new ArrayList<>();
+        expandNode(node, true, nodes);
+        return nodes;
+    }
+
+    private static void expandNode(Node node, boolean onlyChildren, List<Node> nodes) {
+        if (!onlyChildren) {
+            nodes.add(node);
+        }
+        for (Node child: node.children()) {
+            expandNode(child, false, nodes);
+        }
     }
 }
