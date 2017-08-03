@@ -10,10 +10,18 @@ import java.util.Map;
 public class CallableFunction implements Callable {
     private final FunctionNode function;
     private final Map<NamedNode, Object> globals;
+    private int argCount;
 
     public CallableFunction(FunctionNode function, Map<NamedNode, Object> globals) {
         this.function = function;
         this.globals = globals;
+
+        for (int i = 0; i < function.children().size(); i++) {
+            if (function.children().get(i) instanceof SeparatorNode) {
+                argCount = i;
+                break;
+            }
+        }
     }
 
     @Override
@@ -32,7 +40,7 @@ public class CallableFunction implements Callable {
         HashPMap<NamedNode, Object> env = HashTreePMap.empty();
 
         for (int i = 0; i < args.length; i++) {
-            env = env.plus(function.parameters().get(i), args[i]);
+            env = env.plus((NamedNode) function.children().get(i), args[i]);
         }
 
         InterpretingVisitor visitor = new InterpretingVisitor(env, globals);
@@ -51,7 +59,7 @@ public class CallableFunction implements Callable {
 
     @Override
     public int argCount() {
-        return function.parameters().size();
+        return argCount;
     }
 
     @Override

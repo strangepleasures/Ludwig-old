@@ -13,14 +13,13 @@ public class Interpreter {
     }
 
     public static Object call(FunctionNode functionNode, Object... args) {
-        BoundCallNode boundCallNode = new BoundCallNode();
-        boundCallNode.add(new VariableNode(functionNode));
+        VariableNode head = new VariableNode(functionNode);
 
-        for (int i = 0; i < args.length; i++) {
-            boundCallNode.arguments().put(functionNode.parameters().get(i), LiteralNode.ofValue(args[i]));
+        for (Object arg : args) {
+            head.add(LiteralNode.ofValue(arg));
         }
 
-        return eval(boundCallNode, HashTreePMap.empty(), new HashMap<>());
+        return eval(head, HashTreePMap.empty(), new HashMap<>());
     }
 
 }

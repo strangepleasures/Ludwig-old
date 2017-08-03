@@ -48,31 +48,25 @@ public class Workspace {
         Node parent = node(insert.getParent());
 
         if (parent != null) {
-            ParameterNode param = node(insert.getParam());
+            Node prev = node(insert.getPrev());
+            Node next = node(insert.getNext());
 
-            if (param != null) {
-                ((BoundCallNode) parent).arguments().put(param, node);
+            List items = (node instanceof ParameterNode) ? ((Signature) parent).parameters() : parent.children();
+
+            if (next == null) {
+                if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {
+                    items.add(node);
+                }
+            } else if (prev == null) {
+                if (!items.isEmpty() && items.get(0) == next) {
+                    items.add(0, node);
+                }
             } else {
-                Node prev = node(insert.getPrev());
-                Node next = node(insert.getNext());
+                int prevIndex = items.indexOf(prev);
+                int nextIndex = items.indexOf(next);
 
-                List items = (node instanceof ParameterNode) ? ((Signature) parent).parameters() : parent.children();
-
-                if (next == null) {
-                    if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {
-                        items.add(node);
-                    }
-                } else if (prev == null) {
-                    if (!items.isEmpty() && items.get(0) == next) {
-                        items.add(0, node);
-                    }
-                } else {
-                    int prevIndex = items.indexOf(prev);
-                    int nextIndex = items.indexOf(next);
-
-                    if (nextIndex == prevIndex + 1) {
-                        items.add(nextIndex, next);
-                    }
+                if (nextIndex == prevIndex + 1) {
+                    items.add(nextIndex, next);
                 }
             }
         }
@@ -140,8 +134,11 @@ public class Workspace {
                 addNode(n);
 
                 if (n instanceof FunctionNode) {
-                    for (ParameterNode parameterNode : ((FunctionNode) n).parameters()) {
-                        addNode(parameterNode);
+                    for (Node child: n.children()) {
+                        if (n instanceof SeparatorNode) {
+                            break;
+                        }
+                        addNode(n);
                     }
                 }
             }

@@ -73,9 +73,10 @@ public class Parser {
                     ParameterNode param = new ParameterNode();
                     param.setName(nextToken());
                     param.id(node.id() + ":" + param.getName());
-                    node.parameters().add(param);
+                    node.add(param);
                 }
                 consume(")");
+                node.add(new SeparatorNode().id(Change.newId()));
                 consume("(");
                 skip();
                 return node;
@@ -126,7 +127,7 @@ public class Parser {
             case "def": {
                 FunctionNode node = (FunctionNode) packageNode.item(nextToken());
                 locals.clear();
-                node.parameters().forEach(p -> locals.put(p.getName(), p));
+                node.children().forEach(p -> locals.put(((ParameterNode)p).getName(), (ParameterNode)p));
                 while (!nextToken().equals(")"));
                 consume("(");
                 while (pos < tokens.size() && !currentToken().equals(")")) {
@@ -227,15 +228,17 @@ public class Parser {
                     if (headNode != null) {
                         if (headNode instanceof FunctionNode) {
                             FunctionNode fn = (FunctionNode) headNode;
-                            BoundCallNode node = new BoundCallNode();
-                            node.id(Change.newId());
+
                             VariableNode r = new VariableNode(fn);
                             r.id(Change.newId());
-                            node.add(r);
-                            for (ParameterNode param : fn.parameters()) {
-                                node.arguments().put(param, parseNode());
+
+                            for (Node param : fn.children()) {
+                                if (param instanceof SeparatorNode) {
+                                    break;
+                                }
+                                r.add(parseNode());
                             }
-                            return node;
+                            return r;
                         } else {
                             return new VariableNode(headNode);
                         }

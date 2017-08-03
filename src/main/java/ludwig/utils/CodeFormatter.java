@@ -11,22 +11,6 @@ public class CodeFormatter implements NodeVisitor<Void> {
     private final List<CodeLine> lines = new ArrayList<>();
     private int indentation;
 
-
-    @Override
-    public Void visitBoundCall(BoundCallNode boundCallNode) {
-        FunctionNode fn = (FunctionNode) ((VariableNode)boundCallNode.children().get(0)).ref();
-        print(fn.getName());
-        int l = boundCallNode.arguments().values().stream().map(CodeFormatter::level).max(Comparator.naturalOrder()).orElse(0) + 1;
-        boolean inline = l < 3;
-        fn.parameters().forEach(param -> {
-            if (boundCallNode.arguments().containsKey(param)) {
-                child(boundCallNode.arguments().get(param), inline);
-            }
-        });
-
-        return null;
-    }
-
     @Override
     public Void visitList(ListNode node) {
         print("list");
@@ -70,6 +54,8 @@ public class CodeFormatter implements NodeVisitor<Void> {
     @Override
     public Void visitVariable(VariableNode variableNode) {
         print(variableNode.ref().getName());
+        boolean inline = level(variableNode) < 4;
+        variableNode.children().forEach(node -> child(node, inline));
         return null;
     }
 

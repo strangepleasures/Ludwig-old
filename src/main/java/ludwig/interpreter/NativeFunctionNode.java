@@ -1,7 +1,6 @@
 package ludwig.interpreter;
 
-import ludwig.model.FunctionNode;
-import ludwig.model.ParameterNode;
+import ludwig.model.*;
 
 import java.lang.reflect.*;
 import java.util.stream.Stream;
@@ -40,8 +39,9 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
             if (parameter.isAnnotationPresent(Description.class)) {
                 param.setComment(parameter.getAnnotation(Description.class).value());
             }
-            parameters().add(param);
+            add(param);
         }
+        add(new SeparatorNode());
 
         lazy = method.isAnnotationPresent(Lazy.class);
     }

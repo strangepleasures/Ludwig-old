@@ -78,7 +78,12 @@ public class EditorPane extends SplitPane {
 
                 if (node instanceof FunctionNode) {
                     FunctionNode functionNode = (FunctionNode) node;
-                    signatureView.getItems().addAll(functionNode.parameters());
+                    for (Node n: node.children()) {
+                        if (n instanceof SeparatorNode) {
+                            break;
+                        }
+                        signatureView.getItems().add((NamedNode) n);
+                    }
                 }
 
                 node.children().forEach(n -> codeFormatter.child(n, false));

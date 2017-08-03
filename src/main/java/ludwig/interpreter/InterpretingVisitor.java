@@ -16,45 +16,6 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         this.globals = globals;
     }
 
-    @Override
-    public Object visitBoundCall(BoundCallNode boundCallNode) {
-        HashPMap<NamedNode, Object> savedLocals = locals;
-        try {
-            VariableNode ref = (VariableNode) boundCallNode.children().get(0);
-            FunctionNode functionNode = (FunctionNode) ref.ref();
-
-            if (functionNode instanceof NativeFunctionNode) {
-                NativeFunctionNode fn = (NativeFunctionNode) functionNode;
-                boolean delayed = fn.isLazy();
-
-                Object[] args = functionNode
-                        .parameters()
-                        .stream()
-                        .map(param -> boundCallNode.arguments().get(param))
-                        .map(node -> delayed ? new Return(node, locals, globals) : node.accept(this))
-                        .toArray();
-
-                return untail(fn.tail(args));
-            }
-
-            for (ParameterNode param : functionNode.parameters()) {
-                locals = locals.plus(param, boundCallNode.arguments().get(param).accept(this));
-            }
-
-            Object result = null;
-            for (Node node : functionNode.children()) {
-                result = node.accept(this);
-                if (result instanceof Signal) {
-                    break;
-                }
-            }
-
-            return untail(result);
-        } finally {
-            locals = savedLocals;
-        }
-    }
-
 
     @Override
     public Object visitFunction(FunctionNode functionNode) {
@@ -95,6 +56,45 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     @Override
     public Object visitVariable(VariableNode variableNode) {
         NamedNode node = variableNode.ref();
+
+        if (node instanceof NativeFunctionNode) {
+            NativeFunctionNode fn = (NativeFunctionNode) node;
+            boolean delayed = fn.isLazy();
+
+            Object[] args = new Object[fn.argCount()];
+            for (int i = 0; i < args.length; i++) {
+                args[i] = delayed ? new Return(variableNode.children().get(i), locals, globals) : variableNode.children().get(i).accept(this);
+            }
+            return untail(fn.tail(args));
+        }
+
+        if (node instanceof FunctionNode) {
+            HashPMap<NamedNode, Object> savedLocals = locals;
+            try {
+                FunctionNode fn = (FunctionNode) node;
+                Object result = null;
+                boolean params = true;
+                for (int i = 0; i < fn.children().size(); i++) {
+                    Node child = fn.children().get(i);
+                    if (params) {
+                        if (child instanceof SeparatorNode) {
+                            params = false;
+                        } else {
+                            locals = locals.plus((ParameterNode) child, variableNode.children().get(i).accept(this));
+                        }
+                    } else {
+                        result = child.accept(this);
+                        if (result instanceof Signal) {
+                            break;
+                        }
+                    }
+                }
+                return untail(result);
+            } finally {
+                locals = savedLocals;
+            }
+        }
+
 
         if (locals.containsKey(node)) {
             return locals.get(node);

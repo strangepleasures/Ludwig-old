@@ -10,25 +10,17 @@ public class PrintUtilTest {
         Node packageNode = new PackageNode().setName("mypackage");
         FunctionNode functionNode = (FunctionNode) new FunctionNode().setName("foo");
         ParameterNode parameterNode1 = (ParameterNode) new ParameterNode().setName("x");
-        functionNode.parameters().add(parameterNode1);
+        functionNode.add(parameterNode1);
         ParameterNode parameterNode2 = new ParameterNode();
         parameterNode2.setName("y");
-        functionNode.parameters().add(parameterNode2);
-        BoundCallNode boundCallNode = new BoundCallNode();
-        boundCallNode.add(functionNode);
+        functionNode.add(parameterNode2);
+        VariableNode head = new VariableNode(functionNode);
         VariableNode variableNode1 = new VariableNode(parameterNode2);
         VariableNode variableNode2 = new VariableNode(parameterNode1);
-        boundCallNode.arguments().put(parameterNode1, variableNode1);
-        boundCallNode.arguments().put(parameterNode2, variableNode2);
-        functionNode.add(boundCallNode);
+        head.add(variableNode1);
+        head.add(variableNode2);
+        functionNode.add(head);
         packageNode.add(functionNode);
-//        assertEquals(
-//            "package mypackage\n" +
-//                "\tdef foo [x y]\n" +
-//                "\t\tfoo\n" +
-//                "\t\t\tx: y\n" +
-//                "\t\t\ty: x\n",
-//            PrintUtil.toString(packageNode));
     }
 
 }

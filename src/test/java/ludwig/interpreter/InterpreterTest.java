@@ -18,18 +18,19 @@ public class InterpreterTest {
         functionNode.setName("foo");
         ParameterNode parameterNode1 = new ParameterNode();
         parameterNode1.setName("x");
-        functionNode.parameters().add(parameterNode1);
+        functionNode.add(parameterNode1);
         ParameterNode parameterNode2 = new ParameterNode();
         parameterNode2.setName("y");
-        functionNode.parameters().add(parameterNode2);
-        BoundCallNode boundCallNode = new BoundCallNode();
+        functionNode.add(parameterNode2);
+        functionNode.add(new SeparatorNode());
+
         FunctionNode minus = (FunctionNode) systemPackage.item("-");
-        boundCallNode.add(new VariableNode(minus));
+        VariableNode head = new VariableNode(minus);
         VariableNode variableNode1 = new VariableNode(parameterNode1);
         VariableNode variableNode2 = new VariableNode(parameterNode2);
-        boundCallNode.arguments().put(minus.parameters().get(0), variableNode1);
-        boundCallNode.arguments().put(minus.parameters().get(1), variableNode2);
-        functionNode.add(boundCallNode);
+        head.add(variableNode1);
+        head.add(variableNode2);
+        functionNode.add(head);
 
 
         Object result = Interpreter.call(functionNode, 50.0, 8.0);
@@ -43,12 +44,11 @@ public class InterpreterTest {
         lambda.add(new ParameterNode());
         lambda.add(new SeparatorNode());
         FunctionNode plus = (FunctionNode) systemPackage.item("+");
-        BoundCallNode bcn = new BoundCallNode();
-        bcn.add(new VariableNode(plus));
+        VariableNode head = new VariableNode(plus);
         VariableNode variableNode = new VariableNode((NamedNode) lambda.children().get(0));
-        bcn.arguments().put(plus.parameters().get(0), variableNode);
-        bcn.arguments().put(plus.parameters().get(1), LiteralNode.ofValue(3.0));
-        lambda.add(bcn);
+        head.add(variableNode);
+        head.add(LiteralNode.ofValue(3.0));
+        lambda.add(head);
 
         UnboundCallNode ucn = new UnboundCallNode();
         ucn.add(lambda);
