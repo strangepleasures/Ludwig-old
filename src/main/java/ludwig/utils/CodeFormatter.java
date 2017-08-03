@@ -14,7 +14,7 @@ public class CodeFormatter implements NodeVisitor<Void> {
 
     @Override
     public Void visitBoundCall(BoundCallNode boundCallNode) {
-        FunctionNode fn = (FunctionNode) ((RefNode)boundCallNode.children().get(0)).ref();
+        FunctionNode fn = (FunctionNode) ((VariableNode)boundCallNode.children().get(0)).ref();
         print(fn.getName());
         int l = boundCallNode.arguments().values().stream().map(CodeFormatter::level).max(Comparator.naturalOrder()).orElse(0) + 1;
         boolean inline = l < 3;
@@ -44,10 +44,10 @@ public class CodeFormatter implements NodeVisitor<Void> {
     }
 
     @Override
-    public Void visitLet(LetNode letNode) {
+    public Void visitVariableDeclaration(VariableDeclarationNode variableDeclarationNode) {
         print("= ");
-        print(letNode.getName());
-        child(letNode.children().get(0), true);
+        print(variableDeclarationNode.getName());
+        child(variableDeclarationNode.children().get(0), true);
         return null;
     }
 
@@ -68,11 +68,17 @@ public class CodeFormatter implements NodeVisitor<Void> {
     }
 
     @Override
-    public Void visitRef(RefNode refNode) {
-        if (refNode.ref() instanceof FunctionNode) {
-            print("ref ");
+    public Void visitVariable(VariableNode variableNode) {
+        print(variableNode.ref().getName());
+        return null;
+    }
+
+    @Override
+    public Void visitReference(ReferenceNode referenceNode) {
+        print("ref ");
+        if (!referenceNode.children().isEmpty()) {
+            print(referenceNode.children().get(0).toString());
         }
-        print(refNode.ref().getName());
         return null;
     }
 
@@ -91,10 +97,19 @@ public class CodeFormatter implements NodeVisitor<Void> {
     @Override
     public Void visitLambda(LambdaNode lambdaNode) {
         print("λ");
-        lambdaNode.parameters().forEach(param -> print(" " + param.getName()));
-        print(" :");
+
+        boolean body = false;
         boolean inline = level(lambdaNode) < 4;
-        lambdaNode.children().forEach(node -> child(node, inline));
+        for (Node n: lambdaNode.children()) {
+            if (body) {
+                child(n, inline);
+            } else {
+                print(" " + n);
+            }
+            if (n instanceof SeparatorNode) {
+                body = true;
+            }
+        }
         return null;
     }
 
@@ -147,6 +162,12 @@ public class CodeFormatter implements NodeVisitor<Void> {
         for (int i = 1; i < forNode.children().size(); i++) {
             child(forNode.children().get(i), false);
         }
+        return null;
+    }
+
+    @Override
+    public Void visitSeparator(SeparatorNode separatorNode) {
+        print(": ");
         return null;
     }
 

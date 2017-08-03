@@ -1,10 +1,10 @@
 package ludwig.model;
 
 
-public class RefNode extends Node {
+public class VariableNode extends Node {
     private final NamedNode ref;
 
-    public RefNode(NamedNode ref) {
+    public VariableNode(NamedNode ref) {
         this.ref = ref;
     }
 
@@ -14,6 +14,6 @@ public class RefNode extends Node {
 
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {
-        return visitor.visitRef(this);
+        return visitor.visitVariable(this);
     }
 }

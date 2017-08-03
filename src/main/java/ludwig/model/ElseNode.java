@@ -5,4 +5,9 @@ public class ElseNode extends Node {
     public <T> T accept(NodeVisitor<T> visitor) {
         return visitor.visitElse(this);
     }
+
+    @Override
+    public String toString() {
+        return "else";
+    }
 }

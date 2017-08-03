@@ -10,27 +10,39 @@ public class Closure implements Callable {
     private final HashPMap<NamedNode, Object> locals;
     private final Map<NamedNode, Object> globals;
     private final LambdaNode lambda;
+    private int argCount;
 
     public Closure(HashPMap<NamedNode, Object> locals, Map<NamedNode, Object> globals, LambdaNode lambda) {
         this.locals = locals;
         this.globals = globals;
         this.lambda = lambda;
+
+        for (int i = 0; i < lambda.children().size(); i++) {
+            Node node = lambda.children().get(i);
+            if (node instanceof SeparatorNode) {
+                argCount = i;
+                break;
+            }
+        }
     }
 
     @Override
     public Object tail(Object[] args) {
         HashPMap<NamedNode, Object> env = locals;
-        for (int i = 0; i < args.length; i++) {
-            env = env.plus(lambda.parameters().get(i), args[i]);
-        }
-
-        InterpretingVisitor visitor = new InterpretingVisitor(env, globals);
-
+        InterpretingVisitor visitor = null;
         Object result = null;
-        for (Node node : lambda.children()) {
-            result = node.accept(visitor);
-            if (result instanceof Signal) {
-                break;
+
+        for (int i = 0; i < lambda.children().size(); i++) {
+            Node node = lambda.children().get(i);
+            if (node instanceof ParameterNode) {
+                env = env.plus((NamedNode) node, args[i]);
+            } else if (node instanceof SeparatorNode) {
+                visitor = new InterpretingVisitor(env, globals);
+            } else {
+                result = node.accept(visitor);
+                if (result instanceof Signal) {
+                    break;
+                }
             }
         }
 
@@ -39,7 +51,7 @@ public class Closure implements Callable {
 
     @Override
     public int argCount() {
-        return lambda.parameters().size();
+        return argCount;
     }
 
     @Override

@@ -1,13 +1,13 @@
 package ludwig.model;
 
-public class ListNode extends Node {
+public class ReferenceNode extends Node {
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {
-        return visitor.visitList(this);
+        return visitor.visitReference(this);
     }
 
     @Override
     public String toString() {
-        return "list";
+        return "ref";
     }
 }

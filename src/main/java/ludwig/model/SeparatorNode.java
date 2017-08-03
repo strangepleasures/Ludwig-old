@@ -1,13 +1,13 @@
 package ludwig.model;
 
-public class ListNode extends Node {
+public class SeparatorNode extends Node {
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {
-        return visitor.visitList(this);
+        return visitor.visitSeparator(this);
     }
 
     @Override
     public String toString() {
-        return "list";
+        return ":";
     }
 }

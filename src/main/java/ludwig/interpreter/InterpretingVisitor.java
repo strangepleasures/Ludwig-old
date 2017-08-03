@@ -20,7 +20,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     public Object visitBoundCall(BoundCallNode boundCallNode) {
         HashPMap<NamedNode, Object> savedLocals = locals;
         try {
-            RefNode ref = (RefNode) boundCallNode.children().get(0);
+            VariableNode ref = (VariableNode) boundCallNode.children().get(0);
             FunctionNode functionNode = (FunctionNode) ref.ref();
 
             if (functionNode instanceof NativeFunctionNode) {
@@ -28,11 +28,11 @@ class InterpretingVisitor implements NodeVisitor<Object> {
                 boolean delayed = fn.isLazy();
 
                 Object[] args = functionNode
-                    .parameters()
-                    .stream()
-                    .map(param -> boundCallNode.arguments().get(param))
-                    .map(node -> delayed ? new Return(node, locals, globals) : node.accept(this))
-                    .toArray();
+                        .parameters()
+                        .stream()
+                        .map(param -> boundCallNode.arguments().get(param))
+                        .map(node -> delayed ? new Return(node, locals, globals) : node.accept(this))
+                        .toArray();
 
                 return untail(fn.tail(args));
             }
@@ -62,9 +62,9 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     }
 
     @Override
-    public Object visitLet(LetNode letNode) {
-        Object value = letNode.children().get(0).accept(this);
-        locals = locals.plus(letNode, value);
+    public Object visitVariableDeclaration(VariableDeclarationNode variableDeclarationNode) {
+        Object value = variableDeclarationNode.children().get(0).accept(this);
+        locals = locals.plus(variableDeclarationNode, value);
         return value;
     }
 
@@ -93,8 +93,8 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     }
 
     @Override
-    public Object visitRef(RefNode refNode) {
-        NamedNode node = refNode.ref();
+    public Object visitVariable(VariableNode variableNode) {
+        NamedNode node = variableNode.ref();
 
         if (locals.containsKey(node)) {
             return locals.get(node);
@@ -104,18 +104,26 @@ class InterpretingVisitor implements NodeVisitor<Object> {
             return globals.get(node);
         }
 
-        if (node.getClass() == FunctionNode.class) {
-            CallableFunction callableFunction = new CallableFunction((FunctionNode) node, globals);
-            globals.put(node, callableFunction);
-            return callableFunction;
-        }
-
-        if (node.getClass() == LetNode.class) {
+        if (node.getClass() == VariableDeclarationNode.class) {
             Object value = node.children().get(0).accept(this);
             globals.put(node, value);
             return value;
         }
 
+        return node;
+    }
+
+    @Override
+    public Object visitReference(ReferenceNode referenceNode) {
+        FunctionNode node = (FunctionNode) referenceNode.children().get(0).accept(this);
+        if (!(node instanceof Callable)) {
+            CallableFunction callableFunction = (CallableFunction) globals.get(node);
+            if (callableFunction == null) {
+                callableFunction = new CallableFunction(node, globals);
+                globals.put(node, callableFunction);
+            }
+            return callableFunction;
+        }
         return node;
     }
 
@@ -126,12 +134,12 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         boolean delayed = callable.isLazy();
 
         Object[] args = unboundCallNode.children()
-            .stream()
-            .skip(1)
-            .map(node -> delayed ? new Return(node, locals, globals) : node.accept(this))
-            .toArray();
+                .stream()
+                .skip(1)
+                .map(node -> delayed ? new Return(node, locals, globals) : node.accept(this))
+                .toArray();
 
-       return untail(callable.tail(args));
+        return untail(callable.tail(args));
     }
 
     @Override
@@ -169,8 +177,8 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitAssignment(AssignmentNode assignmentNode) {
-        RefNode ref = (RefNode) assignmentNode.children().get(0);
-        return locals = locals.plus(ref.ref() , assignmentNode.children().get(1).accept(this));
+        VariableNode ref = (VariableNode) assignmentNode.children().get(0);
+        return locals = locals.plus(ref.ref(), assignmentNode.children().get(1).accept(this));
     }
 
     @Override
@@ -212,6 +220,11 @@ class InterpretingVisitor implements NodeVisitor<Object> {
                 }
             }
         }
+        return null;
+    }
+
+    @Override
+    public Object visitSeparator(SeparatorNode separatorNode) {
         return null;
     }
 

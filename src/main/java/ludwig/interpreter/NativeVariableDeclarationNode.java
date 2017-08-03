@@ -1,12 +1,12 @@
 package ludwig.interpreter;
 
-import ludwig.model.LetNode;
+import ludwig.model.VariableDeclarationNode;
 import ludwig.model.LiteralNode;
 
 import java.lang.reflect.Field;
 
-public class NativeLetNode extends LetNode {
-    public NativeLetNode(Field field) {
+public class NativeVariableDeclarationNode extends VariableDeclarationNode {
+    public NativeVariableDeclarationNode(Field field) {
         String name = field.isAnnotationPresent(Name.class) ? field.getAnnotation(Name.class).value() : field.getName();
         setName(name);
 

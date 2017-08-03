@@ -5,4 +5,9 @@ public class ReturnNode extends Node {
     public <T> T accept(NodeVisitor<T> visitor) {
         return visitor.visitReturn(this);
     }
+
+    @Override
+    public String toString() {
+        return "return";
+    }
 }

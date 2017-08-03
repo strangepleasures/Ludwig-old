@@ -17,4 +17,9 @@ public class BoundCallNode extends Node {
     public <T> T accept(NodeVisitor<T> visitor) {
         return visitor.visitBoundCall(this);
     }
+
+    @Override
+    public String toString() {
+        return ""; // TODO
+    }
 }

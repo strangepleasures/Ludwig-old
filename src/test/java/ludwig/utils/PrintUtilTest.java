@@ -16,10 +16,10 @@ public class PrintUtilTest {
         functionNode.parameters().add(parameterNode2);
         BoundCallNode boundCallNode = new BoundCallNode();
         boundCallNode.add(functionNode);
-        RefNode refNode1 = new RefNode(parameterNode2);
-        RefNode refNode2 = new RefNode(parameterNode1);
-        boundCallNode.arguments().put(parameterNode1, refNode1);
-        boundCallNode.arguments().put(parameterNode2, refNode2);
+        VariableNode variableNode1 = new VariableNode(parameterNode2);
+        VariableNode variableNode2 = new VariableNode(parameterNode1);
+        boundCallNode.arguments().put(parameterNode1, variableNode1);
+        boundCallNode.arguments().put(parameterNode2, variableNode2);
         functionNode.add(boundCallNode);
         packageNode.add(functionNode);
 //        assertEquals(

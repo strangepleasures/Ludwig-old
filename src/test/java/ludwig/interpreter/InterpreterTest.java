@@ -24,11 +24,11 @@ public class InterpreterTest {
         functionNode.parameters().add(parameterNode2);
         BoundCallNode boundCallNode = new BoundCallNode();
         FunctionNode minus = (FunctionNode) systemPackage.item("-");
-        boundCallNode.add(new RefNode(minus));
-        RefNode refNode1 = new RefNode(parameterNode1);
-        RefNode refNode2 = new RefNode(parameterNode2);
-        boundCallNode.arguments().put(minus.parameters().get(0), refNode1);
-        boundCallNode.arguments().put(minus.parameters().get(1), refNode2);
+        boundCallNode.add(new VariableNode(minus));
+        VariableNode variableNode1 = new VariableNode(parameterNode1);
+        VariableNode variableNode2 = new VariableNode(parameterNode2);
+        boundCallNode.arguments().put(minus.parameters().get(0), variableNode1);
+        boundCallNode.arguments().put(minus.parameters().get(1), variableNode2);
         functionNode.add(boundCallNode);
 
 
@@ -40,12 +40,13 @@ public class InterpreterTest {
     public void testClosure() {
         LambdaNode lambda = new LambdaNode();
 
-        lambda.parameters().add(new ParameterNode());
+        lambda.add(new ParameterNode());
+        lambda.add(new SeparatorNode());
         FunctionNode plus = (FunctionNode) systemPackage.item("+");
         BoundCallNode bcn = new BoundCallNode();
-        bcn.add(new RefNode(plus));
-        RefNode refNode = new RefNode(lambda.parameters().get(0));
-        bcn.arguments().put(plus.parameters().get(0), refNode);
+        bcn.add(new VariableNode(plus));
+        VariableNode variableNode = new VariableNode((NamedNode) lambda.children().get(0));
+        bcn.arguments().put(plus.parameters().get(0), variableNode);
         bcn.arguments().put(plus.parameters().get(1), LiteralNode.ofValue(3.0));
         lambda.add(bcn);
 

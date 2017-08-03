@@ -38,7 +38,7 @@ public class Workspace {
 
         @Override
         public Problem visitInsertReference(InsertReference insert) {
-            Node ref = new RefNode(node(insert.getRef())).id(insert.getId());
+            Node ref = new VariableNode(node(insert.getRef())).id(insert.getId());
             return place(ref, insert);
         }
     };

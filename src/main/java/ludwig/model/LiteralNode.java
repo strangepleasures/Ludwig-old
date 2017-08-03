@@ -34,4 +34,9 @@ public class LiteralNode extends Node {
     public static LiteralNode ofValue(Object value) {
         return new LiteralNode(NodeUtils.formatLiteral(value), value);
     }
+
+    @Override
+    public String toString() {
+        return text;
+    }
 }

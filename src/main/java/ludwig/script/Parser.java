@@ -77,40 +77,33 @@ public class Parser {
                 }
                 consume(")");
                 consume("(");
-                int level = 1;
-                while (level != 0 && pos < tokens.size()) {
-                    switch (nextToken()) {
-                        case "(":
-                            level++;
-                            break;
-                        case ")":
-                            level--;
-                            break;
-                    }
-                }
+                skip();
                 return node;
             }
             case "=": {
-                LetNode node = new LetNode();
+                VariableDeclarationNode node = new VariableDeclarationNode();
                 node.setName(nextToken());
                 node.id(packageId + ":" + node.id());
-
-                int level = 1;
-                while (level != 0 && pos < tokens.size()) {
-                    switch (nextToken()) {
-                        case "(":
-                            level++;
-                            break;
-                        case ")":
-                            level--;
-                            break;
-                    }
-                }
+                skip();
                 return node;
             }
         }
 
         return null;
+    }
+
+    private void skip() {
+        int level = 1;
+        while (level != 0 && pos < tokens.size()) {
+            switch (nextToken()) {
+                case "(":
+                    level++;
+                    break;
+                case ")":
+                    level--;
+                    break;
+            }
+        }
     }
 
     private void parseBodies(PackageNode packageNode) throws ParserException {
@@ -146,7 +139,7 @@ public class Parser {
                 break;
             }
             case "=": {
-                LetNode node = (LetNode) packageNode.item(nextToken());
+                VariableDeclarationNode node = (VariableDeclarationNode) packageNode.item(nextToken());
                 node.add(parseNode());
                 consume(")");
                 break;
@@ -166,6 +159,7 @@ public class Parser {
             String head = nextToken();
 
             switch (head) {
+                case "ref":
                 case "call":
                 case "if":
                 case "else":
@@ -194,22 +188,17 @@ public class Parser {
                     if (locals.containsKey(name)) {
                         AssignmentNode node = new AssignmentNode();
                         node.id(Change.newId());
-                        RefNode var = new RefNode(locals.get(name));
+                        VariableNode var = new VariableNode(locals.get(name));
                         var.id(Change.newId());
                         node.add(var);
                         node.add(parseNode());
                         return node;
                     } else {
-                        LetNode node = (LetNode) new LetNode().setName(name).id(Change.newId());
+                        VariableDeclarationNode node = (VariableDeclarationNode) new VariableDeclarationNode().setName(name).id(Change.newId());
                         locals.put(name, node);
                         node.add(parseNode());
                         return node;
                     }
-                }
-                case "ref": {
-                    RefNode node = new RefNode(find(nextToken()));
-                    node.id(Change.newId());
-                    return node;
                 }
                 case "λ":
                 case "\\": {
@@ -218,9 +207,10 @@ public class Parser {
                     while (!currentToken().equals(")")) {
                         ParameterNode param = (ParameterNode) new ParameterNode().setName(nextToken()).id(Change.newId());
                         locals.put(param.getName(), param);
-                        node.parameters().add(param);
+                        node.add(param);
                     }
                     consume(")");
+                    node.add(new SeparatorNode().id(Change.newId()));
                     consume("(");
                     while (!currentToken().equals(")")) {
                         node.add(parseNode());
@@ -230,7 +220,7 @@ public class Parser {
 
                 default: {
                     if (locals.containsKey(head)) {
-                        return new RefNode(locals.get(head)).id(Change.newId());
+                        return new VariableNode(locals.get(head)).id(Change.newId());
                     }
 
                     NamedNode headNode = find(head);
@@ -239,7 +229,7 @@ public class Parser {
                             FunctionNode fn = (FunctionNode) headNode;
                             BoundCallNode node = new BoundCallNode();
                             node.id(Change.newId());
-                            RefNode r = new RefNode(fn);
+                            VariableNode r = new VariableNode(fn);
                             r.id(Change.newId());
                             node.add(r);
                             for (ParameterNode param : fn.parameters()) {
@@ -247,7 +237,7 @@ public class Parser {
                             }
                             return node;
                         } else {
-                            return new RefNode(headNode);
+                            return new VariableNode(headNode);
                         }
                     } else if (Lexer.isLiteral(head)) {
                         return new LiteralNode(head).id(Change.newId());
@@ -296,6 +286,8 @@ public class Parser {
 
     private Node createSpecial(String token) {
         switch (token) {
+            case "ref":
+                return new ReferenceNode();
             case "call":
                 return new UnboundCallNode();
             case "if":
