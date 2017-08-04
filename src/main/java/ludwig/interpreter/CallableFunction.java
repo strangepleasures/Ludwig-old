@@ -64,6 +64,6 @@ public class CallableFunction implements Callable {
 
     @Override
     public String toString() {
-        return NodeUtils.toString(function);
+        return "ref " + function;
     }
 }

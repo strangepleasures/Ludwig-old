@@ -2,8 +2,7 @@ package ludwig.ide;
 
 import javafx.util.Callback;
 import ludwig.model.*;
-import ludwig.utils.CodeFormatter;
-import ludwig.utils.CodeLine;
+import ludwig.utils.*;
 import ludwig.workspace.Workspace;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -63,20 +62,17 @@ public class EditorPane extends SplitPane {
         signatureView.minHeightProperty().bind(signatureView.prefHeightProperty());
         signatureView.maxHeightProperty().bind(signatureView.prefHeightProperty());
 
-        ListView<CodeLine> codeView = new ListView<>();
+       TextArea codeView = new TextArea();
         codeView.setPrefHeight(1E6);
         methodPane.getChildren().add(codeView);
 
 
         membersList.getSelectionModel().selectedItemProperty().addListener(observable -> {
             signatureView.getItems().clear();
-            codeView.getItems().clear();
+            codeView.setText("");
 
             Named node = membersList.getSelectionModel().getSelectedItem();
             if (node != null) {
-
-                CodeFormatter codeFormatter = new CodeFormatter();
-
                 if (node instanceof FunctionNode) {
                     FunctionNode fn = (FunctionNode) node;
                     signatureView.getItems().add(fn);
@@ -87,24 +83,14 @@ public class EditorPane extends SplitPane {
                         signatureView.getItems().add((NamedNode) n);
                     }
 
-                    boolean body = false;
-                    for (Node child: fn.children()) {
-                        if (child instanceof SeparatorNode) {
-                            body = true;
-                        } else if (body) {
-                            codeFormatter.child(child, false);
-                        }
-                    }
+                    codeView.setText(PrettyPrinter.print(fn));
                 }
 
                 if (node instanceof AssignmentNode) {
                     AssignmentNode an = (AssignmentNode) node;
                     signatureView.getItems().add((NamedNode) an.children().get(0));
-                    codeFormatter.child(an.children().get(1), false);
+                    codeView.setText(PrettyPrinter.print(an.children().get(1)));
                 }
-
-                List<CodeLine> lines = codeFormatter.getLines();
-                codeView.setItems(FXCollections.observableList(lines));
             }
         });
 

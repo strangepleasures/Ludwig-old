@@ -2,6 +2,7 @@ package ludwig.interpreter;
 
 import ludwig.model.*;
 import ludwig.utils.NodeUtils;
+import ludwig.utils.PrettyPrinter;
 import org.pcollections.HashPMap;
 
 import java.util.Map;
@@ -56,6 +57,6 @@ public class Closure implements Callable {
 
     @Override
     public String toString() {
-        return NodeUtils.toString(lambda);
+        return PrettyPrinter.print(lambda);
     }
 }

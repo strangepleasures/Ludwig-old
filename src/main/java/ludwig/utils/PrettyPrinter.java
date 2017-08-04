@@ -1,14 +1,25 @@
 package ludwig.utils;
 
 import ludwig.model.*;
-import lombok.Getter;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Comparator;
 
-public class CodeFormatter implements NodeVisitor<Void> {
-    @Getter
-    private final List<CodeLine> lines = new ArrayList<>();
+public class PrettyPrinter implements NodeVisitor<Void> {
+    private final StringBuilder builder = new StringBuilder();
+
+    private PrettyPrinter() {}
+
+    public static String print(Node parent) {
+        PrettyPrinter printer = new PrettyPrinter();
+        parent.accept(printer);
+        return printer.toString();
+    }
+
+    @Override
+    public String toString() {
+        return builder.toString();
+    }
+
     private int indentation;
 
     @Override
@@ -23,7 +34,14 @@ public class CodeFormatter implements NodeVisitor<Void> {
 
     @Override
     public Void visitFunction(FunctionNode functionNode) {
-        functionNode.children().forEach(n -> child(n, false));
+        boolean body = false;
+        for (Node child: functionNode.children()) {
+            if (child instanceof SeparatorNode) {
+                body = true;
+            } else if (body) {
+                child(child, false);
+            }
+        }
         return null;
     }
 
@@ -148,10 +166,12 @@ public class CodeFormatter implements NodeVisitor<Void> {
         return null;
     }
 
-    public void child(Node node, boolean inline) {
+    private void child(Node node, boolean inline) {
         indentation++;
         if (!inline) {
-            lines.add(new CodeLine(node));
+            if (builder.length() > 0) {
+                builder.append('\n');
+            }
             for (int i = 1; i < indentation; i++) {
                 print("    ");
             }
@@ -163,16 +183,11 @@ public class CodeFormatter implements NodeVisitor<Void> {
     }
 
     void print(String s) {
-        CodeLine line = lines.get(lines.size() - 1);
-        line.append(s);
+        builder.append(s);
     }
 
     private static int level(Node node) {
-        return node.children().stream().map(CodeFormatter::level).max(Comparator.naturalOrder()).orElse(0) + 1;
+        return node.children().stream().map(PrettyPrinter::level).max(Comparator.naturalOrder()).orElse(0) + 1;
     }
 
-    @Override
-    public String toString() {
-        return lines.stream().map(CodeLine::toString).collect(Collectors.joining("\n"));
-    }
 }

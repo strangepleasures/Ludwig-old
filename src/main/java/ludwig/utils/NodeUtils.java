@@ -7,11 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NodeUtils {
-    public static String toString(Node node) {
-        CodeFormatter visitor = new CodeFormatter();
-        node.accept(visitor);
-        return visitor.toString();
-    }
 
     public static Object parseLiteral(String s) {
         switch (s) {
