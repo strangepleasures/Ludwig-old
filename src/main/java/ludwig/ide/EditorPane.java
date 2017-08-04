@@ -1,17 +1,16 @@
 package ludwig.ide;
 
-import javafx.util.Callback;
-import ludwig.model.*;
-import ludwig.utils.*;
-import ludwig.workspace.Workspace;
 import javafx.beans.binding.Bindings;
-import javafx.collections.FXCollections;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 import lombok.Getter;
 import lombok.Setter;
+import ludwig.model.*;
+import ludwig.utils.NodeUtils;
+import ludwig.utils.PrettyPrinter;
+import ludwig.workspace.Workspace;
 
 import java.util.Comparator;
 import java.util.List;
@@ -62,9 +61,29 @@ public class EditorPane extends SplitPane {
         signatureView.minHeightProperty().bind(signatureView.prefHeightProperty());
         signatureView.maxHeightProperty().bind(signatureView.prefHeightProperty());
 
-       TextArea codeView = new TextArea();
+        TextArea codeView = new TextArea();
         codeView.setPrefHeight(1E6);
         methodPane.getChildren().add(codeView);
+
+        codeView.setOnMouseClicked(e -> {
+            if (e.isControlDown()) {
+                Named node = membersList.getSelectionModel().getSelectedItem();
+                if (node instanceof FunctionNode) {
+                    List<Node> nodes = NodeUtils.expandNode((Node) node);
+                    int index = EditorUtils.tokenIndex(codeView);
+                    for (int i = 0; i < nodes.size(); i++) {
+                        if (nodes.get(i) instanceof SeparatorNode) {
+                            if (index + i < nodes.size()) {
+                                Node selected = nodes.get(index + i);
+                                System.out.println(selected);
+                            }
+                            break;
+                        }
+                    }
+
+                }
+            }
+        });
 
 
         membersList.getSelectionModel().selectedItemProperty().addListener(observable -> {
@@ -76,7 +95,7 @@ public class EditorPane extends SplitPane {
                 if (node instanceof FunctionNode) {
                     FunctionNode fn = (FunctionNode) node;
                     signatureView.getItems().add(fn);
-                    for (Node n: fn.children()) {
+                    for (Node n : fn.children()) {
                         if (n instanceof SeparatorNode) {
                             break;
                         }

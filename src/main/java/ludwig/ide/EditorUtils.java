@@ -1,14 +1,14 @@
 package ludwig.ide;
 
-import java.awt.*;
+import javafx.scene.control.TextArea;
 
 public class EditorUtils {
     public static int tokenIndex(TextArea textArea) {
         String text = textArea.getText();
-        int pos = textArea.getSelectionStart();
+        int pos = textArea.getSelection().getStart();
         int index = -1;
         boolean isToken = false;
-        for (int i = 0; i <= pos; i++) {
+        for (int i = 0; i < Math.max(pos + 1, text.length()); i++) {
             boolean t;
             switch (text.charAt(i)) {
                 case '\n':

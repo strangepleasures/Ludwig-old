@@ -36,7 +36,7 @@ public class NodeUtils {
         return String.valueOf(o);
     }
 
-    private static List<Node> expandNode(Node node) {
+    public static List<Node> expandNode(Node node) {
         List<Node> nodes = new ArrayList<>();
         expandNode(node, true, nodes);
         return nodes;
