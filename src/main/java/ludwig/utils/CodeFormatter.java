@@ -135,11 +135,9 @@ public class CodeFormatter implements NodeVisitor<Void> {
 
     @Override
     public Void visitFor(ForNode forNode) {
-        print("for ");
-        print(forNode.getName());
-        child(forNode.children().get(0), true);
-        for (int i = 1; i < forNode.children().size(); i++) {
-            child(forNode.children().get(i), false);
+        print("for");
+        for (int i = 0; i < forNode.children().size(); i++) {
+            child(forNode.children().get(i), i < 2);
         }
         return null;
     }

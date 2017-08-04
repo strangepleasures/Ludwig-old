@@ -25,7 +25,7 @@ public class Workspace {
                 Parser.parse(reader, this, runtime);
             }
         } catch (Exception e) {
-
+            throw new RuntimeException(e);
         }
     }
 

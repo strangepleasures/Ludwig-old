@@ -1,6 +1,6 @@
 package ludwig.model;
 
-public class ForNode extends NamedNode {
+public class ForNode extends Node {
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {
         return visitor.visitFor(this);
@@ -8,6 +8,6 @@ public class ForNode extends NamedNode {
 
     @Override
     public String toString() {
-        return "for " + getName();
+        return "for";
     }
 }

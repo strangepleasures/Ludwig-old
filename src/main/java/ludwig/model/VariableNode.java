@@ -16,4 +16,9 @@ public class VariableNode extends Node {
     public <T> T accept(NodeVisitor<T> visitor) {
         return visitor.visitVariable(this);
     }
+
+    @Override
+    public String toString() {
+        return ref.toString();
+    }
 }

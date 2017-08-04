@@ -196,19 +196,20 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitFor(ForNode forNode) {
-        for (Object var : (Iterable) forNode.children().get(0).accept(this)) {
-            locals = locals.plus(forNode, var);
+        for (Object var : (Iterable) forNode.children().get(1).accept(this)) {
+            ParameterNode v = (ParameterNode) forNode.children().get(0);
+            locals = locals.plus(v, var);
             for (int i = 1; i < forNode.children().size(); i++) {
                 Object value = forNode.children().get(i).accept(this);
                 if (value instanceof Signal) {
                     if (value instanceof Break) {
                         Break br = (Break) value;
-                        if (br.getLoop() == forNode || br.getLoop() == null) {
+                        if (br.getLoop() == v || br.getLoop() == null) {
                             break;
                         }
                     } else if (value instanceof Continue) {
                         Continue c = (Continue) value;
-                        if (c.getLoop() == forNode || c.getLoop() == null) {
+                        if (c.getLoop() == v || c.getLoop() == null) {
                             break;
                         }
                     }

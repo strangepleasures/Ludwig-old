@@ -149,7 +149,7 @@ public class Parser {
                 break;
             }
             case "=": {
-                ParameterNode node = (ParameterNode) packageNode.item(nextToken());
+                AssignmentNode node = (AssignmentNode) packageNode.item(nextToken());
                 node.add(parseNode());
                 consume(")");
                 break;
@@ -169,7 +169,6 @@ public class Parser {
             String head = nextToken();
 
             switch (head) {
-                case "ref":
                 case "call":
                 case "if":
                 case "else":
@@ -182,15 +181,25 @@ public class Parser {
                     }
                     return node;
                 }
+                case "ref":
+                    ReferenceNode ref = new ReferenceNode();
+                    ref.id(Change.newId());
+                    VariableNode v = new VariableNode((NamedNode) find(nextToken()));
+                    ref.children().add(v);
+                    return ref;
                 case "for": {
                     ForNode node = new ForNode();
-                    node.setName(nextToken());
                     node.id(Change.newId());
-                    locals.put(node.getName(), node);
+                    ParameterNode var = new ParameterNode();
+                    var.setName(nextToken());
+                    var.id(Change.newId());
+                    node.add(var);
+
+                    locals.put(var.getName(), var);
                     while (!currentToken().equals(")")) {
                         node.add(parseNode());
                     }
-                    locals.remove(node.getName());
+                    locals.remove(var.getName());
                     return node;
                 }
                 case "=": {
@@ -236,7 +245,7 @@ public class Parser {
                         return new VariableNode(locals.get(head)).id(Change.newId());
                     }
 
-                    Named headNode = (Named) find(head);
+                    Named headNode = find(head);
                     if (headNode instanceof AssignmentNode) {
                         headNode = (Named) ((AssignmentNode) headNode).children().get(0);
                     }
@@ -304,8 +313,6 @@ public class Parser {
 
     private Node createSpecial(String token) {
         switch (token) {
-            case "ref":
-                return new ReferenceNode();
             case "call":
                 return new UnboundCallNode();
             case "if":
