@@ -1,5 +1,6 @@
 package ludwig.ide;
 
+import javafx.util.Callback;
 import ludwig.model.*;
 import ludwig.utils.CodeFormatter;
 import ludwig.utils.CodeLine;
@@ -31,11 +32,11 @@ public class EditorPane extends SplitPane {
         PackageTreeView packageTree = new PackageTreeView(workspace);
         packageTree.setMinWidth(120);
 
-        ListView<NamedNode> membersList = new ListView<>();
+        ListView<Named> membersList = new ListView<>();
         membersList.setMinWidth(120);
 
         packageTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            fillMembers(membersList, newValue);
+            fillMembers(membersList.getItems(), newValue);
         });
 
         VBox memberListPane = new VBox();
@@ -71,37 +72,67 @@ public class EditorPane extends SplitPane {
             signatureView.getItems().clear();
             codeView.getItems().clear();
 
-            NamedNode node = membersList.getSelectionModel().getSelectedItem();
+            Named node = membersList.getSelectionModel().getSelectedItem();
             if (node != null) {
-                signatureView.getItems().add(node);
+
                 CodeFormatter codeFormatter = new CodeFormatter();
 
                 if (node instanceof FunctionNode) {
-                    FunctionNode functionNode = (FunctionNode) node;
-                    for (Node n: node.children()) {
+                    FunctionNode fn = (FunctionNode) node;
+                    signatureView.getItems().add(fn);
+                    for (Node n: fn.children()) {
                         if (n instanceof SeparatorNode) {
                             break;
                         }
                         signatureView.getItems().add((NamedNode) n);
                     }
+
+                    boolean body = false;
+                    for (Node child: fn.children()) {
+                        if (child instanceof SeparatorNode) {
+                            body = true;
+                        } else if (body) {
+                            codeFormatter.child(child, false);
+                        }
+                    }
                 }
 
-                node.children().forEach(n -> codeFormatter.child(n, false));
+                if (node instanceof AssignmentNode) {
+                    AssignmentNode an = (AssignmentNode) node;
+                    signatureView.getItems().add((NamedNode) an.children().get(0));
+                    codeFormatter.child(an.children().get(1), false);
+                }
+
                 List<CodeLine> lines = codeFormatter.getLines();
                 codeView.setItems(FXCollections.observableList(lines));
             }
         });
 
+        membersList.setCellFactory(new Callback<ListView<Named>, ListCell<Named>>() {
+            @Override
+            public ListCell<Named> call(ListView<Named> listView) {
+                return new ListCell<Named>() {
+                    @Override
+                    protected void updateItem(Named item, boolean empty) {
+                        super.updateItem(item, empty);
+
+                        if (!empty && item != null) {
+                            setText(item.getName());
+                        }
+                    }
+                };
+            }
+        });
 
         getItems().addAll(packageTree, memberListPane, methodPane);
 
-        membersList.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (event.getClickCount() == 2
-                && membersList.getSelectionModel().selectedItemProperty().getValue() != null
-                && anotherPane != null) {
-                anotherPane.insertNode(membersList.getSelectionModel().selectedItemProperty().getValue());
-            }
-        });
+//        membersList.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+//            if (event.getClickCount() == 2
+//                && membersList.getSelectionModel().selectedItemProperty().getValue() != null
+//                && anotherPane != null) {
+//                anotherPane.insertNode(membersList.getSelectionModel().selectedItemProperty().getValue());
+//            }
+//        });
 
 
         ContextMenu codeContextMenu = new ContextMenu();
@@ -112,19 +143,19 @@ public class EditorPane extends SplitPane {
     }
 
 
-    private void fillMembers(ListView<NamedNode> memberList, TreeItem<NamedNode> newValue) {
+    private void fillMembers(List<Named> memberList, TreeItem<NamedNode> newValue) {
         NamedNode node = newValue.getValue();
 
         if (node instanceof PackageNode) {
             PackageNode packageNode = (PackageNode) node;
-            memberList.getItems().clear();
+            memberList.clear();
 
             packageNode.children()
                 .stream()
                 .filter(item -> !(item instanceof PackageNode))
-                .map(item -> (NamedNode) item)
-                .sorted(Comparator.comparing(NamedNode::getName))
-                .forEach(memberList.getItems()::add);
+                .map(item -> (Named) item)
+                .sorted(Comparator.comparing(Named::getName))
+                .forEach(memberList::add);
         }
     }
 

@@ -23,13 +23,6 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     }
 
     @Override
-    public Object visitVariableDeclaration(VariableDeclarationNode variableDeclarationNode) {
-        Object value = variableDeclarationNode.children().get(0).accept(this);
-        locals = locals.plus(variableDeclarationNode, value);
-        return value;
-    }
-
-    @Override
     public Object visitList(ListNode listNode) {
         TreePVector<Object> list = TreePVector.empty();
         for (Node item : listNode.children()) {
@@ -55,7 +48,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitVariable(VariableNode variableNode) {
-        NamedNode node = variableNode.ref();
+        Node node = variableNode.ref();
 
         if (node instanceof NativeFunctionNode) {
             NativeFunctionNode fn = (NativeFunctionNode) node;
@@ -104,9 +97,9 @@ class InterpretingVisitor implements NodeVisitor<Object> {
             return globals.get(node);
         }
 
-        if (node.getClass() == VariableDeclarationNode.class) {
-            Object value = node.children().get(0).accept(this);
-            globals.put(node, value);
+        if (node instanceof AssignmentNode) {
+            Object value = node.children().get(1).accept(this);
+            globals.put((NamedNode) node.children().get(0), value);
             return value;
         }
 
@@ -177,8 +170,11 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitAssignment(AssignmentNode assignmentNode) {
-        VariableNode ref = (VariableNode) assignmentNode.children().get(0);
-        return locals = locals.plus(ref.ref(), assignmentNode.children().get(1).accept(this));
+        Node lhs = assignmentNode.children().get(0);
+        if (lhs instanceof ReferenceNode) {
+            lhs = ((VariableNode) lhs).ref();
+        }
+        return locals = locals.plus((NamedNode) lhs, assignmentNode.children().get(1).accept(this));
     }
 
     @Override

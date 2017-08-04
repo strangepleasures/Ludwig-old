@@ -28,14 +28,6 @@ public class CodeFormatter implements NodeVisitor<Void> {
     }
 
     @Override
-    public Void visitVariableDeclaration(VariableDeclarationNode variableDeclarationNode) {
-        print("= ");
-        print(variableDeclarationNode.getName());
-        child(variableDeclarationNode.children().get(0), true);
-        return null;
-    }
-
-    @Override
     public Void visitLiteral(LiteralNode literalNode) {
         print(literalNode.text());
         return null;
@@ -48,6 +40,7 @@ public class CodeFormatter implements NodeVisitor<Void> {
 
     @Override
     public Void visitParameter(ParameterNode parameterNode) {
+        print(parameterNode.getName());
         return null;
     }
 

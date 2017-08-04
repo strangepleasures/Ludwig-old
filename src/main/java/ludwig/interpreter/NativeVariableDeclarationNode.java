@@ -1,14 +1,15 @@
 package ludwig.interpreter;
 
-import ludwig.model.VariableDeclarationNode;
-import ludwig.model.LiteralNode;
+import ludwig.model.*;
 
 import java.lang.reflect.Field;
 
-public class NativeVariableDeclarationNode extends VariableDeclarationNode {
+public class NativeVariableDeclarationNode extends AssignmentNode {
     public NativeVariableDeclarationNode(Field field) {
         String name = field.isAnnotationPresent(Name.class) ? field.getAnnotation(Name.class).value() : field.getName();
-        setName(name);
+        ParameterNode lhs = new ParameterNode();
+        lhs.setName(name);
+        add(lhs);
 
         String packageName;
         if (field.getDeclaringClass().isAnnotationPresent(Name.class)) {
@@ -17,7 +18,7 @@ public class NativeVariableDeclarationNode extends VariableDeclarationNode {
             packageName = field.getDeclaringClass().getSimpleName().toLowerCase();
         }
 
-        id(packageName + ":" + name);
+        lhs.id(packageName + ":" + name);
 
         try {
             add(LiteralNode.ofValue(field.get(null)));

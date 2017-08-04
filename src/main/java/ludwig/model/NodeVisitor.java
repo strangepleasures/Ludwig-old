@@ -11,8 +11,6 @@ public interface NodeVisitor<T> {
 
     T visitSeparator(SeparatorNode separatorNode);
 
-    T visitVariableDeclaration(VariableDeclarationNode variableDeclarationNode);
-
     T visitAssignment(AssignmentNode assignmentNode);
 
     T visitVariable(VariableNode variableNode);

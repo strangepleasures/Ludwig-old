@@ -1,8 +1,9 @@
 package ludwig.model;
 
-public abstract class NamedNode extends Node {
+public abstract class NamedNode extends Node implements Named {
     private String name;
 
+    @Override
     public String getName() {
         return name;
     }

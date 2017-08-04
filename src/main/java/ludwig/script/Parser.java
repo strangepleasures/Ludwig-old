@@ -1,5 +1,6 @@
 package ludwig.script;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import ludwig.changes.Change;
 import ludwig.model.*;
 import ludwig.workspace.Workspace;
@@ -82,9 +83,11 @@ public class Parser {
                 return node;
             }
             case "=": {
-                VariableDeclarationNode node = new VariableDeclarationNode();
-                node.setName(nextToken());
-                node.id(packageId + ":" + node.id());
+                AssignmentNode node = new AssignmentNode();
+                ParameterNode lhs = new ParameterNode();
+                node.add(lhs);
+                lhs.setName(nextToken());
+                lhs.id(packageId + ":" + node.id());
                 skip();
                 return node;
             }
@@ -127,7 +130,13 @@ public class Parser {
             case "def": {
                 FunctionNode node = (FunctionNode) packageNode.item(nextToken());
                 locals.clear();
-                node.children().forEach(p -> locals.put(((ParameterNode)p).getName(), (ParameterNode)p));
+                for (Node child: node.children()) {
+                    if (child instanceof SeparatorNode) {
+                        break;
+                    }
+                    ParameterNode parameterNode = (ParameterNode) child;
+                    locals.put(parameterNode.getName(), parameterNode);
+                }
                 while (!nextToken().equals(")"));
                 consume("(");
                 while (pos < tokens.size() && !currentToken().equals(")")) {
@@ -140,7 +149,7 @@ public class Parser {
                 break;
             }
             case "=": {
-                VariableDeclarationNode node = (VariableDeclarationNode) packageNode.item(nextToken());
+                ParameterNode node = (ParameterNode) packageNode.item(nextToken());
                 node.add(parseNode());
                 consume(")");
                 break;
@@ -195,8 +204,11 @@ public class Parser {
                         node.add(parseNode());
                         return node;
                     } else {
-                        VariableDeclarationNode node = (VariableDeclarationNode) new VariableDeclarationNode().setName(name).id(Change.newId());
-                        locals.put(name, node);
+                        AssignmentNode node = new AssignmentNode();
+                        ParameterNode lhs = new ParameterNode();
+                        lhs.setName(name).id(Change.newId());
+                        locals.put(name, lhs);
+                        node.add(lhs);
                         node.add(parseNode());
                         return node;
                     }
@@ -224,7 +236,10 @@ public class Parser {
                         return new VariableNode(locals.get(head)).id(Change.newId());
                     }
 
-                    NamedNode headNode = find(head);
+                    Named headNode = (Named) find(head);
+                    if (headNode instanceof AssignmentNode) {
+                        headNode = (Named) ((AssignmentNode) headNode).children().get(0);
+                    }
                     if (headNode != null) {
                         if (headNode instanceof FunctionNode) {
                             FunctionNode fn = (FunctionNode) headNode;
@@ -240,7 +255,7 @@ public class Parser {
                             }
                             return r;
                         } else {
-                            return new VariableNode(headNode);
+                            return new VariableNode((NamedNode) headNode);
                         }
                     } else if (Lexer.isLiteral(head)) {
                         return new LiteralNode(head).id(Change.newId());
@@ -275,7 +290,7 @@ public class Parser {
     }
 
     // TODO: Optimize
-    private NamedNode find(String name) {
+    private Named find(String name) {
         for (ProjectNode project : workspace.getProjects()) {
             for (Node node : project.children()) {
                 PackageNode packageNode = (PackageNode) node;
