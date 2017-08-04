@@ -4,10 +4,10 @@ import ludwig.model.*;
 
 import java.lang.reflect.Field;
 
-public class NativeVariableDeclarationNode extends AssignmentNode {
-    public NativeVariableDeclarationNode(Field field) {
+public class ConstantNode extends AssignmentNode {
+    public ConstantNode(Field field) {
         String name = field.isAnnotationPresent(Name.class) ? field.getAnnotation(Name.class).value() : field.getName();
-        ParameterNode lhs = new ParameterNode();
+        VariableNode lhs = new VariableNode();
         lhs.setName(name);
         add(lhs);
 

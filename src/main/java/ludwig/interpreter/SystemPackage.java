@@ -22,7 +22,7 @@ public class SystemPackage extends PackageNode {
 
         for (Field field : clazz.getDeclaredFields()) {
             if (Modifier.isPublic(field.getModifiers())) {
-                add(new NativeVariableDeclarationNode(field));
+                add(new ConstantNode(field));
             }
         }
     }

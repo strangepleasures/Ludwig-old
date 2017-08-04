@@ -42,13 +42,13 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     }
 
     @Override
-    public Object visitParameter(ParameterNode parameterNode) {
+    public Object visitVariable(VariableNode variableNode) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Object visitVariable(VariableNode variableNode) {
-        Node node = variableNode.ref();
+    public Object visitReference(ReferenceNode referenceNode) {
+        Node node = referenceNode.ref();
 
         if (node instanceof NativeFunctionNode) {
             NativeFunctionNode fn = (NativeFunctionNode) node;
@@ -56,7 +56,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
             Object[] args = new Object[fn.argCount()];
             for (int i = 0; i < args.length; i++) {
-                args[i] = delayed ? new Return(variableNode.children().get(i), locals, globals) : variableNode.children().get(i).accept(this);
+                args[i] = delayed ? new Return(referenceNode.children().get(i), locals, globals) : referenceNode.children().get(i).accept(this);
             }
             return untail(fn.tail(args));
         }
@@ -73,7 +73,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
                         if (child instanceof SeparatorNode) {
                             params = false;
                         } else {
-                            locals = locals.plus((ParameterNode) child, variableNode.children().get(i).accept(this));
+                            locals = locals.plus((VariableNode) child, referenceNode.children().get(i).accept(this));
                         }
                     } else {
                         result = child.accept(this);
@@ -107,8 +107,8 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     }
 
     @Override
-    public Object visitReference(ReferenceNode referenceNode) {
-        FunctionNode node = (FunctionNode) referenceNode.children().get(0).accept(this);
+    public Object visitFunctionReference(FunctionReferenceNode functionReference) {
+        FunctionNode node = (FunctionNode) functionReference.children().get(0).accept(this);
         if (!(node instanceof Callable)) {
             CallableFunction callableFunction = (CallableFunction) globals.get(node);
             if (callableFunction == null) {
@@ -121,12 +121,12 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     }
 
     @Override
-    public Object visitUnboundCall(UnboundCallNode unboundCallNode) {
-        Callable callable = (Callable) unboundCallNode.children().get(0).accept(this);
+    public Object visitCall(CallNode callNode) {
+        Callable callable = (Callable) callNode.children().get(0).accept(this);
 
         boolean delayed = callable.isLazy();
 
-        Object[] args = unboundCallNode.children()
+        Object[] args = callNode.children()
                 .stream()
                 .skip(1)
                 .map(node -> delayed ? new Return(node, locals, globals) : node.accept(this))
@@ -171,8 +171,8 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     @Override
     public Object visitAssignment(AssignmentNode assignmentNode) {
         Node lhs = assignmentNode.children().get(0);
-        if (lhs instanceof ReferenceNode) {
-            lhs = ((VariableNode) lhs).ref();
+        if (lhs instanceof FunctionReferenceNode) {
+            lhs = ((ReferenceNode) lhs).ref();
         }
         return locals = locals.plus((NamedNode) lhs, assignmentNode.children().get(1).accept(this));
     }
@@ -197,7 +197,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     @Override
     public Object visitFor(ForNode forNode) {
         for (Object var : (Iterable) forNode.children().get(1).accept(this)) {
-            ParameterNode v = (ParameterNode) forNode.children().get(0);
+            VariableNode v = (VariableNode) forNode.children().get(0);
             locals = locals.plus(v, var);
             for (int i = 1; i < forNode.children().size(); i++) {
                 Object value = forNode.children().get(i).accept(this);

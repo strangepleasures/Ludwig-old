@@ -1,13 +1,13 @@
 package ludwig.model;
 
-public class UnboundCallNode extends Node {
+public class FunctionReferenceNode extends Node {
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {
-        return visitor.visitUnboundCall(this);
+        return visitor.visitFunctionReference(this);
     }
 
     @Override
     public String toString() {
-        return "call";
+        return "ref";
     }
 }

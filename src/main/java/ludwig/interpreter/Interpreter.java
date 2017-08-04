@@ -13,7 +13,7 @@ public class Interpreter {
     }
 
     public static Object call(FunctionNode functionNode, Object... args) {
-        VariableNode head = new VariableNode(functionNode);
+        ReferenceNode head = new ReferenceNode(functionNode);
 
         for (Object arg : args) {
             head.add(LiteralNode.ofValue(arg));

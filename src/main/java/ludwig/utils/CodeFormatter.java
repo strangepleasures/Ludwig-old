@@ -39,35 +39,35 @@ public class CodeFormatter implements NodeVisitor<Void> {
     }
 
     @Override
-    public Void visitParameter(ParameterNode parameterNode) {
-        print(parameterNode.getName());
-        return null;
-    }
-
-    @Override
     public Void visitVariable(VariableNode variableNode) {
-        print(variableNode.ref().getName());
-        boolean inline = level(variableNode) < 4;
-        variableNode.children().forEach(node -> child(node, inline));
+        print(variableNode.getName());
         return null;
     }
 
     @Override
     public Void visitReference(ReferenceNode referenceNode) {
+        print(referenceNode.ref().getName());
+        boolean inline = level(referenceNode) < 4;
+        referenceNode.children().forEach(node -> child(node, inline));
+        return null;
+    }
+
+    @Override
+    public Void visitFunctionReference(FunctionReferenceNode functionReference) {
         print("ref ");
-        if (!referenceNode.children().isEmpty()) {
-            print(referenceNode.children().get(0).toString());
+        if (!functionReference.children().isEmpty()) {
+            print(functionReference.children().get(0).toString());
         }
         return null;
     }
 
     @Override
-    public Void visitUnboundCall(UnboundCallNode unboundCallNode) {
+    public Void visitCall(CallNode callNode) {
         print("call");
-        child(unboundCallNode.children().get(0), true);
-        boolean inline = level(unboundCallNode) < 4;
-        for (int i = 1; i < unboundCallNode.children().size(); i++) {
-            child(unboundCallNode.children().get(i), inline);
+        child(callNode.children().get(0), true);
+        boolean inline = level(callNode) < 4;
+        for (int i = 1; i < callNode.children().size(); i++) {
+            child(callNode.children().get(i), inline);
         }
 
         return null;

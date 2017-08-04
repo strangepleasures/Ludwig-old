@@ -38,7 +38,7 @@ public class Workspace {
 
         @Override
         public Problem visitInsertReference(InsertReference insert) {
-            Node ref = new VariableNode(node(insert.getRef())).id(insert.getId());
+            Node ref = new ReferenceNode(node(insert.getRef())).id(insert.getId());
             return place(ref, insert);
         }
     };
@@ -51,7 +51,7 @@ public class Workspace {
             Node prev = node(insert.getPrev());
             Node next = node(insert.getNext());
 
-            List items = (node instanceof ParameterNode) ? ((Signature) parent).parameters() : parent.children();
+            List items = parent.children();
 
             if (next == null) {
                 if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {

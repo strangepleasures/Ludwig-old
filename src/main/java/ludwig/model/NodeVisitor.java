@@ -7,13 +7,13 @@ public interface NodeVisitor<T> {
 
     T visitFunction(FunctionNode functionNode);
 
-    T visitParameter(ParameterNode parameterNode);
+    T visitVariable(VariableNode variableNode);
 
     T visitSeparator(SeparatorNode separatorNode);
 
     T visitAssignment(AssignmentNode assignmentNode);
 
-    T visitVariable(VariableNode variableNode);
+    T visitReference(ReferenceNode referenceNode);
 
     T visitList(ListNode listNode);
 
@@ -21,7 +21,7 @@ public interface NodeVisitor<T> {
 
     T visitLambda(LambdaNode lambdaNode);
 
-    T visitUnboundCall(UnboundCallNode unboundCallNode);
+    T visitCall(CallNode callNode);
 
     T visitReturn(ReturnNode returnNode);
 
@@ -31,5 +31,5 @@ public interface NodeVisitor<T> {
 
     T visitFor(ForNode forNode);
 
-    T visitReference(ReferenceNode referenceNode);
+    T visitFunctionReference(FunctionReferenceNode functionReference);
 }

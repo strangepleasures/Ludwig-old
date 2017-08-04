@@ -1,6 +1,5 @@
 package ludwig.script;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import ludwig.changes.Change;
 import ludwig.model.*;
 import ludwig.workspace.Workspace;
@@ -71,7 +70,7 @@ public class Parser {
                 node.setName(nextToken());
                 node.id(packageId + ":" + node.getName());
                 while (!currentToken().equals(")")) {
-                    ParameterNode param = new ParameterNode();
+                    VariableNode param = new VariableNode();
                     param.setName(nextToken());
                     param.id(node.id() + ":" + param.getName());
                     node.add(param);
@@ -84,7 +83,7 @@ public class Parser {
             }
             case "=": {
                 AssignmentNode node = new AssignmentNode();
-                ParameterNode lhs = new ParameterNode();
+                VariableNode lhs = new VariableNode();
                 node.add(lhs);
                 lhs.setName(nextToken());
                 lhs.id(packageId + ":" + node.id());
@@ -134,8 +133,8 @@ public class Parser {
                     if (child instanceof SeparatorNode) {
                         break;
                     }
-                    ParameterNode parameterNode = (ParameterNode) child;
-                    locals.put(parameterNode.getName(), parameterNode);
+                    VariableNode variableNode = (VariableNode) child;
+                    locals.put(variableNode.getName(), variableNode);
                 }
                 while (!nextToken().equals(")"));
                 consume("(");
@@ -182,15 +181,15 @@ public class Parser {
                     return node;
                 }
                 case "ref":
-                    ReferenceNode ref = new ReferenceNode();
+                    FunctionReferenceNode ref = new FunctionReferenceNode();
                     ref.id(Change.newId());
-                    VariableNode v = new VariableNode((NamedNode) find(nextToken()));
+                    ReferenceNode v = new ReferenceNode((NamedNode) find(nextToken()));
                     ref.children().add(v);
                     return ref;
                 case "for": {
                     ForNode node = new ForNode();
                     node.id(Change.newId());
-                    ParameterNode var = new ParameterNode();
+                    VariableNode var = new VariableNode();
                     var.setName(nextToken());
                     var.id(Change.newId());
                     node.add(var);
@@ -207,14 +206,14 @@ public class Parser {
                     if (locals.containsKey(name)) {
                         AssignmentNode node = new AssignmentNode();
                         node.id(Change.newId());
-                        VariableNode var = new VariableNode(locals.get(name));
+                        ReferenceNode var = new ReferenceNode(locals.get(name));
                         var.id(Change.newId());
                         node.add(var);
                         node.add(parseNode());
                         return node;
                     } else {
                         AssignmentNode node = new AssignmentNode();
-                        ParameterNode lhs = new ParameterNode();
+                        VariableNode lhs = new VariableNode();
                         lhs.setName(name).id(Change.newId());
                         locals.put(name, lhs);
                         node.add(lhs);
@@ -227,7 +226,7 @@ public class Parser {
                     LambdaNode node = new LambdaNode();
                     node.id(Change.newId());
                     while (!currentToken().equals(")")) {
-                        ParameterNode param = (ParameterNode) new ParameterNode().setName(nextToken()).id(Change.newId());
+                        VariableNode param = (VariableNode) new VariableNode().setName(nextToken()).id(Change.newId());
                         locals.put(param.getName(), param);
                         node.add(param);
                     }
@@ -242,7 +241,7 @@ public class Parser {
 
                 default: {
                     if (locals.containsKey(head)) {
-                        return new VariableNode(locals.get(head)).id(Change.newId());
+                        return new ReferenceNode(locals.get(head)).id(Change.newId());
                     }
 
                     Named headNode = find(head);
@@ -253,7 +252,7 @@ public class Parser {
                         if (headNode instanceof FunctionNode) {
                             FunctionNode fn = (FunctionNode) headNode;
 
-                            VariableNode r = new VariableNode(fn);
+                            ReferenceNode r = new ReferenceNode(fn);
                             r.id(Change.newId());
 
                             for (Node param : fn.children()) {
@@ -264,7 +263,7 @@ public class Parser {
                             }
                             return r;
                         } else {
-                            return new VariableNode((NamedNode) headNode);
+                            return new ReferenceNode((NamedNode) headNode);
                         }
                     } else if (Lexer.isLiteral(head)) {
                         return new LiteralNode(head).id(Change.newId());
@@ -314,7 +313,7 @@ public class Parser {
     private Node createSpecial(String token) {
         switch (token) {
             case "call":
-                return new UnboundCallNode();
+                return new CallNode();
             case "if":
                 return new IfNode();
             case "else":

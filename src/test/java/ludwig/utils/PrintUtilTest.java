@@ -9,16 +9,16 @@ public class PrintUtilTest {
     public void testToString() {
         Node packageNode = new PackageNode().setName("mypackage");
         FunctionNode functionNode = (FunctionNode) new FunctionNode().setName("foo");
-        ParameterNode parameterNode1 = (ParameterNode) new ParameterNode().setName("x");
-        functionNode.add(parameterNode1);
-        ParameterNode parameterNode2 = new ParameterNode();
-        parameterNode2.setName("y");
-        functionNode.add(parameterNode2);
-        VariableNode head = new VariableNode(functionNode);
-        VariableNode variableNode1 = new VariableNode(parameterNode2);
-        VariableNode variableNode2 = new VariableNode(parameterNode1);
-        head.add(variableNode1);
-        head.add(variableNode2);
+        VariableNode variableNode1 = (VariableNode) new VariableNode().setName("x");
+        functionNode.add(variableNode1);
+        VariableNode variableNode2 = new VariableNode();
+        variableNode2.setName("y");
+        functionNode.add(variableNode2);
+        ReferenceNode head = new ReferenceNode(functionNode);
+        ReferenceNode referenceNode1 = new ReferenceNode(variableNode2);
+        ReferenceNode referenceNode2 = new ReferenceNode(variableNode1);
+        head.add(referenceNode1);
+        head.add(referenceNode2);
         functionNode.add(head);
         packageNode.add(functionNode);
     }

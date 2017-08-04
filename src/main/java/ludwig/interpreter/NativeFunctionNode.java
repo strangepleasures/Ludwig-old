@@ -3,7 +3,6 @@ package ludwig.interpreter;
 import ludwig.model.*;
 
 import java.lang.reflect.*;
-import java.util.stream.Stream;
 
 public class NativeFunctionNode extends FunctionNode implements Callable {
     private final Method method;
@@ -32,7 +31,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
         }
 
         for (Parameter parameter : method.getParameters()) {
-            ParameterNode param = new ParameterNode();
+            VariableNode param = new VariableNode();
             String paramName = parameter.isAnnotationPresent(Name.class) ? parameter.getAnnotation(Name.class).value() : parameter.getName();
             param.setName(paramName)
                 .id(id() + ":" + paramName);

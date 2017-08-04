@@ -16,20 +16,20 @@ public class InterpreterTest {
     public void testSimpleFunction() {
         FunctionNode functionNode = new FunctionNode();
         functionNode.setName("foo");
-        ParameterNode parameterNode1 = new ParameterNode();
-        parameterNode1.setName("x");
-        functionNode.add(parameterNode1);
-        ParameterNode parameterNode2 = new ParameterNode();
-        parameterNode2.setName("y");
-        functionNode.add(parameterNode2);
+        VariableNode variableNode1 = new VariableNode();
+        variableNode1.setName("x");
+        functionNode.add(variableNode1);
+        VariableNode variableNode2 = new VariableNode();
+        variableNode2.setName("y");
+        functionNode.add(variableNode2);
         functionNode.add(new SeparatorNode());
 
         FunctionNode minus = (FunctionNode) systemPackage.item("-");
-        VariableNode head = new VariableNode(minus);
-        VariableNode variableNode1 = new VariableNode(parameterNode1);
-        VariableNode variableNode2 = new VariableNode(parameterNode2);
-        head.add(variableNode1);
-        head.add(variableNode2);
+        ReferenceNode head = new ReferenceNode(minus);
+        ReferenceNode referenceNode1 = new ReferenceNode(variableNode1);
+        ReferenceNode referenceNode2 = new ReferenceNode(variableNode2);
+        head.add(referenceNode1);
+        head.add(referenceNode2);
         functionNode.add(head);
 
 
@@ -41,16 +41,16 @@ public class InterpreterTest {
     public void testClosure() {
         LambdaNode lambda = new LambdaNode();
 
-        lambda.add(new ParameterNode());
+        lambda.add(new VariableNode());
         lambda.add(new SeparatorNode());
         FunctionNode plus = (FunctionNode) systemPackage.item("+");
-        VariableNode head = new VariableNode(plus);
-        VariableNode variableNode = new VariableNode((NamedNode) lambda.children().get(0));
-        head.add(variableNode);
+        ReferenceNode head = new ReferenceNode(plus);
+        ReferenceNode referenceNode = new ReferenceNode((NamedNode) lambda.children().get(0));
+        head.add(referenceNode);
         head.add(LiteralNode.ofValue(3.0));
         lambda.add(head);
 
-        UnboundCallNode ucn = new UnboundCallNode();
+        CallNode ucn = new CallNode();
         ucn.add(lambda);
         ucn.add(LiteralNode.ofValue(2.0));
 
