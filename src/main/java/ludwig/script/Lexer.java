@@ -104,8 +104,12 @@ public class Lexer {
                 tokens.add("(");
                 balance++;
             }
-
-            tokens.add(token);
+            if (token.equals(":")) {
+                tokens.add(")");
+                tokens.add("(");
+            } else {
+                tokens.add(token);
+            }
         }
         builder.setLength(0);
     }
