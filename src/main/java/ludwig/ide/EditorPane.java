@@ -66,15 +66,15 @@ public class EditorPane extends SplitPane {
         methodPane.getChildren().add(codeView);
 
         codeView.setOnMouseClicked(e -> {
-            if (e.isControlDown()) {
+        //    if (e.isControlDown()) {
                 Named node = membersList.getSelectionModel().getSelectedItem();
                 if (node instanceof FunctionNode) {
                     List<Node> nodes = NodeUtils.expandNode((Node) node);
                     int index = EditorUtils.tokenIndex(codeView);
                     for (int i = 0; i < nodes.size(); i++) {
                         if (nodes.get(i) instanceof SeparatorNode) {
-                            if (index + i < nodes.size()) {
-                                Node selected = nodes.get(index + i);
+                            if (index + i + 1 < nodes.size()) {
+                                Node selected = nodes.get(index + i + 1);
                                 System.out.println(selected);
                             }
                             break;
@@ -82,7 +82,7 @@ public class EditorPane extends SplitPane {
                     }
 
                 }
-            }
+    //        }
         });
 
 

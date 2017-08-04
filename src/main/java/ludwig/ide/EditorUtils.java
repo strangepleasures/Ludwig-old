@@ -8,7 +8,7 @@ public class EditorUtils {
         int pos = textArea.getSelection().getStart();
         int index = -1;
         boolean isToken = false;
-        for (int i = 0; i < Math.max(pos + 1, text.length()); i++) {
+        for (int i = 0; i < Math.min(pos + 1, text.length()); i++) {
             boolean t;
             switch (text.charAt(i)) {
                 case '\n':
