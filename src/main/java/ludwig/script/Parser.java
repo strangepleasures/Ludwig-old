@@ -69,15 +69,13 @@ public class Parser {
                 FunctionNode node = new FunctionNode();
                 node.setName(nextToken());
                 node.id(packageId + ":" + node.getName());
-                while (!currentToken().equals(")")) {
+                while (!currentToken().equals(":")) {
                     VariableNode param = new VariableNode();
                     param.setName(nextToken());
                     param.id(node.id() + ":" + param.getName());
                     node.add(param);
                 }
-                consume(")");
-                node.add(new SeparatorNode().id(Change.newId()));
-                consume("(");
+                node.add(parseNode());
                 skip();
                 return node;
             }
@@ -136,8 +134,8 @@ public class Parser {
                     VariableNode variableNode = (VariableNode) child;
                     locals.put(variableNode.getName(), variableNode);
                 }
-                while (!nextToken().equals(")"));
-                consume("(");
+                while (!nextToken().equals(":"));
+
                 while (pos < tokens.size() && !currentToken().equals(")")) {
                     node.add(parseNode());
                 }
@@ -225,19 +223,19 @@ public class Parser {
                 case "\\": {
                     LambdaNode node = new LambdaNode();
                     node.id(Change.newId());
-                    while (!currentToken().equals(")")) {
+                    while (!currentToken().equals(":")) {
                         VariableNode param = (VariableNode) new VariableNode().setName(nextToken()).id(Change.newId());
                         locals.put(param.getName(), param);
                         node.add(param);
                     }
-                    consume(")");
-                    node.add(new SeparatorNode().id(Change.newId()));
-                    consume("(");
+                    node.add(parseNode());
                     while (!currentToken().equals(")")) {
                         node.add(parseNode());
                     }
                     return node;
                 }
+                case ":":
+                    return new SeparatorNode().id(Change.newId());
 
                 default: {
                     if (locals.containsKey(head)) {
