@@ -2,14 +2,17 @@ package ludwig.ide;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import ludwig.changes.Change;
 import ludwig.repository.ChangeRepository;
 import ludwig.repository.LocalChangeRepository;
 import ludwig.workspace.Workspace;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.SplitPane;
-import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +31,8 @@ public class App extends Application {
         launch(args);
     }
 
+    private ActionTarget actionTarget;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         loadSettings();  // TODO: async
@@ -35,13 +40,35 @@ public class App extends Application {
 
         SplitPane splitPane = new SplitPane();
 
-        EditorPane leftEditorPane = new EditorPane(workspace, settings);
-        EditorPane rightEditorPane = new EditorPane(workspace, settings);
+        EditorPane leftEditorPane = new EditorPane(this);
+        EditorPane rightEditorPane = new EditorPane(this);
         leftEditorPane.setAnotherPane(rightEditorPane);
         rightEditorPane.setAnotherPane(leftEditorPane);
         splitPane.getItems().addAll(leftEditorPane, rightEditorPane);
 
-        primaryStage.setScene(new Scene(splitPane, 1024, 768));
+        BorderPane borderPane = new BorderPane();
+        borderPane.setCenter(splitPane);
+
+        Button addButton = new Button("", icon("add"));
+        addButton.setOnAction(e -> {
+            if (actionTarget != null) {
+                actionTarget.add();
+            }
+        });
+        Button deleteButton = new Button("", icon("delete"));
+        deleteButton.setOnAction(e -> {
+            if (actionTarget != null) {
+                actionTarget.delete();
+            }
+        });
+
+        ToolBar topToolBar = new ToolBar(
+            addButton,
+            deleteButton
+        );
+        borderPane.setTop(topToolBar);
+
+        primaryStage.setScene(new Scene(borderPane, 1024, 768));
         primaryStage.show();
     }
 
@@ -79,5 +106,18 @@ public class App extends Application {
                 // TODO:
             }
         }
+    }
+
+    public App setActionTarget(ActionTarget actionTarget) {
+        this.actionTarget = actionTarget;
+        return this;
+    }
+
+    private static ImageView icon(String name) {
+        return new ImageView(new Image(App.class.getResourceAsStream("/icons/" + name + ".png")));
+    }
+
+    public Workspace getWorkspace() {
+        return workspace;
     }
 }

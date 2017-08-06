@@ -2,6 +2,7 @@ package ludwig.ide;
 
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
 import javafx.beans.binding.Bindings;
+import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
@@ -9,17 +10,17 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import lombok.Getter;
 import lombok.Setter;
+import ludwig.changes.Change;
+import ludwig.changes.InsertNode;
 import ludwig.model.*;
 import ludwig.utils.NodeUtils;
 import ludwig.utils.PrettyPrinter;
 import ludwig.workspace.Workspace;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class EditorPane extends SplitPane {
-    private final Workspace workspace;
-    private final Settings settings;
+    private final App app;
     private final ListView<Named> membersList = new ListView<>();
     private final PackageTreeView packageTree;
     private final TextArea codeView = new TextArea();
@@ -28,27 +29,21 @@ public class EditorPane extends SplitPane {
     @Setter
     private EditorPane anotherPane;
 
-    public EditorPane(Workspace workspace, Settings settings) {
-        this.workspace = workspace;
-        this.settings = settings;
+    public EditorPane(App app) {
+        this.app = app;
 
-        packageTree = new PackageTreeView(workspace);
+        packageTree = new PackageTreeView(app.getWorkspace());
         packageTree.setMinWidth(120);
 
 
         membersList.setMinWidth(120);
 
         packageTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            fillMembers(membersList.getItems(), newValue);
+            fillMembers();
         });
 
-        VBox memberListPane = new VBox();
-        ToolBar memberListToolBar = new ToolBar();
-        memberListPane.getChildren().addAll(memberListToolBar, membersList);
-        membersList.setPrefHeight(1E6);
 
-        Button addMethodButton = new Button("+M");
-        memberListToolBar.getItems().add(addMethodButton);
+        membersList.setPrefHeight(1E6);
 
         VBox methodPane = new VBox();
         TableView<NamedNode> signatureView = new TableView<>();
@@ -123,7 +118,32 @@ public class EditorPane extends SplitPane {
             }
         });
 
-        getItems().addAll(packageTree, memberListPane, methodPane);
+        membersList.focusedProperty().addListener((observable, oldValue, newValue) ->     {
+            if (newValue) {
+                app.setActionTarget(new ActionTarget() {
+                    @Override
+                    public void add() {
+                        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+                        if (selectedItem != null && selectedItem.getValue() instanceof PackageNode) {
+                            FunctionNode fn = new FunctionNode();
+                            fn.setName("<New>");
+                            fn.id(Change.newId());
+                            InsertNode change = new InsertNode();
+                            change.setNode(fn);
+                            change.setParent(selectedItem.getValue().id());
+                            change.setPrev(selectedItem.getValue().children().stream().findFirst().map(Node::id).orElse(null));
+                            app.getWorkspace().apply(Collections.singletonList(change));
+                        }
+                    }
+
+                    @Override
+                    public void delete() {
+                    }
+                });
+            }
+        });
+
+        getItems().addAll(packageTree, membersList, methodPane);
 
         membersList.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getClickCount() == 2
@@ -135,7 +155,28 @@ public class EditorPane extends SplitPane {
 
 
         ContextMenu codeContextMenu = new ContextMenu();
+
+        app.getWorkspace().changeListeners().add(this::processChanges);
     }
+
+    private void processChanges(List<Change> changes) {
+        for (Change change: changes) {
+            if (change instanceof InsertNode) {
+                InsertNode insert = (InsertNode) change;
+                Node node = app.getWorkspace().node(insert.getNode().id());
+                if (node instanceof NamedNode) {
+                    NamedNode named = (NamedNode) node;
+
+                    if ("<New>".equals(named.getName())) {
+                        fillMembers();
+                        navigateTo(named);
+                    }
+
+                }
+            }
+        }
+    }
+
 
     private int getPosition(MouseEvent e) {
         TextAreaSkin skin = (TextAreaSkin) codeView.getSkin();
@@ -183,19 +224,19 @@ public class EditorPane extends SplitPane {
     }
 
 
-    private void fillMembers(List<Named> memberList, TreeItem<NamedNode> newValue) {
-        NamedNode node = newValue.getValue();
+    private void fillMembers() {
+        membersList.getItems().clear();
+        NamedNode node = packageTree.getSelectionModel().getSelectedItem().getValue();
 
         if (node instanceof PackageNode) {
             PackageNode packageNode = (PackageNode) node;
-            memberList.clear();
 
             packageNode.children()
                 .stream()
                 .filter(item -> !(item instanceof PackageNode))
                 .map(item -> (Named) item)
                 .sorted(Comparator.comparing(Named::getName))
-                .forEach(memberList::add);
+                .forEach(membersList.getItems()::add);
         }
     }
 

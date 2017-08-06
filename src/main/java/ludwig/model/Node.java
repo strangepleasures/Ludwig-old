@@ -14,6 +14,7 @@ public abstract class Node {
     @JsonIgnore
     private Node parent;
     final List<Node> children = new ArrayList<>();
+    boolean deleted;
 
     public abstract <T> T accept(NodeVisitor<T> visitor);
 
@@ -60,5 +61,13 @@ public abstract class Node {
             n = n.parent;
         }
         return (T) n;
+    }
+
+    public boolean deleted() {
+        return deleted;
+    }
+
+    public void delete() {
+        this.deleted = true;
     }
 }

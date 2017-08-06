@@ -1,0 +1,9 @@
+--- !InsertNode
+node: !ProjectNode
+  id: 1
+  name: My Project
+--- !InsertNode
+node: !PackageNode
+  id: 2
+  name: mypackage
+parent: 1

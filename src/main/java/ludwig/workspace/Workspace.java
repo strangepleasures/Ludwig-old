@@ -8,6 +8,7 @@ import ludwig.script.Parser;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class Workspace {
     public static final int MAX_PROBLEMS = 10;
@@ -15,6 +16,7 @@ public class Workspace {
     private final Map<String, Node> nodes = new HashMap<>();
     private final List<Change> appliedChanges = new ArrayList<>();
     private final List<ProjectNode> projects = new ArrayList<>();
+    private final List<Consumer<List<Change>>> changeListeners = new ArrayList<>();
 
     public Workspace() {
         Runtime runtime = new Runtime();
@@ -29,6 +31,10 @@ public class Workspace {
         }
     }
 
+    public final List<Consumer<List<Change>>> changeListeners() {
+        return changeListeners;
+    }
+
     private final ChangeVisitor<Problem> changeVisitor = new ChangeVisitor<Problem>() {
 
         @Override
@@ -40,6 +46,14 @@ public class Workspace {
         public Problem visitInsertReference(InsertReference insert) {
             Node ref = new ReferenceNode(node(insert.getRef())).id(insert.getId());
             return place(ref, insert);
+        }
+
+        @Override
+        public Problem visitDelete(Delete delete) {
+            Node node = node(delete.getId());
+            node.parent().children().remove(node);
+            node.delete();
+            return null;
         }
     };
 
@@ -94,6 +108,8 @@ public class Workspace {
 
         if (problems.isEmpty()) { // TODO: Make a distinction between warnings and errors
             appliedChanges.addAll(changes);
+
+            changeListeners.forEach(listener -> listener.accept(changes));
         } else {
             restore();
         }
@@ -109,7 +125,7 @@ public class Workspace {
         apply(changes);
     }
 
-    public <T> T node(String id) {
+    public <T extends Node> T node(String id) {
         return id == null ? null : (T) nodes.get(id);
     }
 
