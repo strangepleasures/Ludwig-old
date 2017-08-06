@@ -21,18 +21,17 @@ public class Parser {
     }
 
 
-    public static List<Node> parse(Reader reader, Workspace workspace, ProjectNode projectNode) throws ParserException, IOException, LexerException {
-        return parse(Lexer.read(reader), workspace, projectNode);
+    public void parse(Reader reader, Workspace workspace, ProjectNode projectNode) throws ParserException, IOException, LexerException {
+        parse(Lexer.read(reader), workspace, projectNode);
     }
 
-    public static List<Node> parse(List<String> tokens, Workspace workspace, ProjectNode projectNode) throws ParserException {
-        return new Parser(tokens, workspace).parse(projectNode);
+    public void parse(List<String> tokens, Workspace workspace, ProjectNode projectNode) throws ParserException {
+        new Parser(tokens, workspace).parse(projectNode);
     }
 
-    private List<Node> parse(ProjectNode projectNode) throws ParserException {
+    private void parse(ProjectNode projectNode) throws ParserException {
         PackageNode packageNode = parseSignatures(projectNode);
         parseBodies(packageNode);
-        return null;
     }
 
 
@@ -184,7 +183,7 @@ public class Parser {
                     FunctionReferenceNode ref = new FunctionReferenceNode();
                     ref.id(Change.newId());
                     ReferenceNode v = new ReferenceNode((NamedNode) find(nextToken()));
-                    ref.children().add(v);
+                    ref.add(v);
                     return ref;
                 case "for": {
                     ForNode node = new ForNode();
