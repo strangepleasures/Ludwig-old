@@ -2,12 +2,10 @@ package ludwig.ide;
 
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
 import javafx.beans.binding.Bindings;
-import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 import lombok.Getter;
 import lombok.Setter;
 import ludwig.changes.Change;
@@ -15,13 +13,12 @@ import ludwig.changes.InsertNode;
 import ludwig.model.*;
 import ludwig.utils.NodeUtils;
 import ludwig.utils.PrettyPrinter;
-import ludwig.workspace.Workspace;
 
 import java.util.*;
 
 public class EditorPane extends SplitPane {
     private final App app;
-    private final ListView<Named> membersList = new ListView<>();
+    private final ListView<FunctionNode> membersList = new ListView<>();
     private final PackageTreeView packageTree;
     private final TextArea codeView = new TextArea();
 
@@ -79,46 +76,33 @@ public class EditorPane extends SplitPane {
             signatureView.getItems().clear();
             codeView.setText("");
 
-            Named node = membersList.getSelectionModel().getSelectedItem();
+            FunctionNode node = membersList.getSelectionModel().getSelectedItem();
             if (node != null) {
-                if (node instanceof FunctionNode) {
-                    FunctionNode fn = (FunctionNode) node;
-                    signatureView.getItems().add(fn);
-                    for (Node n : fn.children()) {
-                        if (n instanceof SeparatorNode) {
-                            break;
-                        }
-                        signatureView.getItems().add((NamedNode) n);
+                FunctionNode fn = (FunctionNode) node;
+                signatureView.getItems().add(fn);
+                for (Node n : fn.children()) {
+                    if (n instanceof SeparatorNode) {
+                        break;
                     }
-
-                    codeView.setText(PrettyPrinter.print(fn));
+                    signatureView.getItems().add((NamedNode) n);
                 }
 
-                if (node instanceof AssignmentNode) {
-                    AssignmentNode an = (AssignmentNode) node;
-                    signatureView.getItems().add((NamedNode) an.children().get(0));
-                    codeView.setText(PrettyPrinter.print(an.children().get(1)));
-                }
+                codeView.setText(PrettyPrinter.print(fn));
             }
         });
 
-        membersList.setCellFactory(new Callback<ListView<Named>, ListCell<Named>>() {
+        membersList.setCellFactory(listView -> new ListCell<FunctionNode>() {
             @Override
-            public ListCell<Named> call(ListView<Named> listView) {
-                return new ListCell<Named>() {
-                    @Override
-                    protected void updateItem(Named item, boolean empty) {
-                        super.updateItem(item, empty);
+            protected void updateItem(FunctionNode item, boolean empty) {
+                super.updateItem(item, empty);
 
-                        if (!empty && item != null) {
-                            setText(item.getName());
-                        }
-                    }
-                };
+                if (!empty && item != null) {
+                    setText(item.getName());
+                }
             }
         });
 
-        membersList.focusedProperty().addListener((observable, oldValue, newValue) ->     {
+        membersList.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 app.setActionTarget(new ActionTarget() {
                     @Override
@@ -160,7 +144,7 @@ public class EditorPane extends SplitPane {
     }
 
     private void processChanges(List<Change> changes) {
-        for (Change change: changes) {
+        for (Change change : changes) {
             if (change instanceof InsertNode) {
                 InsertNode insert = (InsertNode) change;
                 Node node = app.getWorkspace().node(insert.getNode().id());
@@ -180,7 +164,7 @@ public class EditorPane extends SplitPane {
 
     private int getPosition(MouseEvent e) {
         TextAreaSkin skin = (TextAreaSkin) codeView.getSkin();
-        return skin.getInsertionPoint(e.getX(),  e.getY());
+        return skin.getInsertionPoint(e.getX(), e.getY());
     }
 
     private void gotoDefinition(ReferenceNode node) {
@@ -201,11 +185,6 @@ public class EditorPane extends SplitPane {
             }
             if (decl != null) {
                 locate(decl);
-            }
-        } else {
-            AssignmentNode an = node.parentOfType(AssignmentNode.class);
-            if (an != null) {
-                membersList.getSelectionModel().select(an);
             }
         }
     }
@@ -234,16 +213,15 @@ public class EditorPane extends SplitPane {
             packageNode.children()
                 .stream()
                 .filter(item -> !(item instanceof PackageNode))
-                .map(item -> (Named) item)
-                .sorted(Comparator.comparing(Named::getName))
+                .map(item -> (FunctionNode) item)
+                .sorted(Comparator.comparing(NamedNode::getName))
                 .forEach(membersList.getItems()::add);
         }
     }
 
 
-
     private Node selectedNode(int pos) {
-        Named node = membersList.getSelectionModel().getSelectedItem();
+        FunctionNode node = membersList.getSelectionModel().getSelectedItem();
         if (node instanceof FunctionNode) {
             List<Node> nodes = NodeUtils.expandNode((Node) node);
             int index = EditorUtils.tokenIndex(codeView.getText(), pos);

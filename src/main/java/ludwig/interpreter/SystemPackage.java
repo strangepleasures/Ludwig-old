@@ -19,12 +19,6 @@ public class SystemPackage extends PackageNode {
                 add(new NativeFunctionNode(method));
             }
         }
-
-        for (Field field : clazz.getDeclaredFields()) {
-            if (Modifier.isPublic(field.getModifiers())) {
-                add(new ConstantNode(field));
-            }
-        }
     }
 }
 

@@ -17,11 +17,19 @@ import java.util.stream.StreamSupport;
 @Name("system")
 public class StdLib {
     @Name("true")
-    public static final boolean TRUE = true;
+    public static boolean _true() {
+      return true;
+    }
+
     @Name("false")
-    public static final boolean FALSE = false;
+    public static boolean _false() {
+        return false;
+    }
+
     @Name("null")
-    public static final Object NULL = null;
+    public static Object _null() {
+        return null;
+    }
 
     public static String str(Object x) {
         return String.valueOf(x);

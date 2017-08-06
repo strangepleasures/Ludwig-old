@@ -1,13 +1,13 @@
 package system
 
+def not x :
+	cond x false true
+
 def all seq predicate :
 	for x seq
 		if not call predicate x
 			return false
 	true
-
-def not x :
-	cond x false true
 
 def xor x y :
 	cond x
@@ -71,11 +71,11 @@ def each seq consumer :
 def println x :
 	print concat list x "\n"
 
-= pi 3.14159265358979323846
+def pi : 3.14159265358979323846
 
-= infinity / 1.0 0.0
+def infinity : / 1.0 0.0
 
-= nan / 0.0 0.0
+def nan : / 0.0 0.0
 
 def map seq f :
 	if is-empty seq

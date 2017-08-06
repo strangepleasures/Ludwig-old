@@ -8,7 +8,8 @@ import org.pcollections.HashTreePMap;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 public class Parser {
     private final List<String> tokens;
@@ -58,30 +59,15 @@ public class Parser {
 
     private void parseSignature(PackageNode packageNode) throws ParserException {
         consume("(");
-        String token  = nextToken();
-        switch (token) {
-            case "def": {
-                FunctionNode fn = (FunctionNode) append(packageNode, new FunctionNode().setName(nextToken()));
-                while (!currentToken().equals(")")) {
-                    append(fn, new VariableNode().setName(nextToken()));
-                }
-                consume(")");
-                append(fn, new SeparatorNode());
-                consume("(");
-                skip();
-                break;
-            }
-            case "=": {
-                AssignmentNode node = append(packageNode, new AssignmentNode());
-                append(node, new VariableNode().setName(nextToken()));
-                skip();
-                break;
-            }
+        consume("def");
+        FunctionNode fn = (FunctionNode) append(packageNode, new FunctionNode().setName(nextToken()));
+        while (!currentToken().equals(")")) {
+            append(fn, new VariableNode().setName(nextToken()));
         }
+        consume(")");
+        append(fn, new SeparatorNode());
+        consume("(");
 
-    }
-
-    private void skip() {
         int level = 1;
         while (level != 0 && pos < tokens.size()) {
             switch (nextToken()) {
@@ -110,35 +96,24 @@ public class Parser {
 
     private void parseBody(PackageNode packageNode) throws ParserException {
         consume("(");
-        String token  = nextToken();
-        switch (token) {
-            case "def": {
-                FunctionNode node = (FunctionNode) packageNode.item(nextToken());
-                locals = HashTreePMap.empty();
-                for (Node child: node.children()) {
-                    if (child instanceof SeparatorNode) {
-                        break;
-                    }
-                    VariableNode variableNode = (VariableNode) child;
-                    locals = locals.plus(variableNode.getName(), variableNode);
-                }
-                while (!nextToken().equals(")"));
-                consume("(");
-                while (pos < tokens.size() && !currentToken().equals(")")) {
-                    parseChild(node);
-                }
+        consume("def");
+        FunctionNode node = (FunctionNode) packageNode.item(nextToken());
+        locals = HashTreePMap.empty();
+        for (Node child : node.children()) {
+            if (child instanceof SeparatorNode) {
+                break;
+            }
+            VariableNode variableNode = (VariableNode) child;
+            locals = locals.plus(variableNode.getName(), variableNode);
+        }
+        while (!nextToken().equals(")")) ;
+        consume("(");
+        while (pos < tokens.size() && !currentToken().equals(")")) {
+            parseChild(node);
+        }
 
-                if (pos < tokens.size()) {
-                    nextToken();
-                }
-                break;
-            }
-            case "=": {
-                AssignmentNode node = (AssignmentNode) packageNode.item(nextToken());
-                parseChild(node);
-                consume(")");
-                break;
-            }
+        if (pos < tokens.size()) {
+            nextToken();
         }
     }
 
@@ -158,7 +133,7 @@ public class Parser {
                 case "if":
                 case "else":
                 case "return":
-                case "list":   {
+                case "list": {
                     Node node = append(parent, createSpecial(head));
                     while (!currentToken().equals(")")) {
                         parseChild(node);
@@ -222,22 +197,15 @@ public class Parser {
                     if (locals.containsKey(head)) {
                         append(parent, new ReferenceNode(locals.get(head)));
                     } else {
-                        Named headNode = find(head);
-                        if (headNode instanceof AssignmentNode) {
-                            headNode = (Named) ((AssignmentNode) headNode).children().get(0);
-                        }
-                        if (headNode != null) {
-                            if (headNode instanceof FunctionNode) {
-                                FunctionNode fn = (FunctionNode) headNode;
-                                ReferenceNode r = append(parent, new ReferenceNode(fn));
-                                for (Node param : fn.children()) {
-                                    if (param instanceof SeparatorNode) {
-                                        break;
-                                    }
-                                    parseChild(r);
+                        NamedNode headNode = find(head);
+                        if (headNode instanceof FunctionNode) {
+                            FunctionNode fn = (FunctionNode) headNode;
+                            ReferenceNode r = append(parent, new ReferenceNode(fn));
+                            for (Node param : fn.children()) {
+                                if (param instanceof SeparatorNode) {
+                                    break;
                                 }
-                            } else {
-                                append(parent, new ReferenceNode((NamedNode) headNode));
+                                parseChild(r);
                             }
                         } else if (Lexer.isLiteral(head)) {
                             append(parent, new LiteralNode(head));
@@ -273,7 +241,7 @@ public class Parser {
     }
 
     // TODO: Optimize
-    private Named find(String name) {
+    private NamedNode find(String name) {
         for (ProjectNode project : workspace.getProjects()) {
             for (Node node : project.children()) {
                 PackageNode packageNode = (PackageNode) node;
