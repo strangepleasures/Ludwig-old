@@ -7,7 +7,6 @@ import lombok.Setter;
 @Setter
 public abstract class Insert extends Change {
     String parent;
-    String param;
     String prev;
     String next;
 }
