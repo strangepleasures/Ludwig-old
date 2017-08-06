@@ -21,11 +21,11 @@ public class Parser {
     }
 
 
-    public void parse(Reader reader, Workspace workspace, ProjectNode projectNode) throws ParserException, IOException, LexerException {
+    public static void parse(Reader reader, Workspace workspace, ProjectNode projectNode) throws ParserException, IOException, LexerException {
         parse(Lexer.read(reader), workspace, projectNode);
     }
 
-    public void parse(List<String> tokens, Workspace workspace, ProjectNode projectNode) throws ParserException {
+    public static void parse(List<String> tokens, Workspace workspace, ProjectNode projectNode) throws ParserException {
         new Parser(tokens, workspace).parse(projectNode);
     }
 
