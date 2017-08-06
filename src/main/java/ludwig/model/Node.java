@@ -49,6 +49,11 @@ public abstract class Node {
         return parent;
     }
 
+    public Node parent(Node parent) {
+        this.parent = parent;
+        return this;
+    }
+
     public <T extends Node> T parentOfType(Class<T> type) {
         Node n = this;
         while (n != null && !type.isInstance(n)) {

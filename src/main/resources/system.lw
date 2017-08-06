@@ -1,5 +1,11 @@
 package system
 
+def all seq predicate :
+	for x seq
+		if not call predicate x
+			return false
+	true
+
 def not x :
 	cond x false true
 
@@ -53,11 +59,7 @@ def any seq predicate :
 			return true
 	false
 
-def all seq predicate :
-	for x seq
-		if not call predicate x
-			return false
-	true
+
 
 def concat seq :
 	join seq "" "" ""

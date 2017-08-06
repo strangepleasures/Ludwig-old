@@ -19,6 +19,7 @@ public class ConstantNode extends AssignmentNode {
         }
 
         lhs.id(packageName + ":" + name);
+        id(lhs.id() + ":=");
 
         try {
             add(LiteralNode.ofValue(field.get(null)));

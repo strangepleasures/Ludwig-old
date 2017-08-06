@@ -1,8 +1,10 @@
 package ludwig.script;
 
-import ludwig.changes.Change;
+import ludwig.changes.*;
 import ludwig.model.*;
 import ludwig.workspace.Workspace;
+import org.pcollections.HashPMap;
+import org.pcollections.HashTreePMap;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -13,7 +15,7 @@ public class Parser {
     private final Workspace workspace;
 
     private int pos;
-    private Map<String, NamedNode> locals = new HashMap<>();
+    private HashPMap<String, NamedNode> locals = HashTreePMap.empty();
 
     private Parser(List<String> tokens, Workspace workspace) {
         this.tokens = tokens;
@@ -34,64 +36,49 @@ public class Parser {
         parseBodies(packageNode);
     }
 
-
-
     private PackageNode parseSignatures(ProjectNode projectNode) throws ParserException {
         consume("(");
         consume("package");
 
         String packageName = nextToken();
         PackageNode packageNode = projectNode.children().stream().map(n -> (PackageNode) n)
-            .filter(n -> n.getName().equals(packageName)).findFirst().orElseGet(() -> {
-                PackageNode pn = new PackageNode();
-                pn.setName(packageName).id(projectNode.id() + ":" + packageName);
-                projectNode.add(pn);
-                return pn;
-            });
+            .filter(n -> n.getName().equals(packageName))
+            .findFirst()
+            .orElseGet(() -> (PackageNode) append(projectNode, new PackageNode().setName(packageName)));
 
         consume(")");
 
 
-
         while (pos < tokens.size()) {
-            packageNode.add(parseSignature(packageNode.id()));
+            parseSignature(packageNode);
         }
 
         return packageNode;
     }
 
-    private Node parseSignature(String packageId) throws ParserException {
+    private void parseSignature(PackageNode packageNode) throws ParserException {
         consume("(");
         String token  = nextToken();
         switch (token) {
             case "def": {
-                FunctionNode node = new FunctionNode();
-                node.setName(nextToken());
-                node.id(packageId + ":" + node.getName());
+                FunctionNode fn = (FunctionNode) append(packageNode, new FunctionNode().setName(nextToken()));
                 while (!currentToken().equals(")")) {
-                    VariableNode param = new VariableNode();
-                    param.setName(nextToken());
-                    param.id(node.id() + ":" + param.getName());
-                    node.add(param);
+                    append(fn, new VariableNode().setName(nextToken()));
                 }
                 consume(")");
-                node.add(new SeparatorNode().id(Change.newId()));
+                append(fn, new SeparatorNode());
                 consume("(");
                 skip();
-                return node;
+                break;
             }
             case "=": {
-                AssignmentNode node = new AssignmentNode();
-                VariableNode lhs = new VariableNode();
-                node.add(lhs);
-                lhs.setName(nextToken());
-                lhs.id(packageId + ":" + node.id());
+                AssignmentNode node = append(packageNode, new AssignmentNode());
+                append(node, new VariableNode().setName(nextToken()));
                 skip();
-                return node;
+                break;
             }
         }
 
-        return null;
     }
 
     private void skip() {
@@ -117,7 +104,7 @@ public class Parser {
         consume(")");
 
         while (pos < tokens.size()) {
-           parseBody(packageNode);
+            parseBody(packageNode);
         }
     }
 
@@ -127,18 +114,18 @@ public class Parser {
         switch (token) {
             case "def": {
                 FunctionNode node = (FunctionNode) packageNode.item(nextToken());
-                locals.clear();
+                locals = HashTreePMap.empty();
                 for (Node child: node.children()) {
                     if (child instanceof SeparatorNode) {
                         break;
                     }
                     VariableNode variableNode = (VariableNode) child;
-                    locals.put(variableNode.getName(), variableNode);
+                    locals = locals.plus(variableNode.getName(), variableNode);
                 }
                 while (!nextToken().equals(")"));
                 consume("(");
                 while (pos < tokens.size() && !currentToken().equals(")")) {
-                    node.add(parseNode());
+                    parseChild(node);
                 }
 
                 if (pos < tokens.size()) {
@@ -148,7 +135,7 @@ public class Parser {
             }
             case "=": {
                 AssignmentNode node = (AssignmentNode) packageNode.item(nextToken());
-                node.add(parseNode());
+                parseChild(node);
                 consume(")");
                 break;
             }
@@ -156,7 +143,7 @@ public class Parser {
     }
 
 
-    private Node parseNode() throws ParserException {
+    private void parseChild(Node parent) throws ParserException {
         int level = 0;
         while (currentToken().equals("(")) {
             level++;
@@ -172,102 +159,91 @@ public class Parser {
                 case "else":
                 case "return":
                 case "list":   {
-                    Node node = createSpecial(head);
-                    node.id(Change.newId());
+                    Node node = append(parent, createSpecial(head));
                     while (!currentToken().equals(")")) {
-                        node.add(parseNode());
+                        parseChild(node);
                     }
-                    return node;
+                    break;
                 }
                 case "ref":
-                    FunctionReferenceNode ref = new FunctionReferenceNode();
-                    ref.id(Change.newId());
-                    ReferenceNode v = new ReferenceNode((NamedNode) find(nextToken()));
-                    ref.add(v);
-                    return ref;
+                    FunctionReferenceNode ref = append(parent, new FunctionReferenceNode());
+                    append(ref, new ReferenceNode((NamedNode) find(nextToken())));
+                    break;
                 case "for": {
-                    ForNode node = new ForNode();
-                    node.id(Change.newId());
+                    ForNode node = append(parent, new ForNode());
                     VariableNode var = new VariableNode();
                     var.setName(nextToken());
-                    var.id(Change.newId());
-                    node.add(var);
+                    append(node, var);
 
-                    locals.put(var.getName(), var);
+                    HashPMap savedLocals = locals;
+                    locals = locals.plus(var.getName(), var);
+
                     while (!currentToken().equals(")")) {
-                        node.add(parseNode());
+                        parseChild(node);
                     }
-                    locals.remove(var.getName());
-                    return node;
+                    locals = savedLocals;
+                    break;
                 }
                 case "=": {
                     String name = nextToken();
                     if (locals.containsKey(name)) {
-                        AssignmentNode node = new AssignmentNode();
-                        node.id(Change.newId());
-                        ReferenceNode var = new ReferenceNode(locals.get(name));
-                        var.id(Change.newId());
-                        node.add(var);
-                        node.add(parseNode());
-                        return node;
+                        AssignmentNode node = append(parent, new AssignmentNode());
+                        append(node, new ReferenceNode(locals.get(name)));
+                        parseChild(node);
+                        break;
                     } else {
-                        AssignmentNode node = new AssignmentNode();
-                        VariableNode lhs = new VariableNode();
-                        lhs.setName(name).id(Change.newId());
-                        locals.put(name, lhs);
-                        node.add(lhs);
-                        node.add(parseNode());
-                        return node;
+                        AssignmentNode node = append(parent, new AssignmentNode());
+                        VariableNode lhs = (VariableNode) append(node, new VariableNode().setName(name));
+                        locals = locals.plus(name, lhs);
+                        parseChild(node);
+                        break;
                     }
                 }
                 case "λ":
                 case "\\": {
-                    LambdaNode node = new LambdaNode();
-                    node.id(Change.newId());
+                    LambdaNode node = append(parent, new LambdaNode());
+                    HashPMap<String, NamedNode> savedLocals = locals;
                     while (!currentToken().equals(")")) {
-                        VariableNode param = (VariableNode) new VariableNode().setName(nextToken()).id(Change.newId());
-                        locals.put(param.getName(), param);
-                        node.add(param);
+                        VariableNode param = (VariableNode) append(node, new VariableNode().setName(nextToken()));
+                        locals = locals.plus(param.getName(), param);
+                        append(node, param);
                     }
                     consume(")");
-                    node.add(new SeparatorNode().id(Change.newId()));
+                    append(node, new SeparatorNode());
                     consume("(");
                     while (!currentToken().equals(")")) {
-                        node.add(parseNode());
+                        parseChild(node);
                     }
-                    return node;
+                    locals = savedLocals;
+                    break;
                 }
 
                 default: {
                     if (locals.containsKey(head)) {
-                        return new ReferenceNode(locals.get(head)).id(Change.newId());
-                    }
-
-                    Named headNode = find(head);
-                    if (headNode instanceof AssignmentNode) {
-                        headNode = (Named) ((AssignmentNode) headNode).children().get(0);
-                    }
-                    if (headNode != null) {
-                        if (headNode instanceof FunctionNode) {
-                            FunctionNode fn = (FunctionNode) headNode;
-
-                            ReferenceNode r = new ReferenceNode(fn);
-                            r.id(Change.newId());
-
-                            for (Node param : fn.children()) {
-                                if (param instanceof SeparatorNode) {
-                                    break;
-                                }
-                                r.add(parseNode());
-                            }
-                            return r;
-                        } else {
-                            return new ReferenceNode((NamedNode) headNode);
-                        }
-                    } else if (Lexer.isLiteral(head)) {
-                        return new LiteralNode(head).id(Change.newId());
+                        append(parent, new ReferenceNode(locals.get(head)));
                     } else {
-                        throw new ParserException("Unknown symbol: " + head);
+                        Named headNode = find(head);
+                        if (headNode instanceof AssignmentNode) {
+                            headNode = (Named) ((AssignmentNode) headNode).children().get(0);
+                        }
+                        if (headNode != null) {
+                            if (headNode instanceof FunctionNode) {
+                                FunctionNode fn = (FunctionNode) headNode;
+                                ReferenceNode r = append(parent, new ReferenceNode(fn));
+                                for (Node param : fn.children()) {
+                                    if (param instanceof SeparatorNode) {
+                                        break;
+                                    }
+                                    parseChild(r);
+                                }
+                            } else {
+                                append(parent, new ReferenceNode((NamedNode) headNode));
+                            }
+                        } else if (Lexer.isLiteral(head)) {
+                            append(parent, new LiteralNode(head));
+                        } else {
+                            throw new ParserException("Unknown symbol: " + head);
+                        }
                     }
                 }
             }
@@ -323,5 +299,33 @@ public class Parser {
                 return new ListNode();
         }
         return null;
+    }
+
+    private <T extends Node> T append(Node parent, T node) {
+        if (node instanceof ReferenceNode) {
+            InsertReference change = new InsertReference();
+            change.setId(Change.newId());
+            node.id(change.getId());
+            change.setParent(parent.id());
+            change.setPrev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id());
+            change.setNext(null);
+            change.setRef(((ReferenceNode) node).ref().id());
+            workspace.apply(Collections.singletonList(change));
+            return workspace.node(change.getId());
+        } else {
+            InsertNode change = new InsertNode();
+            change.setParent(parent.id());
+            change.setPrev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id());
+            change.setNext(null);
+            if (node instanceof NamedNode) {
+                node.id(parent.id() + ":" + ((NamedNode) node).getName());
+            } else {
+                node.id(Change.newId());
+            }
+            change.setNode(node);
+            workspace.apply(Collections.singletonList(change));
+            return workspace.node(node.id());
+        }
+
     }
 }

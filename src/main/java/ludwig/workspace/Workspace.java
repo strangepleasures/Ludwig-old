@@ -18,7 +18,7 @@ public class Workspace {
 
     public Workspace() {
         Runtime runtime = new Runtime();
-        registerProject(runtime);
+        addNode(runtime);
 
         try {
             try (Reader reader = new InputStreamReader(Workspace.class.getResourceAsStream("/system.lw"))) {
@@ -46,6 +46,7 @@ public class Workspace {
     private Problem place(Node node, Insert insert) {
         addNode(node);
         Node parent = node(insert.getParent());
+        node.parent(parent);
 
         if (parent != null) {
             Node prev = node(insert.getPrev());
@@ -55,7 +56,7 @@ public class Workspace {
 
             if (next == null) {
                 if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {
-                    items.add(node);
+                    parent.add(node);
                 }
             } else if (prev == null) {
                 if (!items.isEmpty() && items.get(0) == next) {
@@ -69,6 +70,7 @@ public class Workspace {
                     items.add(nextIndex, next);
                 }
             }
+
         }
         return null;
     }
@@ -108,7 +110,7 @@ public class Workspace {
     }
 
     public <T> T node(String id) {
-        return (T) nodes.get(id);
+        return id == null ? null : (T) nodes.get(id);
     }
 
     public void addNode(Node node) {
@@ -116,32 +118,6 @@ public class Workspace {
         if (node instanceof ProjectNode) {
             projects.add((ProjectNode) node);
         }
-    }
-
-    public void registerProject(ProjectNode projectNode) {
-        addNode(projectNode);
-        for (Node packageNode : projectNode.children()) {
-            registerPackage((PackageNode) packageNode);
-        }
-    }
-
-    public void registerPackage(PackageNode p) {
-        addNode(p);
-        for (Node n : p.children()) {
-            if (n instanceof PackageNode) {
-                registerPackage(p);
-            } else {
-                addNode(n);
-
-                if (n instanceof FunctionNode) {
-                    for (Node child: n.children()) {
-                        if (n instanceof SeparatorNode) {
-                            break;
-                        }
-                        addNode(n);
-                    }
-                }
-            }
-        }
+        node.children().forEach(this::addNode);
     }
 }
