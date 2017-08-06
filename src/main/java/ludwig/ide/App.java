@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import ludwig.changes.Change;
 import ludwig.repository.ChangeRepository;
+import ludwig.repository.LocalChangeRepository;
 import ludwig.workspace.Workspace;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -20,6 +21,7 @@ public class App extends Application {
     private static final File SETTINGS_FILE = new File("./application.yaml");
 
     private Settings settings;
+    private ChangeRepository repository;
     private Workspace workspace = new Workspace();
 
     public static void main(String[] args) {
@@ -68,7 +70,10 @@ public class App extends Application {
     private void loadWorkspace() {
         if (settings.getProject() != null) {
             try {
-                List<Change> changes = ChangeRepository.fetch(settings.getProject());
+                if ("file".equals(settings.getProject().getProtocol())) {
+                    repository = new LocalChangeRepository(new File(settings.getProject().getFile()));
+                }
+                List<Change> changes = repository.pull(null);
                 workspace.apply(changes);
             } catch (IOException e) {
                 // TODO:
