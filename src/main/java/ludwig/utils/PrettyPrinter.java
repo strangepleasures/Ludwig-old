@@ -175,7 +175,7 @@ public class PrettyPrinter implements NodeVisitor<Void> {
             for (int i = 1; i < indentation; i++) {
                 print("    ");
             }
-        } else if (indentation > 1) {
+        } else {
             print(" ");
         }
         node.accept(this);

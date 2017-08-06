@@ -42,4 +42,16 @@ public class PackageTreeView extends TreeView<NamedNode> {
     }
 
 
+    public void select(PackageNode packageNode) {
+        getSelectionModel().select(find(packageNode));
+    }
+
+    public TreeItem<NamedNode> find(NamedNode node) {
+        TreeItem<NamedNode> parentItem = node.parent() == null ? getRoot() : find((NamedNode) node.parent());
+        return parentItem.getChildren()
+            .stream()
+            .filter(i -> i.getValue() == node)
+            .findFirst()
+            .orElse(null);
+    }
 }
