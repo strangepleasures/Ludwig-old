@@ -1,6 +1,6 @@
 package ludwig.changes;
 
-public abstract class Insert extends Change {
+public abstract class Insert<T extends Insert> extends Change<T> {
     String parent;
     String prev;
     String next;
@@ -9,26 +9,26 @@ public abstract class Insert extends Change {
         return parent;
     }
 
-    public Insert setParent(String parent) {
+    public T setParent(String parent) {
         this.parent = parent;
-        return this;
+        return (T) this;
     }
 
     public String getPrev() {
         return prev;
     }
 
-    public Insert setPrev(String prev) {
+    public T setPrev(String prev) {
         this.prev = prev;
-        return this;
+        return (T) this;
     }
 
     public String getNext() {
         return next;
     }
 
-    public Insert setNext(String next) {
+    public T setNext(String next) {
         this.next = next;
-        return this;
+        return (T) this;
     }
 }

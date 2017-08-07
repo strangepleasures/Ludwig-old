@@ -9,7 +9,7 @@ import java.util.UUID;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 @Getter
 @Setter
-public abstract class Change {
+public abstract class Change<T extends Change> {
     public final String changeId = newId();
 
     public abstract <T> T accept(ChangeVisitor<T> visitor);

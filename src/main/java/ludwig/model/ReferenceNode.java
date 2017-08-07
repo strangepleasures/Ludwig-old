@@ -1,7 +1,7 @@
 package ludwig.model;
 
 
-public class ReferenceNode extends Node {
+public class ReferenceNode extends Node<ReferenceNode> {
     private final NamedNode ref;
 
     public ReferenceNode(NamedNode ref) {

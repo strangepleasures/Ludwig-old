@@ -42,7 +42,7 @@ public class NodeUtils {
         return nodes;
     }
 
-    private static void expandNode(Node node, boolean onlyChildren, List<Node> nodes) {
+    private static void expandNode(Node<?> node, boolean onlyChildren, List<Node> nodes) {
         if (!onlyChildren) {
             nodes.add(node);
         }

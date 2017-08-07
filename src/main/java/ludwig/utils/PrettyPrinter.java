@@ -186,7 +186,7 @@ public class PrettyPrinter implements NodeVisitor<Void> {
         builder.append(s);
     }
 
-    private static int level(Node node) {
+    private static int level(Node<?> node) {
         return node.children().stream().map(PrettyPrinter::level).max(Comparator.naturalOrder()).orElse(0) + 1;
     }
 

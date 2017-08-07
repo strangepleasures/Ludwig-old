@@ -96,7 +96,7 @@ public class Workspace {
     public List<Problem> apply(List<Change> changes) {
         List<Problem> problems = new ArrayList<>();
 
-        for (Change change : changes) {
+        for (Change<?> change : changes) {
             Problem problem = change.accept(changeVisitor);
             if (problem != null) {
                 problems.add(problem);
@@ -129,7 +129,7 @@ public class Workspace {
         return id == null ? null : (T) nodes.get(id);
     }
 
-    public void addNode(Node node) {
+    public void addNode(Node<?> node) {
         nodes.put(node.id(), node);
         if (node instanceof ProjectNode) {
             projects.add((ProjectNode) node);

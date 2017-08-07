@@ -1,6 +1,6 @@
 package ludwig.model;
 
-public class LambdaNode extends Node {
+public class LambdaNode extends Node<LambdaNode> {
 
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {

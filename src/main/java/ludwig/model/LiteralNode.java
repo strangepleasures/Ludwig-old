@@ -2,7 +2,7 @@ package ludwig.model;
 
 import ludwig.utils.NodeUtils;
 
-public class LiteralNode extends Node {
+public class LiteralNode extends Node<LiteralNode> {
     private String text;
     private Object value;
 

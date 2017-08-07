@@ -48,7 +48,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitReference(ReferenceNode referenceNode) {
-        Node node = referenceNode.ref();
+        Node<?> node = referenceNode.ref();
 
         if (node instanceof NativeFunctionNode) {
             NativeFunctionNode fn = (NativeFunctionNode) node;

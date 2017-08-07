@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
-public abstract class Node {
+public abstract class Node<T extends Node> {
 
     private String id;
     private String comment;
@@ -22,37 +22,37 @@ public abstract class Node {
         return id;
     }
 
-    public Node id(String id) {
+    public T id(String id) {
         this.id = id;
-        return this;
+        return (T) this;
     }
 
     public String getComment() {
         return comment;
     }
 
-    public Node setComment(String comment) {
+    public T setComment(String comment) {
         this.comment = comment;
-        return this;
+        return (T) this;
     }
 
     public List<Node> children() {
         return children;
     }
 
-    public Node add(Node child) {
+    public T add(Node child) {
         children.add(child);
         child.parent = this;
-        return this;
+        return (T) this;
     }
 
     public Node parent() {
         return parent;
     }
 
-    public Node parent(Node parent) {
+    public T parent(Node parent) {
         this.parent = parent;
-        return this;
+        return (T) this;
     }
 
     public <T extends Node> T parentOfType(Class<T> type) {

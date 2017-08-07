@@ -1,15 +1,15 @@
 package ludwig.model;
 
-public abstract class NamedNode extends Node {
+public abstract class NamedNode<T extends NamedNode> extends Node<T> {
     private String name;
 
     public String getName() {
         return name;
     }
 
-    public NamedNode setName(String name) {
+    public T setName(String name) {
         this.name = name;
-        return this;
+        return (T) this;
     }
 
     @Override

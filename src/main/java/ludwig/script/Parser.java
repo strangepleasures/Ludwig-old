@@ -45,7 +45,7 @@ public class Parser {
         PackageNode packageNode = projectNode.children().stream().map(n -> (PackageNode) n)
             .filter(n -> n.getName().equals(packageName))
             .findFirst()
-            .orElseGet(() -> (PackageNode) append(projectNode, new PackageNode().setName(packageName)));
+            .orElseGet(() -> append(projectNode, new PackageNode().setName(packageName)));
 
         consume(")");
 
@@ -60,7 +60,7 @@ public class Parser {
     private void parseSignature(PackageNode packageNode) throws ParserException {
         consume("(");
         consume("def");
-        FunctionNode fn = (FunctionNode) append(packageNode, new FunctionNode().setName(nextToken()));
+        FunctionNode fn = append(packageNode, new FunctionNode().setName(nextToken()));
         while (!currentToken().equals(")")) {
             append(fn, new VariableNode().setName(nextToken()));
         }
@@ -142,7 +142,7 @@ public class Parser {
                 }
                 case "ref":
                     FunctionReferenceNode ref = append(parent, new FunctionReferenceNode());
-                    append(ref, new ReferenceNode((NamedNode) find(nextToken())));
+                    append(ref, new ReferenceNode(find(nextToken())));
                     break;
                 case "for": {
                     ForNode node = append(parent, new ForNode());
@@ -168,7 +168,7 @@ public class Parser {
                         break;
                     } else {
                         AssignmentNode node = append(parent, new AssignmentNode());
-                        VariableNode lhs = (VariableNode) append(node, new VariableNode().setName(name));
+                        VariableNode lhs = append(node, new VariableNode().setName(name));
                         locals = locals.plus(name, lhs);
                         parseChild(node);
                         break;
@@ -179,7 +179,7 @@ public class Parser {
                     LambdaNode node = append(parent, new LambdaNode());
                     HashPMap<String, NamedNode> savedLocals = locals;
                     while (!currentToken().equals(")")) {
-                        VariableNode param = (VariableNode) append(node, new VariableNode().setName(nextToken()));
+                        VariableNode param = append(node, new VariableNode().setName(nextToken()));
                         locals = locals.plus(param.getName(), param);
                         append(node, param);
                     }
@@ -269,28 +269,26 @@ public class Parser {
         return null;
     }
 
-    private <T extends Node> T append(Node parent, T node) {
+    private <T extends Node> T append(Node<?> parent, T node) {
         if (node instanceof ReferenceNode) {
-            InsertReference change = new InsertReference();
-            change.setId(Change.newId());
-            node.id(change.getId());
-            change.setParent(parent.id());
-            change.setPrev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id());
-            change.setNext(null);
-            change.setRef(((ReferenceNode) node).ref().id());
+            InsertReference change = new InsertReference()
+                .setId(Change.newId())
+                .setParent(parent.id())
+                .setPrev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id())
+                .setNext(null)
+                .setRef(((ReferenceNode) node).ref().id());
             workspace.apply(Collections.singletonList(change));
             return workspace.node(change.getId());
         } else {
-            InsertNode change = new InsertNode();
-            change.setParent(parent.id());
-            change.setPrev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id());
-            change.setNext(null);
             if (node instanceof NamedNode) {
                 node.id(parent.id() + ":" + ((NamedNode) node).getName());
             } else {
                 node.id(Change.newId());
             }
-            change.setNode(node);
+            InsertNode change = new InsertNode()
+                .setNode(node)
+                .setParent(parent.id())
+                .setPrev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id());
             workspace.apply(Collections.singletonList(change));
             return workspace.node(node.id());
         }

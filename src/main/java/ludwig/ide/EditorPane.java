@@ -201,7 +201,7 @@ public class EditorPane extends SplitPane {
         navigateTo(node.ref());
     }
 
-    private void navigateTo(NamedNode node) {
+    private void navigateTo(NamedNode<?> node) {
         packageTree.select(node.parentOfType(PackageNode.class));
         FunctionNode fn = node.parentOfType(FunctionNode.class);
         if (fn != null) {
