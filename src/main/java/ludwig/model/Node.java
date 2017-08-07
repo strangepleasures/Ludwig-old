@@ -3,19 +3,17 @@ package ludwig.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
-public abstract class Node<T extends Node> implements Serializable {
-
+public abstract class Node<T extends Node> {
     private String id;
     private String comment;
     @JsonIgnore
     private Node parent;
-    final List<Node> children = new ArrayList<>();
-    boolean deleted;
+    private final List<Node> children = new ArrayList<>();
+    private boolean deleted;
 
     public abstract <T> T accept(NodeVisitor<T> visitor);
 

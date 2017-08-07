@@ -103,7 +103,7 @@ public class EditorPane extends SplitPane {
             protected void updateItem(FunctionNode item, boolean empty) {
                 super.updateItem(item, empty);
 
-                setText((!empty && item != null) ? item.getName() : "");
+                setText((!empty && item != null) ? item.signature() : "");
             }
         });
 
@@ -270,7 +270,6 @@ public class EditorPane extends SplitPane {
 
 
     private void fillMembers() {
- //       membersList.getItems().clear();
         NamedNode node = packageTree.getSelectionModel().getSelectedItem().getValue();
 
         if (node instanceof PackageNode) {
@@ -279,16 +278,8 @@ public class EditorPane extends SplitPane {
                 .stream()
                 .filter(item -> !(item instanceof PackageNode))
                 .map(item -> (FunctionNode) item)
-                .sorted(Comparator.comparing(NamedNode::getName))
+                .sorted(Comparator.comparing(FunctionNode::signature))
                 .collect(Collectors.toList())));
-//
-//
-//            packageNode.children()
-//                .stream()
-//                .filter(item -> !(item instanceof PackageNode))
-//                .map(item -> (FunctionNode) item)
-//                .sorted(Comparator.comparing(NamedNode::getName))
-//                .forEach(membersList.getItems()::add);
         }
     }
 
