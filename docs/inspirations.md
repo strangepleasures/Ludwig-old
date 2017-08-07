@@ -8,3 +8,4 @@
 - [Moose, a platform for software and data analysis](http://www.moosetechnology.org/)
 - [Optional static typing for Python](https://github.com/python/mypy)
 - [Code is not text! How graph technologies can help us to understand our code better _by Andreas Dewes_](https://www.slideshare.net/japh44/code-is-not-text-how-graph-technologies-can-help-us-to-understand-our-code-better)
+- [Life Beyond the Illusion of Present _by Jonas Boner_](https://www.youtube.com/watch?v=Nhz5jMXS8gE)
