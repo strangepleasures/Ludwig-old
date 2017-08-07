@@ -1,5 +1,6 @@
 package ludwig.ide;
 
+import com.sun.javafx.collections.ObservableListWrapper;
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.*;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 
 public class EditorPane extends SplitPane {
     private final App app;
-    private final ListView<FunctionNode> membersList = new ListView<>();
+    private final ListView<FunctionNode>  membersList = new ListView<>();
     private final PackageTreeView packageTree;
     private final TextArea codeView = new TextArea();
 
@@ -102,9 +103,7 @@ public class EditorPane extends SplitPane {
             protected void updateItem(FunctionNode item, boolean empty) {
                 super.updateItem(item, empty);
 
-                if (!empty && item != null) {
-                    setText(item.getName());
-                }
+                setText((!empty && item != null) ? item.getName() : "");
             }
         });
 
@@ -271,18 +270,25 @@ public class EditorPane extends SplitPane {
 
 
     private void fillMembers() {
-        membersList.getItems().clear();
+ //       membersList.getItems().clear();
         NamedNode node = packageTree.getSelectionModel().getSelectedItem().getValue();
 
         if (node instanceof PackageNode) {
             PackageNode packageNode = (PackageNode) node;
-
-            packageNode.children()
+            membersList.setItems(new ObservableListWrapper<>(packageNode.children()
                 .stream()
                 .filter(item -> !(item instanceof PackageNode))
                 .map(item -> (FunctionNode) item)
                 .sorted(Comparator.comparing(NamedNode::getName))
-                .forEach(membersList.getItems()::add);
+                .collect(Collectors.toList())));
+//
+//
+//            packageNode.children()
+//                .stream()
+//                .filter(item -> !(item instanceof PackageNode))
+//                .map(item -> (FunctionNode) item)
+//                .sorted(Comparator.comparing(NamedNode::getName))
+//                .forEach(membersList.getItems()::add);
         }
     }
 

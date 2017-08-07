@@ -61,3 +61,24 @@ node: !<SeparatorNode>
   comment: null
   children: []
   deleted: false
+--- !<InsertNode>
+changeId: "0daaf277-b2dc-437e-a3c3-3086edc1ac58"
+parent: "2"
+prev: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
+next: null
+node: !<FunctionNode>
+  id: "ad783d5c-355f-415c-b46f-4c7c74c9132f"
+  comment: null
+  children: []
+  deleted: false
+  name: "bar"
+--- !<InsertNode>
+changeId: "2c6e0bb0-086e-4d9c-a6c4-9ca79859870d"
+parent: "ad783d5c-355f-415c-b46f-4c7c74c9132f"
+prev: null
+next: null
+node: !<SeparatorNode>
+  id: "f70e2fb5-9706-4bca-99d9-1b8a8b5ef84e"
+  comment: null
+  children: []
+  deleted: false
