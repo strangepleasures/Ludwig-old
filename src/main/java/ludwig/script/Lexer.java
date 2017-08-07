@@ -15,6 +15,8 @@ public class Lexer {
         this.reader = reader;
     }
 
+
+
     public static List<String> read(Reader reader) throws IOException, LexerException {
         return new Lexer(reader).read();
     }

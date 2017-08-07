@@ -16,6 +16,8 @@
     <orderEntry type="library" name="Gradle: org.reflections:reflections:0.9.11" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.8.9" level="project" />
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.9" level="project" />
+    <orderEntry type="library" name="Gradle: org.controlsfx:controlsfx:8.40.13" level="project" />
+    <orderEntry type="library" name="Gradle: org.controlsfx:openjfx-dialogs:1.0.2" level="project" />
     <orderEntry type="library" name="Gradle: junit:junit:4.12" level="project" />
     <orderEntry type="library" name="Gradle: com.google.guava:guava:20.0" level="project" />
     <orderEntry type="library" name="Gradle: org.javassist:javassist:3.21.0-GA" level="project" />

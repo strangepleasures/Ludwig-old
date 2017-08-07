@@ -31,8 +31,6 @@ public class App extends Application {
         launch(args);
     }
 
-    private ActionTarget actionTarget;
-
     @Override
     public void start(Stage primaryStage) throws Exception {
         loadSettings();  // TODO: async
@@ -48,25 +46,6 @@ public class App extends Application {
 
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(splitPane);
-
-        Button addButton = new Button("", icon("add"));
-        addButton.setOnAction(e -> {
-            if (actionTarget != null) {
-                actionTarget.add();
-            }
-        });
-        Button deleteButton = new Button("", icon("delete"));
-        deleteButton.setOnAction(e -> {
-            if (actionTarget != null) {
-                actionTarget.delete();
-            }
-        });
-
-        ToolBar topToolBar = new ToolBar(
-            addButton,
-            deleteButton
-        );
-        borderPane.setTop(topToolBar);
 
         primaryStage.setScene(new Scene(borderPane, 1024, 768));
         primaryStage.show();
@@ -108,14 +87,7 @@ public class App extends Application {
         }
     }
 
-    public App setActionTarget(ActionTarget actionTarget) {
-        this.actionTarget = actionTarget;
-        return this;
-    }
 
-    private static ImageView icon(String name) {
-        return new ImageView(new Image(App.class.getResourceAsStream("/icons/" + name + ".png")));
-    }
 
     public Workspace getWorkspace() {
         return workspace;

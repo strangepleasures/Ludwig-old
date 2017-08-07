@@ -8,13 +8,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
 import lombok.Setter;
-import ludwig.changes.Change;
-import ludwig.changes.InsertNode;
+import ludwig.changes.*;
 import ludwig.model.*;
+import ludwig.script.Lexer;
+import ludwig.script.LexerException;
 import ludwig.utils.NodeUtils;
 import ludwig.utils.PrettyPrinter;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
+
+import static java.util.Collections.singletonList;
 
 public class EditorPane extends SplitPane {
     private final App app;
@@ -58,7 +63,7 @@ public class EditorPane extends SplitPane {
         signatureView.minHeightProperty().bind(signatureView.prefHeightProperty());
         signatureView.maxHeightProperty().bind(signatureView.prefHeightProperty());
 
-
+        codeView.setEditable(false);
         codeView.setPrefHeight(1E6);
         methodPane.getChildren().add(codeView);
 
@@ -102,43 +107,71 @@ public class EditorPane extends SplitPane {
             }
         });
 
-        membersList.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                app.setActionTarget(new ActionTarget() {
-                    @Override
-                    public void add() {
-                        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
-                        if (selectedItem != null && selectedItem.getValue() instanceof PackageNode) {
-                            FunctionNode fn = new FunctionNode();
-                            fn.setName("<New>");
-                            fn.id(Change.newId());
-                            InsertNode change = new InsertNode();
-                            change.setNode(fn);
-                            change.setParent(selectedItem.getValue().id());
-                            change.setPrev(selectedItem.getValue().children().stream().findFirst().map(Node::id).orElse(null));
-                            app.getWorkspace().apply(Collections.singletonList(change));
-                        }
-                    }
-
-                    @Override
-                    public void delete() {
-                    }
-                });
-            }
-        });
-
         getItems().addAll(packageTree, membersList, methodPane);
 
         membersList.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getClickCount() == 2
                 && membersList.getSelectionModel().selectedItemProperty().getValue() != null
                 && anotherPane != null) {
-                anotherPane.insertNode((NamedNode) membersList.getSelectionModel().selectedItemProperty().getValue());
+                anotherPane.insertNode(membersList.getSelectionModel().selectedItemProperty().getValue());
             }
         });
 
 
-        ContextMenu codeContextMenu = new ContextMenu();
+        MenuItem addFunction = new MenuItem("Add...", Icons.icon("add"));
+        addFunction.setOnAction(e -> {
+            TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+            if (selectedItem != null && selectedItem.getValue() instanceof PackageNode) {
+                PackageNode packageNode = (PackageNode) selectedItem.getValue();
+
+                TextInputDialog dialog = new TextInputDialog();
+                dialog.setTitle("Add a function");
+                dialog.setHeaderText("Enter function signature");
+
+
+                dialog.showAndWait().ifPresent(signature -> {
+                    List<String> parts = Collections.emptyList();
+                    try {
+                        parts = Lexer.read(new StringReader(signature));
+                    } catch (IOException | LexerException t) {
+                    }
+                    if (!parts.isEmpty()) {
+                        List<Change> changes = new ArrayList<>();
+
+                        InsertNode insertFn = (InsertNode) new InsertNode()
+                            .setNode(new FunctionNode().setName(parts.get(0)).id(Change.newId()))
+                            .setParent(packageNode.id())
+                            .setPrev(packageNode.children().isEmpty() ? null : packageNode.children().get(packageNode.children().size() - 1).id());
+
+                        changes.add(insertFn);
+
+                        String prev = null;
+                        for (int i = 1; i < parts.size(); i++) {
+                            String id = Change.newId();
+                            changes.add(new InsertNode()
+                                .setNode(new VariableNode().setName(parts.get(i)).id(id))
+                                .setParent(insertFn.getNode().id())
+                                .setPrev(prev));
+                            prev = id;
+                        }
+                        changes.add(new InsertNode()
+                            .setNode(new SeparatorNode().id(Change.newId()))
+                            .setParent(insertFn.getNode().id())
+                            .setPrev(prev));
+
+                        app.getWorkspace().apply(changes);
+
+                        FunctionNode fn = app.getWorkspace().node(insertFn.getNode().id());
+                        navigateTo(fn);
+                    }
+
+                });
+            }
+        });
+
+        membersList.setContextMenu(new ContextMenu(
+            addFunction
+        ));
 
         app.getWorkspace().changeListeners().add(this::processChanges);
     }
@@ -148,14 +181,11 @@ public class EditorPane extends SplitPane {
             if (change instanceof InsertNode) {
                 InsertNode insert = (InsertNode) change;
                 Node node = app.getWorkspace().node(insert.getNode().id());
-                if (node instanceof NamedNode) {
-                    NamedNode named = (NamedNode) node;
 
-                    if ("<New>".equals(named.getName())) {
-                        fillMembers();
-                        navigateTo(named);
-                    }
-
+                if (node instanceof FunctionNode
+                    && packageTree.getSelectionModel().getSelectedItem() != null
+                    && node.parentOfType(PackageNode.class) == packageTree.getSelectionModel().getSelectedItem().getValue()) {
+                    fillMembers();
                 }
             }
         }

@@ -20,6 +20,8 @@ dependencies {
     compile 'org.reflections:reflections:0.9.11'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.8.9'
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.9'
+    compile 'org.controlsfx:controlsfx:8.40.13'
+    compile 'org.controlsfx:openjfx-dialogs:1.0.2'
 
     compileOnly 'org.projectlombok:lombok:1.16.18'
 
