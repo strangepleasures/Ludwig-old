@@ -23,7 +23,7 @@ public class NodeUtils {
                     try {
                         return Double.parseDouble(s);
                     } catch (NumberFormatException e2) {
-                        return StringEscapeUtils.unescapeJavaScript(s);
+                        return StringEscapeUtils.unescapeJavaScript(s.substring(1, s.length() - 1));
                     }
                 }
         }

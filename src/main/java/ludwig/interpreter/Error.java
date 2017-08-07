@@ -10,4 +10,9 @@ public class Error implements Signal {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        return "Error: " + message;
+    }
 }

@@ -10,3 +10,7 @@ def test-compose :
 			call f 1
 			exp sin 1
 		"Function composition"
+
+def test-range :
+	= r range 0 10
+	assert== size r 10

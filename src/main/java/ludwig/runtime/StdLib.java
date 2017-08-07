@@ -210,7 +210,7 @@ public class StdLib {
         return StreamSupport.stream(it.spliterator(), false).map(String::valueOf).collect(Collectors.joining(delimiter, prefix, suffix));
     }
 
-    public static int size(Iterable<?> it) {
+    public static long size(Iterable<?> it) {
         if (it instanceof Collection) {
             return ((Collection) it).size();
         }
