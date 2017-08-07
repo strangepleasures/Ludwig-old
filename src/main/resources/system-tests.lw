@@ -23,3 +23,18 @@ def test-list :
 	assert== 1 get a 0
 	assert== 2 get a 1
 	assert== 3 get a 2
+
+def test-map :
+	= src list 1 2 3
+	= dst to-list map src λ x : * x x
+	assert==
+		list 1 4 9
+		dst
+
+def test-lazy-sequences :
+	= result null
+	= n 1000000
+	= seq map range 0 + n 1 λ x : x
+	for i seq
+		= result i
+	assert== result n
