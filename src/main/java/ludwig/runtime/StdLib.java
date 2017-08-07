@@ -177,9 +177,9 @@ public class StdLib {
         return result;
     }
 
-    public static Object get(Iterable seq, int n) {
+    public static Object get(Iterable seq, long n) {
         if (seq instanceof List) {
-            return ((List) seq).get(n);
+            return ((List) seq).get((int) n);
         }
         return StreamSupport.stream(seq.spliterator(), false).skip(n - 1).findFirst().get();
     }

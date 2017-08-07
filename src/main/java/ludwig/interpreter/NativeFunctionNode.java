@@ -69,6 +69,10 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
             return ((Number) o).doubleValue();
         }
 
+        if (type == long.class) {
+            return (Long) o;
+        }
+
         if (o instanceof Callable) {
             Callable callable = (Callable) o;
             Method theMethod = functionalMethod(type);

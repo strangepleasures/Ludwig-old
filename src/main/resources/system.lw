@@ -61,6 +61,13 @@ def max seq :
 				y
 				x
 
+def min seq :
+	= result null
+	for x seq
+		if or is-null result < x result
+			= result x
+	result
+
 def any seq predicate :
 	for x seq
 		if call predicate x
