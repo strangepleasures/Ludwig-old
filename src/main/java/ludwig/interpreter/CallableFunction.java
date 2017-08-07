@@ -1,7 +1,6 @@
 package ludwig.interpreter;
 
 import ludwig.model.*;
-import ludwig.utils.NodeUtils;
 import org.pcollections.HashPMap;
 import org.pcollections.HashTreePMap;
 
@@ -45,8 +44,8 @@ public class CallableFunction implements Callable {
 
         Object result = null;
 
-        for (Node node : function.children()) {
-            result = node.accept(visitor);
+        for (int i = argCount + 1; i < function.children().size(); i++) {
+            result = function.children().get(i).accept(visitor);
             if (result instanceof Signal) {
                 break;
             }

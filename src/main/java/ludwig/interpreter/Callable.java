@@ -4,8 +4,8 @@ public interface Callable {
     default Object call(Object... args) {
         Object result = tail(args);
 
-        if (result instanceof Return) {
-            return ((Return) result).get();
+        if (result instanceof Delayed) {
+            return ((Delayed) result).get();
         }
 
         return result;

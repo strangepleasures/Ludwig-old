@@ -66,7 +66,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
         }
 
         if (type == Double.class || type == double.class) {
-            ((Number) o).doubleValue();
+            return ((Number) o).doubleValue();
         }
 
         if (o instanceof Callable) {

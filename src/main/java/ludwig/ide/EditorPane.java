@@ -8,7 +8,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
 import lombok.Setter;
-import ludwig.changes.*;
+import ludwig.changes.Change;
+import ludwig.changes.InsertNode;
+import ludwig.interpreter.*;
 import ludwig.model.*;
 import ludwig.script.Lexer;
 import ludwig.script.LexerException;
@@ -18,8 +20,6 @@ import ludwig.utils.PrettyPrinter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
-
-import static java.util.Collections.singletonList;
 
 public class EditorPane extends SplitPane {
     private final App app;
@@ -128,7 +128,6 @@ public class EditorPane extends SplitPane {
                 dialog.setTitle("Add a function");
                 dialog.setHeaderText("Enter function signature");
 
-
                 dialog.showAndWait().ifPresent(signature -> {
                     List<String> parts = Collections.emptyList();
                     try {
@@ -168,9 +167,45 @@ public class EditorPane extends SplitPane {
                 });
             }
         });
+        MenuItem runMenu = new MenuItem("Run...", Icons.icon("run"));
+        runMenu.setOnAction(e -> {
+            FunctionNode fn = membersList.getSelectionModel().getSelectedItem();
+            if (fn != null) {
+
+                try {
+                    Callable callable = (fn instanceof Callable) ? (Callable) fn : new CallableFunction(fn);
+                    Object result;
+                    if (callable.argCount() > 0) {
+                        TextInputDialog dialog = new TextInputDialog();
+                        dialog.setTitle("Execute function");
+                        dialog.setHeaderText("Enter function arguments");
+                        dialog.setContentText(fn.getName());
+                        Optional<String> params = dialog.showAndWait();
+                        if (params.isPresent()) {
+                            Object[] args = Lexer.read(new StringReader(params.get()))
+                                .stream()
+                                .filter(s -> !s.equals("(") && !s.equals(")"))
+                                .map(NodeUtils::parseLiteral)
+                                .map(x -> callable.isLazy() ? (Delayed<?>) () -> x : x)
+                                .toArray();
+                            result = callable.call(args);
+                        } else {
+                            return;
+                        }
+
+                    } else {
+                        result = callable.call();
+                    }
+                    new Alert(Alert.AlertType.INFORMATION, "Result: " + NodeUtils.formatLiteral(result)).show();
+                } catch (Exception err) {
+                    new Alert(Alert.AlertType.ERROR, "Error: " + err.toString()).show();
+                }
+            }
+        });
 
         membersList.setContextMenu(new ContextMenu(
-            addFunction
+            addFunction,
+            runMenu
         ));
 
         app.getWorkspace().changeListeners().add(this::processChanges);

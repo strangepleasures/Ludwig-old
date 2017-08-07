@@ -1,15 +1,9 @@
 package ludwig.runtime;
 
-import ludwig.interpreter.Lazy;
-import ludwig.interpreter.Description;
-import ludwig.interpreter.Name;
-import org.pcollections.OrderedPSet;
-import org.pcollections.POrderedSet;
-import org.pcollections.PVector;
-import org.pcollections.TreePVector;
+import ludwig.interpreter.*;
+import org.pcollections.*;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -18,7 +12,7 @@ import java.util.stream.StreamSupport;
 public class StdLib {
     @Name("true")
     public static boolean _true() {
-      return true;
+        return true;
     }
 
     @Name("false")
@@ -98,23 +92,30 @@ public class StdLib {
 
     @Name("<=")
     public static boolean ordered(Object x, Object y) {
-        return Objects.equals(x, y)
-                || x instanceof Comparable && y instanceof Comparable && ((Comparable) x).compareTo(y) <= 0;
+        if (Objects.equals(x, y)) {
+            return true;
+        }
+
+        if (x instanceof Double || y instanceof Double) {
+            return ((Number) x).doubleValue() <= ((Number) y).doubleValue();
+        }
+
+        return x instanceof Comparable && x.getClass().isInstance(y) && ((Comparable) x).compareTo(y) <= 0;
     }
 
     @Lazy
-    public static Object and(Supplier<Boolean> x, Supplier<Boolean> y) {
+    public static Object and(Delayed<Boolean> x, Delayed<Boolean> y) {
         return x.get() ? y : false;
     }
 
     @Lazy
-    public static Object or(Supplier<Boolean> x, Supplier<Boolean> y) {
+    public static Object or(Delayed<Boolean> x, Delayed<Boolean> y) {
         return x.get() ? true : y;
     }
 
     @Lazy
-    public static Object cond(Supplier<Boolean> condition, Supplier<?> option1, Supplier<?> option2) {
-        return condition.get() ? option1.get() : option2.get();
+    public static <T> Delayed<T> cond(Delayed<Boolean> condition, Delayed<? extends T> option1, Delayed<? extends T> option2) {
+        return (Delayed<T>) (condition.get() ? option1 : option2);
     }
 
     @Name("is-empty")
@@ -130,9 +131,10 @@ public class StdLib {
         if (seq instanceof List) {
             List<E> list = (List<E>) seq;
             return list.subList(1, list.size());
-        } if (seq instanceof Cons) {
+        }
+        if (seq instanceof Cons) {
             return ((Cons<E>) seq).tail.get();
-        }  else {
+        } else {
             return () -> {
                 Iterator<E> i = seq.iterator();
                 if (i.hasNext()) {
@@ -169,7 +171,7 @@ public class StdLib {
             return (POrderedSet<E>) source;
         }
         POrderedSet<E> result = OrderedPSet.empty();
-        for (E i: source) {
+        for (E i : source) {
             result = result.plus(i);
         }
         return result;
@@ -184,15 +186,16 @@ public class StdLib {
 
 
     @Lazy
-    public static <T> Iterable<T> cons(Supplier<T> head, Supplier<Iterable<T>> tail) {
+    public static <T> Iterable<T> cons(Delayed<T> head, Delayed<Iterable<T>> tail) {
         return new Cons<>(head, tail);
     }
 
     @Lazy
     @Name("lazy-seq")
-    public static <T> Iterable<T> lazySequence(Supplier<Iterable<T>> seq) {
+    public static <T> Iterable<T> lazySequence(Delayed<Iterable<T>> seq) {
         return new Iterable<T>() {
             Iterable<T> inner;
+
             @Override
             public Iterator<T> iterator() {
                 if (inner == null) {
@@ -219,10 +222,10 @@ public class StdLib {
     }
 
     private static class Cons<T> implements Iterable<T> {
-        private final Supplier<T> head;
-        private final Supplier<Iterable<T>>tail;
+        private final Delayed<T> head;
+        private final Delayed<Iterable<T>> tail;
 
-        private Cons(Supplier<T> head, Supplier<Iterable<T>> tail) {
+        private Cons(Delayed<T> head, Delayed<Iterable<T>> tail) {
             this.head = head;
             this.tail = tail;
         }
@@ -233,13 +236,13 @@ public class StdLib {
         }
     }
 
-    private static  class ConsIterator<T> implements Iterator<T> {
-        private Supplier<T> head;
-        private Supplier<Iterable<T>>tail;
+    private static class ConsIterator<T> implements Iterator<T> {
+        private Delayed<T> head;
+        private Delayed<Iterable<T>> tail;
         private boolean first = true;
         private Iterator<T> it;
 
-        private ConsIterator(Supplier<T> head, Supplier<Iterable<T>> tail) {
+        private ConsIterator(Delayed<T> head, Delayed<Iterable<T>> tail) {
             this.head = head;
             this.tail = tail;
         }
