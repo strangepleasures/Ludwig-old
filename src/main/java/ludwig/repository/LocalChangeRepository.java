@@ -6,9 +6,7 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 import ludwig.changes.Change;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +19,10 @@ public class LocalChangeRepository implements ChangeRepository {
 
     @Override
     public void push(List<Change> changes) throws IOException {
-        try (JsonGenerator generator = YamlConfiguration.YAML_FACTORY.createGenerator(file, JsonEncoding.UTF8)) {
-            for (Change change: changes) {
+
+        try (FileOutputStream fos = new FileOutputStream(file, true);
+             JsonGenerator generator = YamlConfiguration.YAML_FACTORY.createGenerator(fos, JsonEncoding.UTF8)) {
+            for (Change change : changes) {
                 YamlConfiguration.OBJECT_MAPPER.writeValue(generator, change);
             }
         }
