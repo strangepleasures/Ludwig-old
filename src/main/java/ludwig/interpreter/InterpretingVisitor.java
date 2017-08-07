@@ -159,7 +159,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     @Override
     public Object visitAssignment(AssignmentNode assignmentNode) {
         Node lhs = assignmentNode.children().get(0);
-        if (lhs instanceof FunctionReferenceNode) {
+        if (lhs instanceof ReferenceNode) {
             lhs = ((ReferenceNode) lhs).ref();
         }
         return locals = locals.plus((NamedNode) lhs, assignmentNode.children().get(1).accept(this));

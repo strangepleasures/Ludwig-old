@@ -13,4 +13,6 @@ def test-compose :
 
 def test-range :
 	= r range 0 10
-	assert== size r 10
+	assert== 10 size r
+
+	assert== 9 max r
