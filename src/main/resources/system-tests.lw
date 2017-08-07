@@ -1,0 +1,12 @@
+package system-tests
+
+def test-assert :
+	assert true "Shouldn't fail"
+
+def test-compose :
+	= f compose ref exp λ x : sin x
+	assert
+		==
+			call f 1
+			exp sin 1
+		"Function composition"

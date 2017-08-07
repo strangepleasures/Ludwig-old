@@ -32,4 +32,6 @@ public interface NodeVisitor<T> {
     T visitFor(ForNode forNode);
 
     T visitFunctionReference(FunctionReferenceNode functionReference);
+
+    T visitThrow(ThrowNode throwNode);
 }

@@ -26,6 +26,9 @@ public class Workspace {
             try (Reader reader = new InputStreamReader(Workspace.class.getResourceAsStream("/system.lw"))) {
                 Parser.parse(reader, this, runtime);
             }
+            try (Reader reader = new InputStreamReader(Workspace.class.getResourceAsStream("/system-tests.lw"))) {
+                Parser.parse(reader, this, runtime);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

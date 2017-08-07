@@ -96,11 +96,16 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitFunctionReference(FunctionReferenceNode functionReference) {
-        FunctionNode node = (FunctionNode) functionReference.children().get(0).accept(this);
+        FunctionNode node = (FunctionNode) ((ReferenceNode) functionReference.children().get(0)).ref();
         if (!(node instanceof Callable)) {
             return new CallableFunction(node);
         }
         return node;
+    }
+
+    @Override
+    public Object visitThrow(ThrowNode throwNode) {
+        return new Error(throwNode.children().get(0).accept(this).toString());
     }
 
     @Override

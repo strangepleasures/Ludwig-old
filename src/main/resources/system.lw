@@ -1,5 +1,9 @@
 package system
 
+def assert condition message :
+	if not condition
+		throw message
+
 def not x :
 	cond x false true
 
