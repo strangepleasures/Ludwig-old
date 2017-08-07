@@ -31,7 +31,7 @@ public class NodeUtils {
 
     public static String formatLiteral(Object o) {
         if (o instanceof String) {
-            return StringEscapeUtils.escapeJavaScript(o.toString());
+            return '"' + StringEscapeUtils.escapeJavaScript(o.toString()) + '"';
         }
         return String.valueOf(o);
     }
