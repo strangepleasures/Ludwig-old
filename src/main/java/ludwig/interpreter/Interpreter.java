@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class Interpreter {
     public static Object eval(Node node, HashPMap<NamedNode, Object> locals, Map<NamedNode, Object> globals) {
-        return node.accept(new InterpretingVisitor(locals, globals));
+        return node.accept(new InterpretingVisitor(locals));
     }
 
     public static Object call(FunctionNode functionNode, Object... args) {

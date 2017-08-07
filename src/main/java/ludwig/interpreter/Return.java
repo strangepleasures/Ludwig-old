@@ -12,15 +12,13 @@ import java.util.function.Supplier;
 public class Return<T> implements Signal, Supplier<T> {
     Node node;
     HashPMap<NamedNode, Object> locals;
-    Map<NamedNode, Object> globals;
 
     public T get() {
         Node n = node;
         HashPMap<NamedNode, Object> l = locals;
-        Map<NamedNode, Object> g = globals;
 
         while (true) {
-            Object r = n.accept(new InterpretingVisitor(l, g));
+            Object r = n.accept(new InterpretingVisitor(l));
             if (r instanceof Return) {
                 Return inner = (Return) r;
                 n = inner.node;

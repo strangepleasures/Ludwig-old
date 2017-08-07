@@ -8,12 +8,10 @@ import java.util.Map;
 
 class InterpretingVisitor implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
-    private Map<NamedNode, Object> globals;
     private boolean doElse;
 
-    InterpretingVisitor(HashPMap<NamedNode, Object> locals, Map<NamedNode, Object> globals) {
+    InterpretingVisitor(HashPMap<NamedNode, Object> locals) {
         this.locals = locals;
-        this.globals = globals;
     }
 
 
@@ -56,7 +54,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
             Object[] args = new Object[fn.argCount()];
             for (int i = 0; i < args.length; i++) {
-                args[i] = delayed ? new Return(referenceNode.children().get(i), locals, globals) : referenceNode.children().get(i).accept(this);
+                args[i] = delayed ? new Return(referenceNode.children().get(i), locals) : referenceNode.children().get(i).accept(this);
             }
             return untail(fn.tail(args));
         }
@@ -93,16 +91,6 @@ class InterpretingVisitor implements NodeVisitor<Object> {
             return locals.get(node);
         }
 
-        if (globals.containsKey(node)) {
-            return globals.get(node);
-        }
-
-        if (node instanceof AssignmentNode) {
-            Object value = node.children().get(1).accept(this);
-            globals.put((NamedNode) node.children().get(0), value);
-            return value;
-        }
-
         return node;
     }
 
@@ -110,12 +98,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     public Object visitFunctionReference(FunctionReferenceNode functionReference) {
         FunctionNode node = (FunctionNode) functionReference.children().get(0).accept(this);
         if (!(node instanceof Callable)) {
-            CallableFunction callableFunction = (CallableFunction) globals.get(node);
-            if (callableFunction == null) {
-                callableFunction = new CallableFunction(node, globals);
-                globals.put(node, callableFunction);
-            }
-            return callableFunction;
+            return new CallableFunction(node);
         }
         return node;
     }
@@ -129,7 +112,7 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         Object[] args = callNode.children()
                 .stream()
                 .skip(1)
-                .map(node -> delayed ? new Return(node, locals, globals) : node.accept(this))
+                .map(node -> delayed ? new Return(node, locals) : node.accept(this))
                 .toArray();
 
         return untail(callable.tail(args));
@@ -137,12 +120,12 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitLambda(LambdaNode lambdaNode) {
-        return new Closure(locals, globals, lambdaNode);
+        return new Closure(locals, lambdaNode);
     }
 
     @Override
     public Object visitReturn(ReturnNode returnNode) {
-        return new Return(returnNode.children().get(0), locals, globals);
+        return new Return(returnNode.children().get(0), locals);
     }
 
     @Override

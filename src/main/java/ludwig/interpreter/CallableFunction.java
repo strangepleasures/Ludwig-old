@@ -9,12 +9,10 @@ import java.util.Map;
 
 public class CallableFunction implements Callable {
     private final FunctionNode function;
-    private final Map<NamedNode, Object> globals;
     private int argCount;
 
-    public CallableFunction(FunctionNode function, Map<NamedNode, Object> globals) {
+    public CallableFunction(FunctionNode function) {
         this.function = function;
-        this.globals = globals;
 
         for (int i = 0; i < function.children().size(); i++) {
             if (function.children().get(i) instanceof SeparatorNode) {
@@ -43,7 +41,7 @@ public class CallableFunction implements Callable {
             env = env.plus((NamedNode) function.children().get(i), args[i]);
         }
 
-        InterpretingVisitor visitor = new InterpretingVisitor(env, globals);
+        InterpretingVisitor visitor = new InterpretingVisitor(env);
 
         Object result = null;
 

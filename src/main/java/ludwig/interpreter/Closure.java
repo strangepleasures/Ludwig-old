@@ -9,13 +9,11 @@ import java.util.Map;
 
 public class Closure implements Callable {
     private final HashPMap<NamedNode, Object> locals;
-    private final Map<NamedNode, Object> globals;
     private final LambdaNode lambda;
     private int argCount;
 
-    public Closure(HashPMap<NamedNode, Object> locals, Map<NamedNode, Object> globals, LambdaNode lambda) {
+    public Closure(HashPMap<NamedNode, Object> locals, LambdaNode lambda) {
         this.locals = locals;
-        this.globals = globals;
         this.lambda = lambda;
 
         for (int i = 0; i < lambda.children().size(); i++) {
@@ -38,7 +36,7 @@ public class Closure implements Callable {
             if (node instanceof VariableNode) {
                 env = env.plus((NamedNode) node, args[i]);
             } else if (node instanceof SeparatorNode) {
-                visitor = new InterpretingVisitor(env, globals);
+                visitor = new InterpretingVisitor(env);
             } else {
                 result = node.accept(visitor);
                 if (result instanceof Signal) {
