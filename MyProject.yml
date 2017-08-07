@@ -7,3 +7,57 @@ node: !PackageNode
   id: 2
   name: mypackage
 parent: 1
+--- !<InsertNode>
+changeId: "fc870967-5de6-4508-973f-ab5135b75ef8"
+parent: "2"
+prev: null
+next: null
+node: !<FunctionNode>
+  id: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
+  comment: null
+  children: []
+  deleted: false
+  name: "foo"
+--- !<InsertNode>
+changeId: "6e72aad5-87c1-4eb4-86bd-49a373f89e5f"
+parent: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
+prev: null
+next: null
+node: !<VariableNode>
+  id: "70d68930-ca9f-41c3-8647-a59e70c82935"
+  comment: null
+  children: []
+  deleted: false
+  name: "x"
+--- !<InsertNode>
+changeId: "631b52a0-2d5c-49f1-8da6-bf86f87f09d1"
+parent: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
+prev: "70d68930-ca9f-41c3-8647-a59e70c82935"
+next: null
+node: !<VariableNode>
+  id: "f36c4498-4252-408b-a484-a98ea323b54d"
+  comment: null
+  children: []
+  deleted: false
+  name: "y"
+--- !<InsertNode>
+changeId: "f888ac7c-4dca-496a-8eb6-957be2ca9adf"
+parent: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
+prev: "f36c4498-4252-408b-a484-a98ea323b54d"
+next: null
+node: !<VariableNode>
+  id: "2249eec4-bd07-4e2e-bc43-43b185996a33"
+  comment: null
+  children: []
+  deleted: false
+  name: "z"
+--- !<InsertNode>
+changeId: "1c736bc2-046a-4a3d-85df-f8cecc9e7e7d"
+parent: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
+prev: "2249eec4-bd07-4e2e-bc43-43b185996a33"
+next: null
+node: !<SeparatorNode>
+  id: "e999f9b5-10cf-4064-a310-0e0443e0f28d"
+  comment: null
+  children: []
+  deleted: false

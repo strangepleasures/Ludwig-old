@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import ludwig.changes.Change;
@@ -16,6 +14,7 @@ import ludwig.workspace.Workspace;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 public class App extends Application {
@@ -81,12 +80,18 @@ public class App extends Application {
                 }
                 List<Change> changes = repository.pull(null);
                 workspace.apply(changes);
+                workspace.changeListeners().add(change -> {
+                    try {
+                        repository.push(Collections.singletonList(change));
+                    } catch (IOException e) {
+
+                    }
+                });
             } catch (IOException e) {
                 // TODO:
             }
         }
     }
-
 
 
     public Workspace getWorkspace() {

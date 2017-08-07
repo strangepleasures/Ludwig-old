@@ -3,11 +3,12 @@ package ludwig.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
-public abstract class Node<T extends Node> {
+public abstract class Node<T extends Node> implements Serializable {
 
     private String id;
     private String comment;

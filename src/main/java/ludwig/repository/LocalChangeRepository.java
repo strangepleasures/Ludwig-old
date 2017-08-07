@@ -19,7 +19,6 @@ public class LocalChangeRepository implements ChangeRepository {
 
     @Override
     public void push(List<Change> changes) throws IOException {
-
         try (FileOutputStream fos = new FileOutputStream(file, true);
              JsonGenerator generator = YamlConfiguration.YAML_FACTORY.createGenerator(fos, JsonEncoding.UTF8)) {
             for (Change change : changes) {

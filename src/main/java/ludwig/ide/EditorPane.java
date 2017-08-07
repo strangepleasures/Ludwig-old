@@ -20,6 +20,7 @@ import ludwig.utils.PrettyPrinter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class EditorPane extends SplitPane {
     private final App app;
@@ -131,13 +132,16 @@ public class EditorPane extends SplitPane {
                 dialog.showAndWait().ifPresent(signature -> {
                     List<String> parts = Collections.emptyList();
                     try {
-                        parts = Lexer.read(new StringReader(signature));
+                        parts = Lexer.read(new StringReader(signature))
+                            .stream()
+                            .filter(s -> !s.equals("(") && !s.equals(")"))
+                            .collect(Collectors.toList());
                     } catch (IOException | LexerException t) {
                     }
                     if (!parts.isEmpty()) {
                         List<Change> changes = new ArrayList<>();
 
-                        InsertNode insertFn = (InsertNode) new InsertNode()
+                        InsertNode insertFn = new InsertNode()
                             .setNode(new FunctionNode().setName(parts.get(0)).id(Change.newId()))
                             .setParent(packageNode.id())
                             .setPrev(packageNode.children().isEmpty() ? null : packageNode.children().get(packageNode.children().size() - 1).id());
@@ -211,17 +215,15 @@ public class EditorPane extends SplitPane {
         app.getWorkspace().changeListeners().add(this::processChanges);
     }
 
-    private void processChanges(List<Change> changes) {
-        for (Change change : changes) {
-            if (change instanceof InsertNode) {
-                InsertNode insert = (InsertNode) change;
-                Node node = app.getWorkspace().node(insert.getNode().id());
+    private void processChanges(Change change) {
+        if (change instanceof InsertNode) {
+            InsertNode insert = (InsertNode) change;
+            Node node = app.getWorkspace().node(insert.getNode().id());
 
-                if (node instanceof FunctionNode
-                    && packageTree.getSelectionModel().getSelectedItem() != null
-                    && node.parentOfType(PackageNode.class) == packageTree.getSelectionModel().getSelectedItem().getValue()) {
-                    fillMembers();
-                }
+            if (node instanceof FunctionNode
+                && packageTree.getSelectionModel().getSelectedItem() != null
+                && node.parentOfType(PackageNode.class) == packageTree.getSelectionModel().getSelectedItem().getValue()) {
+                fillMembers();
             }
         }
     }

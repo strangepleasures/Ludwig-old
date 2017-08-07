@@ -16,7 +16,7 @@ public class Workspace {
     private final Map<String, Node> nodes = new HashMap<>();
     private final List<Change> appliedChanges = new ArrayList<>();
     private final List<ProjectNode> projects = new ArrayList<>();
-    private final List<Consumer<List<Change>>> changeListeners = new ArrayList<>();
+    private final List<Consumer<Change>> changeListeners = new ArrayList<>();
 
     public Workspace() {
         Runtime runtime = new Runtime();
@@ -34,7 +34,7 @@ public class Workspace {
         }
     }
 
-    public final List<Consumer<List<Change>>> changeListeners() {
+    public final List<Consumer<Change>> changeListeners() {
         return changeListeners;
     }
 
@@ -106,13 +106,15 @@ public class Workspace {
                 if (problems.size() == MAX_PROBLEMS) {
                     break;
                 }
+            } else {
+                changeListeners.forEach(listener -> listener.accept(change));
             }
         }
 
         if (problems.isEmpty()) { // TODO: Make a distinction between warnings and errors
             appliedChanges.addAll(changes);
 
-            changeListeners.forEach(listener -> listener.accept(changes));
+
         } else {
             restore();
         }
