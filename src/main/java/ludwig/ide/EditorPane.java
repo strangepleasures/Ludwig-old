@@ -28,6 +28,7 @@ public class EditorPane extends SplitPane {
     private final ListView<FunctionNode>  membersList = new ListView<>();
     private final PackageTreeView packageTree;
     private final TableView<NamedNode> signatureView = new TableView<>();
+    private final ToolBar signatureToolbar;
     private final CheckBox lazyCheckbox = new CheckBox("Lazy");
     private final TextArea codeView = new TextArea();
 
@@ -51,10 +52,6 @@ public class EditorPane extends SplitPane {
 
         membersList.setPrefHeight(1E6);
 
-        VBox methodPane = new VBox();
-
-        methodPane.getChildren().add(signatureView);
-        methodPane.getChildren().add(lazyCheckbox);
 
         TableColumn<NamedNode, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -68,9 +65,26 @@ public class EditorPane extends SplitPane {
         signatureView.minHeightProperty().bind(signatureView.prefHeightProperty());
         signatureView.maxHeightProperty().bind(signatureView.prefHeightProperty());
 
+        Button addParameterButton = new Button("", Icons.icon("add"));
+        addParameterButton.setOnAction(e -> {
+
+        });
+        Button removeParameterButton = new Button("", Icons.icon("delete"));
+        removeParameterButton.setOnAction(e -> {
+
+        });
+        Button moveParameterUpButton = new Button("", Icons.icon("up"));
+        moveParameterUpButton.setOnAction(e -> {
+
+        });
+        Button moveParameterDownButton = new Button("", Icons.icon("down"));
+        moveParameterDownButton.setOnAction(e -> {
+
+        });
+        signatureToolbar = new ToolBar(addParameterButton, removeParameterButton, moveParameterUpButton, moveParameterDownButton);
+
         codeView.setEditable(false);
         codeView.setPrefHeight(1E6);
-        methodPane.getChildren().add(codeView);
 
         codeView.setOnMouseClicked(e -> {
             Node sel = selectedNode(getPosition(e));
@@ -110,7 +124,7 @@ public class EditorPane extends SplitPane {
             }
         });
 
-        getItems().addAll(packageTree, membersList, methodPane);
+        getItems().addAll(packageTree, membersList, new VBox(signatureView, signatureToolbar, lazyCheckbox, codeView));
 
         membersList.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getClickCount() == 2
