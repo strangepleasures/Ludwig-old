@@ -5,8 +5,8 @@ def assert condition message :
 		throw message
 
 def assert== a b :
-	if != a b
-		throw concat list "!= " a " " b
+	assert == a b
+		concat list "!= " a " " b
 
 def not x :
 	cond x false true
