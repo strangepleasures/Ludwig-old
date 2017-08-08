@@ -3,10 +3,14 @@ package ludwig.ide;
 import com.sun.javafx.collections.ObservableListWrapper;
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
 import javafx.beans.binding.Bindings;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.Setter;
 import ludwig.changes.Change;
@@ -18,6 +22,7 @@ import ludwig.script.LexerException;
 import ludwig.utils.NodeUtils;
 import ludwig.utils.PrettyPrinter;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
@@ -42,6 +47,28 @@ public class EditorPane extends SplitPane {
         packageTree = new PackageTreeView(app.getWorkspace());
         packageTree.setMinWidth(120);
 
+        final ContextMenu packageTreeMenu = new ContextMenu();
+        MenuItem openProjectMenuItem = new MenuItem("Open project...", Icons.icon("add"));
+        packageTreeMenu.getItems().addAll(openProjectMenuItem);
+        openProjectMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                FileChooser dialog = new FileChooser();
+                dialog.setTitle("Open Project");
+                File file = dialog.showOpenDialog(new Stage());
+                if(file != null){
+                    app.loadProject(file);
+                }
+            }
+        });
+        packageTree.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.isSecondaryButtonDown()) {
+                    packageTreeMenu.show(packageTree, event.getScreenX(), event.getScreenY());
+                }
+            }
+        });
 
         membersList.setMinWidth(120);
 

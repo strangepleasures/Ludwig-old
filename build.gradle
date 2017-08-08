@@ -3,6 +3,8 @@ version '0.0.1-SNAPSHOT'
 
 apply plugin: 'java'
 
+apply plugin: 'application'
+
 sourceCompatibility = 1.8
 
 compileJava {
@@ -27,3 +29,5 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
 }
+
+mainClassName = "ludwig.ide.App"

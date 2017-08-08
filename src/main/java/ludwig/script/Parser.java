@@ -29,7 +29,7 @@ public class Parser {
     }
 
     public static void parse(List<String> tokens, Workspace workspace, ProjectNode projectNode) throws ParserException {
-        new Parser(tokens, workspace).parse(projectNode);
+     //   new Parser(tokens, workspace).parse(projectNode);
     }
 
     private void parse(ProjectNode projectNode) throws ParserException {

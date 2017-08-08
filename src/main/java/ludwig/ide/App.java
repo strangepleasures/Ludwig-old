@@ -93,6 +93,14 @@ public class App extends Application {
         }
     }
 
+    public void loadProject(File file){
+        try {
+            repository = new LocalChangeRepository(file);
+            List<Change> changes = repository.pull(null);
+            workspace.apply(changes);
+        } catch (IOException e) {
+        }
+    }
 
     public Workspace getWorkspace() {
         return workspace;
