@@ -27,6 +27,8 @@ public class EditorPane extends SplitPane {
     private final App app;
     private final ListView<FunctionNode>  membersList = new ListView<>();
     private final PackageTreeView packageTree;
+    private final TableView<NamedNode> signatureView = new TableView<>();
+    private final CheckBox lazyCheckbox = new CheckBox("Lazy");
     private final TextArea codeView = new TextArea();
 
     @Getter
@@ -50,8 +52,9 @@ public class EditorPane extends SplitPane {
         membersList.setPrefHeight(1E6);
 
         VBox methodPane = new VBox();
-        TableView<NamedNode> signatureView = new TableView<>();
+
         methodPane.getChildren().add(signatureView);
+        methodPane.getChildren().add(lazyCheckbox);
 
         TableColumn<NamedNode, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -83,9 +86,8 @@ public class EditorPane extends SplitPane {
             signatureView.getItems().clear();
             codeView.setText("");
 
-            FunctionNode node = membersList.getSelectionModel().getSelectedItem();
-            if (node != null) {
-                FunctionNode fn = (FunctionNode) node;
+            FunctionNode fn = membersList.getSelectionModel().getSelectedItem();
+            if (fn != null) {
                 signatureView.getItems().add(fn);
                 for (Node n : fn.children()) {
                     if (n instanceof SeparatorNode) {
@@ -93,6 +95,7 @@ public class EditorPane extends SplitPane {
                     }
                     signatureView.getItems().add((NamedNode) n);
                 }
+                lazyCheckbox.setSelected(fn.isLazy());
 
                 codeView.setText(PrettyPrinter.print(fn));
             }
