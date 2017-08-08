@@ -54,18 +54,14 @@ public class EditorPane extends SplitPane {
                 app.loadProject(file);
             }
         });
-        packageTree.setOnMousePressed(event -> {
-            if (event.isSecondaryButtonDown()) {
-                packageTreeMenu.show(packageTree, event.getScreenX(), event.getScreenY());
-            }
-        });
+
+        packageTree.setContextMenu(packageTreeMenu);
 
         membersList.setMinWidth(120);
 
         packageTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             fillMembers();
         });
-
 
         membersList.setPrefHeight(1E6);
 
