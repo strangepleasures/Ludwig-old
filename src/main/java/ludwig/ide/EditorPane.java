@@ -2,9 +2,6 @@ package ludwig.ide;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
-import javafx.beans.binding.Bindings;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -23,9 +20,7 @@ import ludwig.script.LexerException;
 import ludwig.utils.NodeUtils;
 import ludwig.utils.PrettyPrinter;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,7 +50,7 @@ public class EditorPane extends SplitPane {
             FileChooser dialog = new FileChooser();
             dialog.setTitle("Open Project");
             File file = dialog.showOpenDialog(new Stage());
-            if(file != null){
+            if (file != null) {
                 app.loadProject(file);
             }
         });
@@ -257,16 +252,7 @@ public class EditorPane extends SplitPane {
     }
 
     private void processChanges(Change change) {
-        if (change instanceof InsertNode) {
-            InsertNode insert = (InsertNode) change;
-            Node node = app.getWorkspace().node(insert.getNode().id());
-
-            if (node instanceof FunctionNode
-                && packageTree.getSelectionModel().getSelectedItem() != null
-                && node.parentOfType(PackageNode.class) == packageTree.getSelectionModel().getSelectedItem().getValue()) {
-                fillMembers();
-            }
-        }
+        refresh();
     }
 
 
@@ -312,33 +298,38 @@ public class EditorPane extends SplitPane {
 
 
     private void fillMembers() {
-        NamedNode node = packageTree.getSelectionModel().getSelectedItem().getValue();
+        membersList.getItems().clear();
+        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            NamedNode node = selectedItem.getValue();
 
-        if (node instanceof PackageNode) {
-            PackageNode packageNode = (PackageNode) node;
-            membersList.setItems(new ObservableListWrapper<>(packageNode.children()
-                .stream()
-                .filter(item -> !(item instanceof PackageNode))
-                .map(item -> (FunctionNode) item)
-                .sorted(Comparator.comparing(FunctionNode::signature))
-                .collect(Collectors.toList())));
+            if (node instanceof PackageNode) {
+                PackageNode packageNode = (PackageNode) node;
+                membersList.setItems(new ObservableListWrapper<>(packageNode.children()
+                    .stream()
+                    .filter(item -> !(item instanceof PackageNode))
+                    .map(item -> (FunctionNode) item)
+                    .sorted(Comparator.comparing(FunctionNode::signature))
+                    .collect(Collectors.toList())));
+            }
         }
     }
 
 
     private Node selectedNode(int pos) {
-        FunctionNode node = membersList.getSelectionModel().getSelectedItem();
-        if (node instanceof FunctionNode) {
-            List<Node> nodes = NodeUtils.expandNode((Node) node);
-            int index = EditorUtils.tokenIndex(codeView.getText(), pos);
-            for (int i = 0; i < nodes.size(); i++) {
-                if (nodes.get(i) instanceof SeparatorNode) {
-                    if (index + i + 1 < nodes.size()) {
-                        return nodes.get(index + i + 1);
+        if (membersList.getSelectionModel() != null) {
+            FunctionNode node = membersList.getSelectionModel().getSelectedItem();
+            if (node instanceof FunctionNode) {
+                List<Node> nodes = NodeUtils.expandNode((Node) node);
+                int index = EditorUtils.tokenIndex(codeView.getText(), pos);
+                for (int i = 0; i < nodes.size(); i++) {
+                    if (nodes.get(i) instanceof SeparatorNode) {
+                        if (index + i + 1 < nodes.size()) {
+                            return nodes.get(index + i + 1);
+                        }
                     }
                 }
             }
-
         }
         return null;
     }
@@ -350,6 +341,7 @@ public class EditorPane extends SplitPane {
     private TextField commentTextField(Node node) {
         TextField textField = new TextField(node.getComment()) {
             private String saved;
+
             {
                 setOnAction(e -> {
                     applyChanges();
@@ -359,7 +351,7 @@ public class EditorPane extends SplitPane {
                     if (focusedProperty().get()) {
                         saved = getText();
                     } else {
-                        if (!getText().equals(saved)) {
+                        if (!Objects.equals(getText(), saved)) {
                             applyChanges();
                         }
                     }
@@ -377,6 +369,7 @@ public class EditorPane extends SplitPane {
     private TextField nameTextField(NamedNode node) {
         TextField textField = new TextField(node.getName()) {
             private String saved;
+
             {
                 setOnAction(e -> {
                     applyChanges();
@@ -399,6 +392,37 @@ public class EditorPane extends SplitPane {
             }
         };
         return textField;
+    }
+
+    void refresh() {
+        NamedNode packageSelection = null;
+        NamedNode memberSelection = null;
+        NamedNode signatureSelection = null;
+        Node codeSelection = null;
+
+        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            packageSelection = selectedItem.getValue();
+        }
+
+        memberSelection = membersList.getSelectionModel().getSelectedItem();
+
+        codeSelection = selectedNode();
+
+        packageTree.refresh();
+        packageTree.getSelectionModel().clearSelection();
+        membersList.getSelectionModel().clearSelection();
+
+        if (memberSelection != null) {
+            navigateTo(memberSelection);
+        } else if (packageSelection != null) {
+            navigateTo(packageSelection);
+        }
+
+        if (codeSelection != null) {
+            locate(codeSelection);
+        }
+
     }
 
 }

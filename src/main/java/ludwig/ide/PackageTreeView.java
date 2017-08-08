@@ -54,4 +54,8 @@ public class PackageTreeView extends TreeView<NamedNode> {
             .findFirst()
             .orElse(null);
     }
+
+    public void refresh() {
+        setRoot(createRoot(workspace));
+    }
 }
