@@ -336,7 +336,7 @@ public class EditorPane extends SplitPane {
         return selectedNode(codeView.getSelection().getStart());
     }
 
-    private TextField commentTextField(Node node) {
+    private TextField commentTextField(Node<?> node) {
         TextField textField = new TextField(node.getComment()) {
             private String saved;
 
@@ -355,6 +355,7 @@ public class EditorPane extends SplitPane {
                     }
                 });
 
+                setEditable(!node.parentOfType(ProjectNode.class).isReadonly());
             }
 
             private void applyChanges() {
@@ -364,7 +365,7 @@ public class EditorPane extends SplitPane {
         return textField;
     }
 
-    private TextField nameTextField(NamedNode node) {
+    private TextField nameTextField(NamedNode<?> node) {
         TextField textField = new TextField(node.getName()) {
             private String saved;
 
@@ -383,11 +384,13 @@ public class EditorPane extends SplitPane {
                     }
                 });
 
+                setEditable(!node.parentOfType(ProjectNode.class).isReadonly());
             }
 
             private void applyChanges() {
                 app.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(node.id()).setName(getText())));
             }
+
         };
         return textField;
     }
