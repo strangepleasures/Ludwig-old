@@ -93,6 +93,20 @@ public class PrettyPrinter implements NodeVisitor<Void> {
     }
 
     @Override
+    public Void visitBreak(BreakNode breakNode) {
+        print("break ");
+        breakNode.children().get(0).accept(this);
+        return null;
+    }
+
+    @Override
+    public Void visitContinue(ContinueNode continueNode) {
+        print("continue ");
+        continueNode.children().get(0).accept(this);
+        return null;
+    }
+
+    @Override
     public Void visitCall(CallNode callNode) {
         print("call");
         child(callNode.children().get(0), true);

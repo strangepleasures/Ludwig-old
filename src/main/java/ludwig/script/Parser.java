@@ -142,7 +142,9 @@ public class Parser {
                 case "else":
                 case "return":
                 case "throw":
-                case "list": {
+                case "list":
+                case "break" :
+                case "continue" : {
                     Node node = append(parent, createSpecial(head));
                     while (!currentToken().equals(")")) {
                         parseChild(node);
@@ -275,6 +277,10 @@ public class Parser {
                 return new ListNode();
             case "throw":
                 return new ThrowNode();
+            case "break":
+                return new BreakNode();
+            case "continue":
+                return new ContinueNode();
         }
         return null;
     }
