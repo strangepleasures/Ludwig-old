@@ -66,6 +66,13 @@ public class Workspace {
             node.setComment(comment.getComment());
             return null;
         }
+
+        @Override
+        public Problem visitRename(Rename rename) {
+            NamedNode node = node(rename.getNodeId());
+            node.setName(rename.getName());
+            return null;
+        }
     };
 
     private Problem place(Node node, Insert insert) {

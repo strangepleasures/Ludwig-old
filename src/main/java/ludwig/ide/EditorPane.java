@@ -51,23 +51,17 @@ public class EditorPane extends SplitPane {
         final ContextMenu packageTreeMenu = new ContextMenu();
         MenuItem openProjectMenuItem = new MenuItem("Open project...", Icons.icon("add"));
         packageTreeMenu.getItems().addAll(openProjectMenuItem);
-        openProjectMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                FileChooser dialog = new FileChooser();
-                dialog.setTitle("Open Project");
-                File file = dialog.showOpenDialog(new Stage());
-                if(file != null){
-                    app.loadProject(file);
-                }
+        openProjectMenuItem.setOnAction(event -> {
+            FileChooser dialog = new FileChooser();
+            dialog.setTitle("Open Project");
+            File file = dialog.showOpenDialog(new Stage());
+            if(file != null){
+                app.loadProject(file);
             }
         });
-        packageTree.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (event.isSecondaryButtonDown()) {
-                    packageTreeMenu.show(packageTree, event.getScreenX(), event.getScreenY());
-                }
+        packageTree.setOnMousePressed(event -> {
+            if (event.isSecondaryButtonDown()) {
+                packageTreeMenu.show(packageTree, event.getScreenX(), event.getScreenY());
             }
         });
 
@@ -127,7 +121,7 @@ public class EditorPane extends SplitPane {
             if (fn != null) {
                 signatureView.add(new Label("Name"), 1, 1);
                 signatureView.add(new Label("Description"), 2, 1);
-                signatureView.add(new TextField(fn.getName()), 1, 2);
+                signatureView.add(nameTextField(fn), 1, 2);
                 signatureView.add(commentTextField(fn), 2, 2);
 
                 int row = 3;
@@ -135,7 +129,7 @@ public class EditorPane extends SplitPane {
                     if (n instanceof SeparatorNode) {
                         break;
                     }
-                    signatureView.add(new TextField(n.toString()), 1, row);
+                    signatureView.add(nameTextField((NamedNode) n), 1, row);
                     signatureView.add(commentTextField(n), 2, row);
                     row++;
                 }
@@ -375,6 +369,33 @@ public class EditorPane extends SplitPane {
 
             private void applyChanges() {
                 app.getWorkspace().apply(Collections.singletonList(new Comment().setNodeId(node.id()).setComment(getText())));
+            }
+        };
+        return textField;
+    }
+
+    private TextField nameTextField(NamedNode node) {
+        TextField textField = new TextField(node.getName()) {
+            private String saved;
+            {
+                setOnAction(e -> {
+                    applyChanges();
+                });
+
+                this.focusedProperty().addListener(e -> {
+                    if (focusedProperty().get()) {
+                        saved = getText();
+                    } else {
+                        if (!getText().equals(saved)) {
+                            applyChanges();
+                        }
+                    }
+                });
+
+            }
+
+            private void applyChanges() {
+                app.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(node.id()).setName(getText())));
             }
         };
         return textField;

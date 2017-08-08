@@ -9,4 +9,6 @@ public interface ChangeVisitor<T> {
     T visitDelete(Delete delete);
 
     T visitComment(Comment comment);
+
+    T visitRename(Rename rename);
 }
