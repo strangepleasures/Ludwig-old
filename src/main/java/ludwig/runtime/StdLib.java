@@ -4,7 +4,7 @@ import ludwig.interpreter.*;
 import org.pcollections.*;
 
 import java.util.*;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -162,11 +162,20 @@ public class StdLib {
         return result;
     }
 
-    public static Object get(Iterable seq, long n) {
+    public static Object at(Iterable seq, long n) {
         if (seq instanceof List) {
             return ((List) seq).get((int) n);
         }
         return StreamSupport.stream(seq.spliterator(), false).skip(n - 1).findFirst().get();
+    }
+
+    public static Object get(Accessor accessor, Object obj) {
+        return accessor.get(obj);
+    }
+
+    public static Object set(Accessor accessor, Object obj, Object value) {
+        accessor.set(obj, value);
+        return value;
     }
 
 
@@ -204,6 +213,18 @@ public class StdLib {
             result++;
         }
         return result;
+    }
+
+    public static Object Object() {
+        return new Instance();
+    }
+
+    public static Field field() {
+        return new Field();
+    }
+
+    public static <T, R> Property<T, R> property(Function<? super T, ? extends R> getter, BiConsumer<? super T, ? super R> setter) {
+        return new Property<>(getter, setter);
     }
 
     private static class Cons<T> implements Iterable<T> {

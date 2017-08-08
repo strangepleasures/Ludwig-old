@@ -7,4 +7,8 @@ public interface ChangeVisitor<T> {
     T visitInsertReference(InsertReference insert);
 
     T visitDelete(Delete delete);
+
+    T visitComment(Comment comment);
+
+    T visitRename(Rename rename);
 }

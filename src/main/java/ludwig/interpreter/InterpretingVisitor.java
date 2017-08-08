@@ -113,6 +113,16 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     }
 
     @Override
+    public Object visitBreak(BreakNode breakNode) {
+        return new Break(((ReferenceNode) breakNode.children().get(0)).ref());
+    }
+
+    @Override
+    public Object visitContinue(ContinueNode continueNode) {
+        return new Continue(((ReferenceNode) continueNode.children().get(0)).ref());
+    }
+
+    @Override
     public Object visitCall(CallNode callNode) {
         Object head = callNode.children().get(0).accept(this);
         if (head instanceof Delayed) {

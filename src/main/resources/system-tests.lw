@@ -20,9 +20,9 @@ def test-range :
 def test-list :
 	= a list 1 2 3
 	assert== 3 size a
-	assert== 1 get a 0
-	assert== 2 get a 1
-	assert== 3 get a 2
+	assert== 1 at a 0
+	assert== 2 at a 1
+	assert== 3 at a 2
 
 def test-map :
 	= src list 1 2 3
@@ -38,3 +38,17 @@ def test-lazy-sequences :
 	for i seq
 		= result i
 	assert== result n
+
+def test-fields-and-properties :
+	= x field
+	= y field
+	= r property
+		\ it :
+			+ get x it get y it
+		null
+	= o Object
+	set x o 3
+	set y o 4
+	assert== 3 get x o
+	assert== 4 get y o
+	assert== 7 get r o

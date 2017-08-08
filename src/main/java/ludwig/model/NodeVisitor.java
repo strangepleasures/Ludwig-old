@@ -36,4 +36,8 @@ public interface NodeVisitor<T> {
     T visitThrow(ThrowNode throwNode);
 
     T visitPlaceholder(PlaceholderNode placeholderNode);
+
+    T visitBreak(BreakNode breakNode);
+
+    T visitContinue(ContinueNode continueNode);
 }

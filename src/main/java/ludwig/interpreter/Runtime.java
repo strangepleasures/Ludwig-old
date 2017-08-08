@@ -12,5 +12,7 @@ public class Runtime extends ProjectNode {
         Arrays.asList(StdLib.class)
             .stream()
             .forEach(c -> add(new SystemPackage(c)));
+
+        setReadonly(true);
     }
 }

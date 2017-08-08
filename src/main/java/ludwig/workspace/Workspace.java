@@ -18,6 +18,7 @@ public class Workspace {
     private final List<ProjectNode> projects = new ArrayList<>();
     private final List<Consumer<Change>> changeListeners = new ArrayList<>();
     private final UsageTracker usageTracker = new UsageTracker(this);
+    private boolean batchUpdate;
 
     public Workspace() {
         Runtime runtime = new Runtime();
@@ -57,6 +58,20 @@ public class Workspace {
             Node node = node(delete.getId());
             node.parent().children().remove(node);
             node.delete();
+            return null;
+        }
+
+        @Override
+        public Problem visitComment(Comment comment) {
+            Node node = node(comment.getNodeId());
+            node.setComment(comment.getComment());
+            return null;
+        }
+
+        @Override
+        public Problem visitRename(Rename rename) {
+            NamedNode node = node(rename.getNodeId());
+            node.setName(rename.getName());
             return null;
         }
     };
@@ -99,8 +114,9 @@ public class Workspace {
 
     public List<Problem> apply(List<Change> changes) {
         List<Problem> problems = new ArrayList<>();
-
-        for (Change<?> change : changes) {
+        for (int i = 0; i < changes.size(); i++) {
+            Change<?> change = changes.get(i);
+            batchUpdate = i < changes.size() - 1;
             Problem problem = change.accept(changeVisitor);
             if (problem != null) {
                 problems.add(problem);
@@ -145,5 +161,9 @@ public class Workspace {
 
     public UsageTracker getUsageTracker() {
         return usageTracker;
+    }
+
+    public boolean isBatchUpdate() {
+        return batchUpdate;
     }
 }

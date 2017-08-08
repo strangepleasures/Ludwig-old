@@ -2,19 +2,17 @@ package ludwig.ide;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
-import javafx.beans.binding.Bindings;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.Setter;
-import ludwig.changes.Change;
-import ludwig.changes.InsertNode;
+import ludwig.changes.*;
 import ludwig.interpreter.*;
 import ludwig.model.*;
 import ludwig.script.Lexer;
@@ -22,17 +20,15 @@ import ludwig.script.LexerException;
 import ludwig.utils.NodeUtils;
 import ludwig.utils.PrettyPrinter;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class EditorPane extends SplitPane {
     private final App app;
-    private final ListView<FunctionNode>  membersList = new ListView<>();
+    private final ListView<FunctionNode> membersList = new ListView<>();
     private final PackageTreeView packageTree;
-    private final TableView<NamedNode> signatureView = new TableView<>();
+    private final GridPane signatureView = new GridPane();
     private final ToolBar signatureToolbar;
     private final CheckBox lazyCheckbox = new CheckBox("Lazy");
     private final TextArea codeView = new TextArea();
@@ -50,32 +46,22 @@ public class EditorPane extends SplitPane {
         final ContextMenu packageTreeMenu = new ContextMenu();
         MenuItem openProjectMenuItem = new MenuItem("Open project...", Icons.icon("add"));
         packageTreeMenu.getItems().addAll(openProjectMenuItem);
-        openProjectMenuItem.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                FileChooser dialog = new FileChooser();
-                dialog.setTitle("Open Project");
-                File file = dialog.showOpenDialog(new Stage());
-                if(file != null){
-                    app.loadProject(file);
-                }
+        openProjectMenuItem.setOnAction(event -> {
+            FileChooser dialog = new FileChooser();
+            dialog.setTitle("Open Project");
+            File file = dialog.showOpenDialog(new Stage());
+            if (file != null) {
+                app.loadProject(file);
             }
         });
-        packageTree.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (event.isSecondaryButtonDown()) {
-                    packageTreeMenu.show(packageTree, event.getScreenX(), event.getScreenY());
-                }
-            }
-        });
+
+        packageTree.setContextMenu(packageTreeMenu);
 
         membersList.setMinWidth(120);
 
         packageTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             fillMembers();
         });
-
 
         membersList.setPrefHeight(1E6);
 
@@ -84,16 +70,11 @@ public class EditorPane extends SplitPane {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         TableColumn<NamedNode, String> descriptionColumn = new TableColumn<>("Description");
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
-        signatureView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        signatureView.getColumns().addAll(nameColumn, descriptionColumn);
-        signatureView.setFixedCellSize(25);
-
-        signatureView.prefHeightProperty().bind(Bindings.size(signatureView.getItems()).multiply(signatureView.getFixedCellSize()).add(30));
-        signatureView.minHeightProperty().bind(signatureView.prefHeightProperty());
-        signatureView.maxHeightProperty().bind(signatureView.prefHeightProperty());
+        descriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 
         Button addParameterButton = new Button("", Icons.icon("add"));
         addParameterButton.setOnAction(e -> {
+
 
         });
         Button removeParameterButton = new Button("", Icons.icon("delete"));
@@ -124,17 +105,24 @@ public class EditorPane extends SplitPane {
 
 
         membersList.getSelectionModel().selectedItemProperty().addListener(observable -> {
-            signatureView.getItems().clear();
+            signatureView.getChildren().clear();
             codeView.setText("");
 
             FunctionNode fn = membersList.getSelectionModel().getSelectedItem();
             if (fn != null) {
-                signatureView.getItems().add(fn);
+                signatureView.add(new Label("Name"), 1, 1);
+                signatureView.add(new Label("Description"), 2, 1);
+                signatureView.add(nameTextField(fn), 1, 2);
+                signatureView.add(commentTextField(fn), 2, 2);
+
+                int row = 3;
                 for (Node n : fn.children()) {
                     if (n instanceof SeparatorNode) {
                         break;
                     }
-                    signatureView.getItems().add((NamedNode) n);
+                    signatureView.add(nameTextField((NamedNode) n), 1, row);
+                    signatureView.add(commentTextField(n), 2, row);
+                    row++;
                 }
                 lazyCheckbox.setSelected(fn.isLazy());
 
@@ -260,15 +248,8 @@ public class EditorPane extends SplitPane {
     }
 
     private void processChanges(Change change) {
-        if (change instanceof InsertNode) {
-            InsertNode insert = (InsertNode) change;
-            Node node = app.getWorkspace().node(insert.getNode().id());
-
-            if (node instanceof FunctionNode
-                && packageTree.getSelectionModel().getSelectedItem() != null
-                && node.parentOfType(PackageNode.class) == packageTree.getSelectionModel().getSelectedItem().getValue()) {
-                fillMembers();
-            }
+        if (!app.getWorkspace().isBatchUpdate()) {
+            refresh();
         }
     }
 
@@ -315,39 +296,134 @@ public class EditorPane extends SplitPane {
 
 
     private void fillMembers() {
-        NamedNode node = packageTree.getSelectionModel().getSelectedItem().getValue();
+        membersList.getItems().clear();
+        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            NamedNode node = selectedItem.getValue();
 
-        if (node instanceof PackageNode) {
-            PackageNode packageNode = (PackageNode) node;
-            membersList.setItems(new ObservableListWrapper<>(packageNode.children()
-                .stream()
-                .filter(item -> !(item instanceof PackageNode))
-                .map(item -> (FunctionNode) item)
-                .sorted(Comparator.comparing(FunctionNode::signature))
-                .collect(Collectors.toList())));
+            if (node instanceof PackageNode) {
+                PackageNode packageNode = (PackageNode) node;
+                membersList.setItems(new ObservableListWrapper<>(packageNode.children()
+                    .stream()
+                    .filter(item -> !(item instanceof PackageNode))
+                    .map(item -> (FunctionNode) item)
+                    .sorted(Comparator.comparing(FunctionNode::signature))
+                    .collect(Collectors.toList())));
+            }
         }
     }
 
 
     private Node selectedNode(int pos) {
-        FunctionNode node = membersList.getSelectionModel().getSelectedItem();
-        if (node instanceof FunctionNode) {
-            List<Node> nodes = NodeUtils.expandNode((Node) node);
-            int index = EditorUtils.tokenIndex(codeView.getText(), pos);
-            for (int i = 0; i < nodes.size(); i++) {
-                if (nodes.get(i) instanceof SeparatorNode) {
-                    if (index + i + 1 < nodes.size()) {
-                        return nodes.get(index + i + 1);
+        if (membersList.getSelectionModel() != null) {
+            FunctionNode node = membersList.getSelectionModel().getSelectedItem();
+            if (node instanceof FunctionNode) {
+                List<Node> nodes = NodeUtils.expandNode((Node) node);
+                int index = EditorUtils.tokenIndex(codeView.getText(), pos);
+                for (int i = 0; i < nodes.size(); i++) {
+                    if (nodes.get(i) instanceof SeparatorNode) {
+                        if (index + i + 1 < nodes.size()) {
+                            return nodes.get(index + i + 1);
+                        }
                     }
                 }
             }
-
         }
         return null;
     }
 
     private Node selectedNode() {
         return selectedNode(codeView.getSelection().getStart());
+    }
+
+    private TextField commentTextField(Node<?> node) {
+        TextField textField = new TextField(node.getComment()) {
+            private String saved;
+
+            {
+                setOnAction(e -> {
+                    applyChanges();
+                });
+
+                this.focusedProperty().addListener(e -> {
+                    if (focusedProperty().get()) {
+                        saved = getText();
+                    } else {
+                        if (!Objects.equals(getText(), saved)) {
+                            applyChanges();
+                        }
+                    }
+                });
+
+                setEditable(!node.parentOfType(ProjectNode.class).isReadonly());
+            }
+
+            private void applyChanges() {
+                app.getWorkspace().apply(Collections.singletonList(new Comment().setNodeId(node.id()).setComment(getText())));
+            }
+        };
+        return textField;
+    }
+
+    private TextField nameTextField(NamedNode<?> node) {
+        TextField textField = new TextField(node.getName()) {
+            private String saved;
+
+            {
+                setOnAction(e -> {
+                    applyChanges();
+                });
+
+                this.focusedProperty().addListener(e -> {
+                    if (focusedProperty().get()) {
+                        saved = getText();
+                    } else {
+                        if (!getText().equals(saved)) {
+                            applyChanges();
+                        }
+                    }
+                });
+
+                setEditable(!node.parentOfType(ProjectNode.class).isReadonly());
+            }
+
+            private void applyChanges() {
+                app.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(node.id()).setName(getText())));
+            }
+
+        };
+        return textField;
+    }
+
+    void refresh() {
+        NamedNode packageSelection = null;
+        NamedNode memberSelection = null;
+        NamedNode signatureSelection = null;
+        Node codeSelection = null;
+
+        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            packageSelection = selectedItem.getValue();
+        }
+
+        memberSelection = membersList.getSelectionModel().getSelectedItem();
+
+        codeSelection = selectedNode();
+
+        packageTree.refresh();
+        packageTree.getSelectionModel().clearSelection();
+        membersList.getSelectionModel().clearSelection();
+
+        if (memberSelection != null) {
+            navigateTo(memberSelection);
+        } else if (packageSelection != null) {
+            navigateTo(packageSelection);
+        }
+
+        if (codeSelection != null) {
+            locate(codeSelection);
+        }
+
     }
 
 }
