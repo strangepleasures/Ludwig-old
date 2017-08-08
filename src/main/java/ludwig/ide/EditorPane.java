@@ -248,7 +248,9 @@ public class EditorPane extends SplitPane {
     }
 
     private void processChanges(Change change) {
-        refresh();
+        if (!app.getWorkspace().isBatchUpdate()) {
+            refresh();
+        }
     }
 
 
