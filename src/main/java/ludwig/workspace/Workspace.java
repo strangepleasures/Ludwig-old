@@ -59,6 +59,13 @@ public class Workspace {
             node.delete();
             return null;
         }
+
+        @Override
+        public Problem visitComment(Comment comment) {
+            Node node = node(comment.getNodeId());
+            node.setComment(comment.getComment());
+            return null;
+        }
     };
 
     private Problem place(Node node, Insert insert) {

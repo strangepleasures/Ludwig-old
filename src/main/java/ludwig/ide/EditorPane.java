@@ -2,15 +2,15 @@ package ludwig.ide;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
-import javafx.beans.binding.Bindings;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import lombok.Getter;
 import lombok.Setter;
-import ludwig.changes.Change;
-import ludwig.changes.InsertNode;
+import ludwig.changes.*;
 import ludwig.interpreter.*;
 import ludwig.model.*;
 import ludwig.script.Lexer;
@@ -25,9 +25,9 @@ import java.util.stream.Collectors;
 
 public class EditorPane extends SplitPane {
     private final App app;
-    private final ListView<FunctionNode>  membersList = new ListView<>();
+    private final ListView<FunctionNode> membersList = new ListView<>();
     private final PackageTreeView packageTree;
-    private final TableView<NamedNode> signatureView = new TableView<>();
+    private final GridPane signatureView = new GridPane();
     private final ToolBar signatureToolbar;
     private final CheckBox lazyCheckbox = new CheckBox("Lazy");
     private final TextArea codeView = new TextArea();
@@ -57,16 +57,11 @@ public class EditorPane extends SplitPane {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         TableColumn<NamedNode, String> descriptionColumn = new TableColumn<>("Description");
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
-        signatureView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        signatureView.getColumns().addAll(nameColumn, descriptionColumn);
-        signatureView.setFixedCellSize(25);
-
-        signatureView.prefHeightProperty().bind(Bindings.size(signatureView.getItems()).multiply(signatureView.getFixedCellSize()).add(30));
-        signatureView.minHeightProperty().bind(signatureView.prefHeightProperty());
-        signatureView.maxHeightProperty().bind(signatureView.prefHeightProperty());
+        descriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 
         Button addParameterButton = new Button("", Icons.icon("add"));
         addParameterButton.setOnAction(e -> {
+
 
         });
         Button removeParameterButton = new Button("", Icons.icon("delete"));
@@ -97,17 +92,24 @@ public class EditorPane extends SplitPane {
 
 
         membersList.getSelectionModel().selectedItemProperty().addListener(observable -> {
-            signatureView.getItems().clear();
+            signatureView.getChildren().clear();
             codeView.setText("");
 
             FunctionNode fn = membersList.getSelectionModel().getSelectedItem();
             if (fn != null) {
-                signatureView.getItems().add(fn);
+                signatureView.add(new Label("Name"), 1, 1);
+                signatureView.add(new Label("Description"), 2, 1);
+                signatureView.add(new TextField(fn.getName()), 1, 2);
+                signatureView.add(commentTextField(fn), 2, 2);
+
+                int row = 3;
                 for (Node n : fn.children()) {
                     if (n instanceof SeparatorNode) {
                         break;
                     }
-                    signatureView.getItems().add((NamedNode) n);
+                    signatureView.add(new TextField(n.toString()), 1, row);
+                    signatureView.add(commentTextField(n), 2, row);
+                    row++;
                 }
                 lazyCheckbox.setSelected(fn.isLazy());
 
@@ -321,6 +323,33 @@ public class EditorPane extends SplitPane {
 
     private Node selectedNode() {
         return selectedNode(codeView.getSelection().getStart());
+    }
+
+    private TextField commentTextField(Node node) {
+        TextField textField = new TextField(node.getComment()) {
+            private String saved;
+            {
+                setOnAction(e -> {
+                    applyChanges();
+                });
+
+                this.focusedProperty().addListener(e -> {
+                    if (focusedProperty().get()) {
+                        saved = getText();
+                    } else {
+                        if (!getText().equals(saved)) {
+                            applyChanges();
+                        }
+                    }
+                });
+
+            }
+
+            private void applyChanges() {
+                app.getWorkspace().apply(Collections.singletonList(new Comment().setNodeId(node.id()).setComment(getText())));
+            }
+        };
+        return textField;
     }
 
 }

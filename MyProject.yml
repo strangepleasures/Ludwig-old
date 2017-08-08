@@ -82,3 +82,55 @@ node: !<SeparatorNode>
   comment: null
   children: []
   deleted: false
+--- !<InsertNode>
+changeId: "54ffcd51-3e7f-4503-8809-38af627ebc7c"
+parent: "2"
+prev: "ad783d5c-355f-415c-b46f-4c7c74c9132f"
+next: null
+node: !<FunctionNode>
+  id: "70882823-ab45-4f14-a0d9-a76509a07741"
+  comment: null
+  children: []
+  deleted: false
+  name: "baz"
+  lazy: false
+--- !<InsertNode>
+changeId: "888fdaa2-e747-410f-a07f-fe51dc827807"
+parent: "70882823-ab45-4f14-a0d9-a76509a07741"
+prev: null
+next: null
+node: !<VariableNode>
+  id: "5afa267d-c0b5-46b9-8ffe-a96d6abff2b6"
+  comment: null
+  children: []
+  deleted: false
+  name: "a"
+--- !<InsertNode>
+changeId: "141c03f3-3047-46f5-a8b6-621554d406fe"
+parent: "70882823-ab45-4f14-a0d9-a76509a07741"
+prev: "5afa267d-c0b5-46b9-8ffe-a96d6abff2b6"
+next: null
+node: !<VariableNode>
+  id: "9180b076-0b64-4d09-a82a-b617fcd8434f"
+  comment: null
+  children: []
+  deleted: false
+  name: "b"
+--- !<InsertNode>
+changeId: "63390fdb-e029-4626-bb57-48fa786245c5"
+parent: "70882823-ab45-4f14-a0d9-a76509a07741"
+prev: "9180b076-0b64-4d09-a82a-b617fcd8434f"
+next: null
+node: !<SeparatorNode>
+  id: "f5b232ec-33aa-4533-8dc9-404f3cfee8b3"
+  comment: null
+  children: []
+  deleted: false
+--- !<Comment>
+changeId: "c42e987d-1405-4fc1-8435-eb6e21a8ae2e"
+nodeId: "70882823-ab45-4f14-a0d9-a76509a07741"
+comment: "BBB"
+--- !<Comment>
+changeId: "9b008053-50d9-40ca-9e2c-827f27fce3bd"
+nodeId: "system:all"
+comment: "hmm"
