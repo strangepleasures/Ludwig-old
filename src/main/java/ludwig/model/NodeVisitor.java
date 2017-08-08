@@ -34,4 +34,6 @@ public interface NodeVisitor<T> {
     T visitFunctionReference(FunctionReferenceNode functionReference);
 
     T visitThrow(ThrowNode throwNode);
+
+    T visitPlaceholder(PlaceholderNode placeholderNode);
 }

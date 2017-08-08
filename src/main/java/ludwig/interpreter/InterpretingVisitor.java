@@ -108,6 +108,11 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     }
 
     @Override
+    public Object visitPlaceholder(PlaceholderNode placeholderNode) {
+        return null;
+    }
+
+    @Override
     public Object visitCall(CallNode callNode) {
         Object head = callNode.children().get(0).accept(this);
         if (head instanceof Delayed) {
