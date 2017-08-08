@@ -86,11 +86,11 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         }
 
 
-        if (locals.containsKey(node)) {
-            return locals.get(node);
+        Object value = locals.get(node);
+        if (value instanceof Delayed) {
+            value = ((Delayed) value).get();
         }
-
-        return node;
+        return value;
     }
 
     @Override
