@@ -3,9 +3,11 @@ package ludwig.ide;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.SplitPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import ludwig.changes.Change;
 import ludwig.repository.ChangeRepository;
@@ -14,7 +16,6 @@ import ludwig.workspace.Workspace;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 public class App extends Application {
@@ -34,16 +35,45 @@ public class App extends Application {
     public void start(Stage primaryStage) throws Exception {
         loadSettings();  // TODO: async
         loadWorkspace(); // TODO: async
+        BorderPane borderPane = new BorderPane();
+
+        // do menu bar - make own class
+        MenuBar menuBar = new MenuBar();
+        menuBar.isUseSystemMenuBar();
+
+        Menu fileMenu = new Menu("File");
+        MenuItem newMenuItem = new MenuItem("New");
+        MenuItem openMenuItem = new MenuItem("Open");
+        MenuItem exitMenuItem = new MenuItem("Exit");
+
+        exitMenuItem.setOnAction(actionEvent -> {/**not implemented**/});
+        openMenuItem.setOnAction(actionEvent -> {
+                FileChooser dialog = new FileChooser();
+                dialog.setTitle("Open Project");
+                File file = dialog.showOpenDialog(new Stage());
+                if(file != null){
+                    try {
+                        settings.setProject(file.toURI().toURL());
+                        start(new Stage());
+                        primaryStage.close();
+                    } catch (Exception e) {
+                        //failed to open
+                    }
+                }
+            }
+        );
+        exitMenuItem.setOnAction(actionEvent -> Platform.exit());
+
+        fileMenu.getItems().addAll(newMenuItem, openMenuItem, new SeparatorMenuItem(), exitMenuItem);
+        menuBar.getMenus().addAll(fileMenu);
+        borderPane.setTop(menuBar);
 
         SplitPane splitPane = new SplitPane();
-
         EditorPane leftEditorPane = new EditorPane(this);
         EditorPane rightEditorPane = new EditorPane(this);
         leftEditorPane.setAnotherPane(rightEditorPane);
         rightEditorPane.setAnotherPane(leftEditorPane);
         splitPane.getItems().addAll(leftEditorPane, rightEditorPane);
-
-        BorderPane borderPane = new BorderPane();
         borderPane.setCenter(splitPane);
 
         primaryStage.setScene(new Scene(borderPane, 1024, 768));
@@ -57,10 +87,12 @@ public class App extends Application {
     }
 
     private void loadSettings() {
-        try {
-            settings = mapper.readValue(SETTINGS_FILE, Settings.class);
-        } catch (IOException e) {
-            settings = new Settings();
+        if(settings == null) {
+            try {
+                settings = mapper.readValue(SETTINGS_FILE, Settings.class);
+            } catch (IOException e) {
+                settings = new Settings();
+            }
         }
     }
 
@@ -73,6 +105,10 @@ public class App extends Application {
     }
 
     private void loadWorkspace() {
+        if (workspace != null){
+            //todo  any save etc?
+            workspace = new Workspace();
+        }
         if (settings.getProject() != null) {
             try {
                 if ("file".equals(settings.getProject().getProtocol())) {
@@ -80,25 +116,18 @@ public class App extends Application {
                 }
                 List<Change> changes = repository.pull(null);
                 workspace.apply(changes);
-                workspace.changeListeners().add(change -> {
-                    try {
-                        repository.push(Collections.singletonList(change));
-                    } catch (IOException e) {
 
-                    }
-                });
+                //TODO not sure why we want to push to repo on load?
+//                workspace.changeListeners().add(change -> {
+//                    try {
+//                       // repository.push(Collections.singletonList(change));
+//                    } catch (IOException e) {
+//
+//                    }
+//                });
             } catch (IOException e) {
                 // TODO:
             }
-        }
-    }
-
-    public void loadProject(File file){
-        try {
-            repository = new LocalChangeRepository(file);
-            List<Change> changes = repository.pull(null);
-            workspace.apply(changes);
-        } catch (IOException e) {
         }
     }
 
