@@ -25,8 +25,8 @@ public class CallableFunction implements Callable {
     public Object call(Object[] args) {
         Object result = tail(args);
 
-        if (result instanceof Return) {
-            return ((Return) result).get();
+        if (result instanceof Delayed) {
+            return ((Delayed) result).get();
         }
 
         return result;
@@ -52,6 +52,11 @@ public class CallableFunction implements Callable {
         }
 
         return result;
+    }
+
+    @Override
+    public boolean isLazy() {
+        return function.isLazy();
     }
 
     @Override

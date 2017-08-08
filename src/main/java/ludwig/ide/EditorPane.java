@@ -201,6 +201,7 @@ public class EditorPane extends SplitPane {
                     }
                     new Alert(Alert.AlertType.INFORMATION, "Result: " + NodeUtils.formatLiteral(result)).show();
                 } catch (Exception err) {
+                    err.printStackTrace();
                     new Alert(Alert.AlertType.ERROR, "Error: " + err.toString()).show();
                 }
             }

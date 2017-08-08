@@ -1,10 +1,18 @@
 package ludwig.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 public class FunctionNode extends NamedNode<FunctionNode> {
+    private boolean lazy;
+
+    public boolean isLazy() {
+        return lazy;
+    }
+
+    public FunctionNode setLazy(boolean lazy) {
+        this.lazy = lazy;
+        return this;
+    }
+
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {
         return visitor.visitFunction(this);

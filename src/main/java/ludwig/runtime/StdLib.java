@@ -103,21 +103,6 @@ public class StdLib {
         return x instanceof Comparable && x.getClass().isInstance(y) && ((Comparable) x).compareTo(y) <= 0;
     }
 
-    @Lazy
-    public static Object and(Delayed<Boolean> x, Delayed<Boolean> y) {
-        return x.get() ? y : false;
-    }
-
-    @Lazy
-    public static Object or(Delayed<Boolean> x, Delayed<Boolean> y) {
-        return x.get() ? true : y;
-    }
-
-    @Lazy
-    public static <T> Delayed<T> cond(Delayed<Boolean> condition, Delayed<? extends T> option1, Delayed<? extends T> option2) {
-        return (Delayed<T>) (condition.get() ? option1 : option2);
-    }
-
     @Name("is-empty")
     public static boolean isEmpty(Iterable seq) {
         return !seq.iterator().hasNext();

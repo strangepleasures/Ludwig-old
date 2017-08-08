@@ -4,8 +4,6 @@ import ludwig.model.*;
 import org.pcollections.HashPMap;
 import org.pcollections.TreePVector;
 
-import java.util.Map;
-
 class InterpretingVisitor implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
     private boolean doElse;
@@ -71,7 +69,8 @@ class InterpretingVisitor implements NodeVisitor<Object> {
                         if (child instanceof SeparatorNode) {
                             params = false;
                         } else {
-                            locals = locals.plus((VariableNode) child, referenceNode.children().get(i).accept(this));
+                            Node arg = referenceNode.children().get(i);
+                            locals = locals.plus((VariableNode) child, fn.isLazy() ? new Return(arg, locals) : arg.accept(this));
                         }
                     } else {
                         result = child.accept(this);
@@ -110,15 +109,20 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitCall(CallNode callNode) {
-        Callable callable = (Callable) callNode.children().get(0).accept(this);
+        Object head = callNode.children().get(0).accept(this);
+        if (head instanceof Delayed) {
+            return untail(((Delayed) head).get());
+        }
+
+        Callable callable = (Callable) head;
 
         boolean delayed = callable.isLazy();
 
         Object[] args = callNode.children()
-                .stream()
-                .skip(1)
-                .map(node -> delayed ? new Return(node, locals) : node.accept(this))
-                .toArray();
+            .stream()
+            .skip(1)
+            .map(node -> delayed ? new Return(node, locals) : node.accept(this))
+            .toArray();
 
         return untail(callable.tail(args));
     }

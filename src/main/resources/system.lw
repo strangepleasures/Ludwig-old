@@ -22,6 +22,22 @@ def xor x y :
 		not y
 		y
 
+def lazy and a b :
+	cond call a
+		b
+		false
+
+def lazy or a b :
+	cond call a
+		true
+		b
+
+def lazy cond condition option1 option2 :
+	if call condition
+		return option1
+	else
+		return option2
+
 def neg x :
 	* -1 x
 

@@ -60,7 +60,12 @@ public class Parser {
     private void parseSignature(PackageNode packageNode) throws ParserException {
         consume("(");
         consume("def");
-        FunctionNode fn = append(packageNode, new FunctionNode().setName(nextToken()));
+        boolean lazy = false;
+        if (currentToken().equals("lazy")) {
+            lazy = true;
+            consume("lazy");
+        }
+        FunctionNode fn = append(packageNode, new FunctionNode().setName(nextToken()).setLazy(lazy));
         while (!currentToken().equals(")")) {
             append(fn, new VariableNode().setName(nextToken()));
         }
@@ -97,6 +102,9 @@ public class Parser {
     private void parseBody(PackageNode packageNode) throws ParserException {
         consume("(");
         consume("def");
+        if (currentToken().equals("lazy")) {
+            consume("lazy");
+        }
         FunctionNode node = (FunctionNode) packageNode.item(nextToken());
         locals = HashTreePMap.empty();
         for (Node child : node.children()) {
