@@ -8,8 +8,6 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import lombok.Getter;
 import lombok.Setter;
 import ludwig.changes.*;
@@ -42,20 +40,6 @@ public class EditorPane extends SplitPane {
 
         packageTree = new PackageTreeView(app.getWorkspace());
         packageTree.setMinWidth(120);
-
-        final ContextMenu packageTreeMenu = new ContextMenu();
-        MenuItem openProjectMenuItem = new MenuItem("Open project...", Icons.icon("add"));
-        packageTreeMenu.getItems().addAll(openProjectMenuItem);
-        openProjectMenuItem.setOnAction(event -> {
-            FileChooser dialog = new FileChooser();
-            dialog.setTitle("Open Project");
-            File file = dialog.showOpenDialog(new Stage());
-            if (file != null) {
-                app.loadProject(file);
-            }
-        });
-
-        packageTree.setContextMenu(packageTreeMenu);
 
         membersList.setMinWidth(120);
 
