@@ -4,7 +4,7 @@ import ludwig.interpreter.*;
 import org.pcollections.*;
 
 import java.util.*;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -204,6 +204,10 @@ public class StdLib {
             result++;
         }
         return result;
+    }
+
+    public static <T, R> Property<T, R> property(Function<? super T, ? extends R> getter, BiConsumer<? super T, ? super R> setter) {
+        return new Property<>(getter, setter);
     }
 
     private static class Cons<T> implements Iterable<T> {
