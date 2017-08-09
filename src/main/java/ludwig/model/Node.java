@@ -12,7 +12,7 @@ public abstract class Node<T extends Node> {
     private String comment;
     @JsonIgnore
     private Node parent;
-    private final List<Node> children = new ArrayList<>();
+    private final List<Node<?>> children = new ArrayList<>();
     private boolean deleted;
 
     public abstract <T> T accept(NodeVisitor<T> visitor);
@@ -35,7 +35,7 @@ public abstract class Node<T extends Node> {
         return (T) this;
     }
 
-    public List<Node> children() {
+    public List<Node<?>> children() {
         return children;
     }
 
@@ -45,11 +45,11 @@ public abstract class Node<T extends Node> {
         return (T) this;
     }
 
-    public Node parent() {
+    public Node<?> parent() {
         return parent;
     }
 
-    public T parent(Node parent) {
+    public T parent(Node<?> parent) {
         this.parent = parent;
         return (T) this;
     }

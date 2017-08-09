@@ -274,8 +274,39 @@ public class EditorPane extends SplitPane {
         }
     }
 
-    private void insertNode(NamedNode value) {
+    private void insertNode(NamedNode<?> node) {
+        Node<?> sel = selectedNode();
+        InsertReference head = new InsertReference()
+            .setId(Change.newId())
+            .setRef(node.id());
+        List<Change> changes = new ArrayList<>();
+        if (sel != null) {
+            head.setParent(sel.parent().id());
+            int index = sel.parent().children().indexOf(sel);
+            head.setPrev(index == 0 ? null : sel.parent().children().get(index - 1).id());
+            head.setNext(index == sel.parent().children().size() - 1 ? null : sel.parent().children().get(index + 1).id());
+            changes.add(new Delete().setId(sel.id()));
+        } else {
+            FunctionNode target = membersList.getSelectionModel().getSelectedItem();
+            head.setParent(target.id());
+            head.setPrev(target.children().get(target.children().size() - 1).id());
+        }
 
+        changes.add(head);
+        String prev = null;
+        for (Node<?> child: node.children()) {
+            if (child instanceof SeparatorNode) {
+                break;
+            }
+            InsertNode insertPlaceholder = new InsertNode()
+                .setNode(new PlaceholderNode(((VariableNode) child).getName()).id(Change.newId()))
+                .setParent(head.getId())
+                .setPrev(prev);
+            changes.add(insertPlaceholder);
+            prev = insertPlaceholder.getNode().id();
+        }
+
+        app.getWorkspace().apply(changes);
     }
 
 
@@ -302,8 +333,11 @@ public class EditorPane extends SplitPane {
         if (membersList.getSelectionModel() != null) {
             FunctionNode node = membersList.getSelectionModel().getSelectedItem();
             if (node instanceof FunctionNode) {
-                List<Node> nodes = NodeUtils.expandNode((Node) node);
+                List<Node> nodes = NodeUtils.expandNode(node);
                 int index = EditorUtils.tokenIndex(codeView.getText(), pos);
+                if (index < 0) {
+                    return null;
+                }
                 for (int i = 0; i < nodes.size(); i++) {
                     if (nodes.get(i) instanceof SeparatorNode) {
                         if (index + i + 1 < nodes.size()) {
