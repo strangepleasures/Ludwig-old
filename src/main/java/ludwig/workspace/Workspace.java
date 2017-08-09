@@ -19,6 +19,7 @@ public class Workspace {
     private final List<Consumer<Change>> changeListeners = new ArrayList<>();
     private final UsageTracker usageTracker = new UsageTracker(this);
     private boolean batchUpdate;
+    private boolean loading;
 
     public Workspace() {
         Runtime runtime = new Runtime();
@@ -136,6 +137,19 @@ public class Workspace {
             restore();
         }
         return problems;
+    }
+
+    public List<Problem> load(List<Change> changes) {
+        loading = true;
+        try {
+            return apply(changes);
+        } finally {
+            loading = false;
+        }
+    }
+
+    public boolean isLoading() {
+        return loading;
     }
 
     private void restore() {

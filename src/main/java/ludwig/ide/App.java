@@ -16,6 +16,7 @@ import ludwig.workspace.Workspace;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 public class App extends Application {
@@ -115,16 +116,17 @@ public class App extends Application {
                     repository = new LocalChangeRepository(new File(settings.getProject().getFile()));
                 }
                 List<Change> changes = repository.pull(null);
-                workspace.apply(changes);
+                workspace.load(changes);
 
-                //TODO not sure why we want to push to repo on load?
-//                workspace.changeListeners().add(change -> {
-//                    try {
-//                       // repository.push(Collections.singletonList(change));
-//                    } catch (IOException e) {
-//
-//                    }
-//                });
+                workspace.changeListeners().add(change -> {
+                    try {
+                        if (!workspace.isLoading()) {
+                            repository.push(Collections.singletonList(change));
+                        }
+                    } catch (IOException e) {
+
+                    }
+                });
             } catch (IOException e) {
                 // TODO:
             }
