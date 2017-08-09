@@ -1,6 +1,8 @@
 package system-tests
 
 def test-fields-and-properties :
+	= tag 1
+	assert== 1 tag
 	= o Object
 	= tag o 123
 	assert== 123 tag o
@@ -43,6 +45,12 @@ def test-lazy-sequences :
 	for i seq
 		= result i
 	assert== result n
+
+def test-refs :
+	= _exp ref exp
+	assert== exp 1 call _exp 1
+	= _fact ref fact
+	assert== fact 5 call _fact 5
 
 field tag
 

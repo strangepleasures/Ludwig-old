@@ -191,6 +191,7 @@ public class Parser {
                     AssignmentNode node = append(parent, new AssignmentNode());
 
                     boolean isField = false;
+                    int savedPos = pos;
 
                     NamedNode f = find(name);
                     if (f instanceof FieldNode) {
@@ -203,6 +204,7 @@ public class Parser {
                     }
 
                     if (!isField) {
+                        pos = savedPos;
                         node.children().clear();
                         if (locals.containsKey(name)) {
                             append(node, new ReferenceNode(locals.get(name)));
@@ -234,29 +236,36 @@ public class Parser {
                 }
 
                 default: {
+                    NamedNode headNode = find(head);
+
+                    if (headNode instanceof FieldNode) {
+                        int savedPos = pos;
+                        FieldNode fn = (FieldNode) headNode;
+                        ReferenceNode r = append(parent, new ReferenceNode(fn));
+                        if (currentToken().equals(")")) {
+                            pos = savedPos;
+                            parent.children().remove(parent.children().size() - 1);
+                        } else {
+                            parseChild(r);
+                            return;
+                        }
+                    }
+
                     if (locals.containsKey(head)) {
                         append(parent, new ReferenceNode(locals.get(head)));
-                    } else {
-                        NamedNode headNode = find(head);
-                        if (headNode instanceof FunctionNode) {
-                            FunctionNode fn = (FunctionNode) headNode;
-                            ReferenceNode r = append(parent, new ReferenceNode(fn));
-                            for (Node param : fn.children()) {
-                                if (param instanceof SeparatorNode) {
-                                    break;
-                                }
-                                parseChild(r);
+                    } else if (headNode instanceof FunctionNode) {
+                        FunctionNode fn = (FunctionNode) headNode;
+                        ReferenceNode r = append(parent, new ReferenceNode(fn));
+                        for (Node param : fn.children()) {
+                            if (param instanceof SeparatorNode) {
+                                break;
                             }
-                        } else if (headNode instanceof FieldNode) {
-                            FieldNode fn = (FieldNode) headNode;
-                            ReferenceNode r = append(parent, new ReferenceNode(fn));
-
                             parseChild(r);
-                        } else if (Lexer.isLiteral(head)) {
-                            append(parent, new LiteralNode(head));
-                        } else {
-                            throw new ParserException("Unknown symbol: " + head);
                         }
+                    } else if (Lexer.isLiteral(head)) {
+                        append(parent, new LiteralNode(head));
+                    } else {
+                        throw new ParserException("Unknown symbol: " + head);
                     }
                 }
             }
