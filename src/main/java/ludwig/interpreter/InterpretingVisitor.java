@@ -85,6 +85,10 @@ class InterpretingVisitor implements NodeVisitor<Object> {
             }
         }
 
+        if (node instanceof FieldNode) {
+            Instance instance = (Instance) referenceNode.children().get(0).accept(this);
+            return instance.get((FieldNode) node);
+        }
 
         Object value = locals.get(node);
         if (value instanceof Delayed) {
@@ -120,6 +124,11 @@ class InterpretingVisitor implements NodeVisitor<Object> {
     @Override
     public Object visitContinue(ContinueNode continueNode) {
         return new Continue(((ReferenceNode) continueNode.children().get(0)).ref());
+    }
+
+    @Override
+    public Object visitField(FieldNode fieldNode) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -177,11 +186,20 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitAssignment(AssignmentNode assignmentNode) {
+        Object value = assignmentNode.children().get(1).accept(this);
+
         Node lhs = assignmentNode.children().get(0);
         if (lhs instanceof ReferenceNode) {
             lhs = ((ReferenceNode) lhs).ref();
+            if (lhs instanceof FieldNode) {
+                Instance instance = (Instance) assignmentNode.children().get(0).children().get(0).accept(this);
+                instance.set((FieldNode) lhs, value);
+                return value;
+            }
         }
-        return locals = locals.plus((NamedNode) lhs, assignmentNode.children().get(1).accept(this));
+
+        locals = locals.plus((NamedNode) lhs, value);
+        return value;
     }
 
     @Override

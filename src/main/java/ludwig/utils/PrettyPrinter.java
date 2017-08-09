@@ -107,6 +107,12 @@ public class PrettyPrinter implements NodeVisitor<Void> {
     }
 
     @Override
+    public Void visitField(FieldNode fieldNode) {
+        print(fieldNode.toString());
+        return null;
+    }
+
+    @Override
     public Void visitCall(CallNode callNode) {
         print("call");
         child(callNode.children().get(0), true);

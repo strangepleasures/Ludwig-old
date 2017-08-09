@@ -18,13 +18,14 @@ import ludwig.script.LexerException;
 import ludwig.utils.NodeUtils;
 import ludwig.utils.PrettyPrinter;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class EditorPane extends SplitPane {
     private final App app;
-    private final ListView<FunctionNode> membersList = new ListView<>();
+    private final ListView<NamedNode> membersList = new ListView<>();
     private final PackageTreeView packageTree;
     private final GridPane signatureView = new GridPane();
     private final ToolBar signatureToolbar;
@@ -92,12 +93,15 @@ public class EditorPane extends SplitPane {
             signatureView.getChildren().clear();
             codeView.setText("");
 
-            FunctionNode fn = membersList.getSelectionModel().getSelectedItem();
-            if (fn != null) {
-                signatureView.add(new Label("Name"), 1, 1);
-                signatureView.add(new Label("Description"), 2, 1);
-                signatureView.add(nameTextField(fn), 1, 2);
-                signatureView.add(commentTextField(fn), 2, 2);
+            NamedNode selectedItem = membersList.getSelectionModel().getSelectedItem();
+
+            signatureView.add(new Label("Name"), 1, 1);
+            signatureView.add(new Label("Description"), 2, 1);
+            signatureView.add(nameTextField(selectedItem), 1, 2);
+            signatureView.add(commentTextField(selectedItem), 2, 2);
+
+            if (selectedItem instanceof FunctionNode) {
+                FunctionNode fn = (FunctionNode) selectedItem;
 
                 int row = 3;
                 for (Node n : fn.children()) {
@@ -112,14 +116,15 @@ public class EditorPane extends SplitPane {
 
                 codeView.setText(PrettyPrinter.print(fn));
             }
+
         });
 
-        membersList.setCellFactory(listView -> new ListCell<FunctionNode>() {
+        membersList.setCellFactory(listView -> new ListCell<NamedNode>() {
             @Override
-            protected void updateItem(FunctionNode item, boolean empty) {
+            protected void updateItem(NamedNode item, boolean empty) {
                 super.updateItem(item, empty);
 
-                setText((!empty && item != null) ? item.signature() : "");
+                setText((!empty && item != null) ? signature(item) : "");
             }
         });
 
@@ -188,7 +193,11 @@ public class EditorPane extends SplitPane {
         });
         MenuItem runMenu = new MenuItem("Run...", Icons.icon("run"));
         runMenu.setOnAction(e -> {
-            FunctionNode fn = membersList.getSelectionModel().getSelectedItem();
+            NamedNode selectedItem = membersList.getSelectionModel().getSelectedItem();
+            if (!(selectedItem instanceof FunctionNode)) {
+                return;
+            }
+            FunctionNode fn = (FunctionNode) selectedItem;
             if (fn != null) {
 
                 try {
@@ -280,8 +289,13 @@ public class EditorPane extends SplitPane {
             .setId(Change.newId())
             .setRef(node.id());
         List<Change> changes = new ArrayList<>();
+        NamedNode selectedItem = membersList.getSelectionModel().getSelectedItem();
+        if (!(selectedItem instanceof FunctionNode)) {
+            return;
+        }
+        FunctionNode target = (FunctionNode) selectedItem;
         if (sel != null) {
-            if(node.parentOfType(ProjectNode.class).isReadonly()) {
+            if (node.parentOfType(ProjectNode.class).isReadonly()) {
                 return;
             }
             head.setParent(sel.parent().id());
@@ -290,8 +304,8 @@ public class EditorPane extends SplitPane {
             head.setNext(index == sel.parent().children().size() - 1 ? null : sel.parent().children().get(index + 1).id());
             changes.add(new Delete().setId(sel.id()));
         } else {
-            FunctionNode target = membersList.getSelectionModel().getSelectedItem();
-            if(target.parentOfType(ProjectNode.class).isReadonly()) {
+
+            if (target.parentOfType(ProjectNode.class).isReadonly()) {
                 return;
             }
             head.setParent(target.id());
@@ -300,7 +314,7 @@ public class EditorPane extends SplitPane {
 
         changes.add(head);
         String prev = null;
-        for (Node<?> child: node.children()) {
+        for (Node<?> child : node.children()) {
             if (child instanceof SeparatorNode) {
                 break;
             }
@@ -327,17 +341,28 @@ public class EditorPane extends SplitPane {
                 membersList.setItems(new ObservableListWrapper<>(packageNode.children()
                     .stream()
                     .filter(item -> !(item instanceof PackageNode))
-                    .map(item -> (FunctionNode) item)
-                    .sorted(Comparator.comparing(FunctionNode::signature))
+                    .map(item -> (NamedNode) item)
+                    .sorted(Comparator.comparing(EditorPane::signature))
                     .collect(Collectors.toList())));
             }
         }
     }
 
+    private static String signature(NamedNode node) {
+        if (node instanceof FunctionNode) {
+            return ((FunctionNode) node).signature();
+        }
+        return node.getName();
+    }
+
 
     private Node selectedNode(int pos) {
         if (membersList.getSelectionModel() != null) {
-            FunctionNode node = membersList.getSelectionModel().getSelectedItem();
+            NamedNode selectedItem = membersList.getSelectionModel().getSelectedItem();
+            if (!(selectedItem instanceof FunctionNode)) {
+                return null;
+            }
+            FunctionNode node = (FunctionNode) selectedItem;
             if (node instanceof FunctionNode) {
                 List<Node> nodes = NodeUtils.expandNode(node);
                 int index = EditorUtils.tokenIndex(codeView.getText(), pos);

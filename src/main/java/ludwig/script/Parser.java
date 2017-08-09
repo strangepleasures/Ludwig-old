@@ -59,30 +59,38 @@ public class Parser {
 
     private void parseSignature(PackageNode packageNode) throws ParserException {
         consume("(");
-        consume("def");
-        boolean lazy = false;
-        if (currentToken().equals("lazy")) {
-            lazy = true;
-            consume("lazy");
-        }
-        FunctionNode fn = append(packageNode, new FunctionNode().setName(nextToken()).setLazy(lazy));
-        while (!currentToken().equals(")")) {
-            append(fn, new VariableNode().setName(nextToken()));
-        }
-        consume(")");
-        append(fn, new SeparatorNode());
-        consume("(");
 
-        int level = 1;
-        while (level != 0 && pos < tokens.size()) {
-            switch (nextToken()) {
-                case "(":
-                    level++;
-                    break;
-                case ")":
-                    level--;
-                    break;
-            }
+        switch (nextToken()) {
+            case "def":
+                boolean lazy = false;
+                if (currentToken().equals("lazy")) {
+                    lazy = true;
+                    consume("lazy");
+                }
+                FunctionNode fn = append(packageNode, new FunctionNode().setName(nextToken()).setLazy(lazy));
+                while (!currentToken().equals(")")) {
+                    append(fn, new VariableNode().setName(nextToken()));
+                }
+                consume(")");
+                append(fn, new SeparatorNode());
+                consume("(");
+
+                int level = 1;
+                while (level != 0 && pos < tokens.size()) {
+                    switch (nextToken()) {
+                        case "(":
+                            level++;
+                            break;
+                        case ")":
+                            level--;
+                            break;
+                    }
+                }
+                break;
+            case "field":
+                append(packageNode, new FieldNode().setName(nextToken()));
+                consume(")");
+                break;
         }
     }
 
@@ -101,27 +109,35 @@ public class Parser {
 
     private void parseBody(PackageNode packageNode) throws ParserException {
         consume("(");
-        consume("def");
-        if (currentToken().equals("lazy")) {
-            consume("lazy");
-        }
-        FunctionNode node = (FunctionNode) packageNode.item(nextToken());
-        locals = HashTreePMap.empty();
-        for (Node child : node.children()) {
-            if (child instanceof SeparatorNode) {
-                break;
-            }
-            VariableNode variableNode = (VariableNode) child;
-            locals = locals.plus(variableNode.getName(), variableNode);
-        }
-        while (!nextToken().equals(")")) ;
-        consume("(");
-        while (pos < tokens.size() && !currentToken().equals(")")) {
-            parseChild(node);
-        }
+        switch (nextToken()) {
+            case "def":
+                if (currentToken().equals("lazy")) {
+                    consume("lazy");
+                }
+                FunctionNode node = (FunctionNode) packageNode.item(nextToken());
+                locals = HashTreePMap.empty();
+                for (Node child : node.children()) {
+                    if (child instanceof SeparatorNode) {
+                        break;
+                    }
+                    VariableNode variableNode = (VariableNode) child;
+                    locals = locals.plus(variableNode.getName(), variableNode);
+                }
+                while (!nextToken().equals(")")) ;
+                consume("(");
+                while (pos < tokens.size() && !currentToken().equals(")")) {
+                    parseChild(node);
+                }
 
-        if (pos < tokens.size()) {
-            nextToken();
+                if (pos < tokens.size()) {
+                    nextToken();
+                }
+                break;
+            case "field":
+                nextToken();
+                consume(")");
+                break;
+
         }
     }
 
@@ -143,8 +159,8 @@ public class Parser {
                 case "return":
                 case "throw":
                 case "list":
-                case "break" :
-                case "continue" : {
+                case "break":
+                case "continue": {
                     Node node = append(parent, createSpecial(head));
                     while (!currentToken().equals(")")) {
                         parseChild(node);
@@ -172,18 +188,32 @@ public class Parser {
                 }
                 case "=": {
                     String name = nextToken();
-                    if (locals.containsKey(name)) {
-                        AssignmentNode node = append(parent, new AssignmentNode());
-                        append(node, new ReferenceNode(locals.get(name)));
-                        parseChild(node);
-                        break;
-                    } else {
-                        AssignmentNode node = append(parent, new AssignmentNode());
-                        VariableNode lhs = append(node, new VariableNode().setName(name));
-                        locals = locals.plus(name, lhs);
-                        parseChild(node);
-                        break;
+                    AssignmentNode node = append(parent, new AssignmentNode());
+
+                    boolean isField = false;
+
+                    NamedNode f = find(name);
+                    if (f instanceof FieldNode) {
+                        ReferenceNode r = append(node, new ReferenceNode(f));
+                        parseChild(r);
+                        if (!currentToken().equals(")")) {
+                            parseChild(node);
+                            isField = true;
+                        }
                     }
+
+                    if (!isField) {
+                        node.children().clear();
+                        if (locals.containsKey(name)) {
+                            append(node, new ReferenceNode(locals.get(name)));
+                            parseChild(node);
+                        } else {
+                            VariableNode lhs = append(node, new VariableNode().setName(name));
+                            locals = locals.plus(name, lhs);
+                            parseChild(node);
+                        }
+                    }
+                    break;
                 }
                 case "λ":
                 case "\\": {
@@ -217,6 +247,11 @@ public class Parser {
                                 }
                                 parseChild(r);
                             }
+                        } else if (headNode instanceof FieldNode) {
+                            FieldNode fn = (FieldNode) headNode;
+                            ReferenceNode r = append(parent, new ReferenceNode(fn));
+
+                            parseChild(r);
                         } else if (Lexer.isLiteral(head)) {
                             append(parent, new LiteralNode(head));
                         } else {

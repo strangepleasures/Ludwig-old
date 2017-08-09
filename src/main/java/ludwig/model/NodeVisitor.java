@@ -40,4 +40,6 @@ public interface NodeVisitor<T> {
     T visitBreak(BreakNode breakNode);
 
     T visitContinue(ContinueNode continueNode);
+
+    T visitField(FieldNode fieldNode);
 }
