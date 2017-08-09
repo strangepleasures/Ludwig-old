@@ -281,6 +281,9 @@ public class EditorPane extends SplitPane {
             .setRef(node.id());
         List<Change> changes = new ArrayList<>();
         if (sel != null) {
+            if(node.parentOfType(ProjectNode.class).isReadonly()) {
+                return;
+            }
             head.setParent(sel.parent().id());
             int index = sel.parent().children().indexOf(sel);
             head.setPrev(index == 0 ? null : sel.parent().children().get(index - 1).id());
@@ -288,6 +291,9 @@ public class EditorPane extends SplitPane {
             changes.add(new Delete().setId(sel.id()));
         } else {
             FunctionNode target = membersList.getSelectionModel().getSelectedItem();
+            if(target.parentOfType(ProjectNode.class).isReadonly()) {
+                return;
+            }
             head.setParent(target.id());
             head.setPrev(target.children().get(target.children().size() - 1).id());
         }
