@@ -18,14 +18,13 @@ public class NodeUtils {
             case "null":
                 return null;
             default:
+                if (s.startsWith("'")) {
+                    return StringEscapeUtils.unescapeJavaScript(s.substring(1, s.length() - 1));
+                }
                 try {
                     return Long.parseLong(s);
                 } catch (NumberFormatException e1) {
-                    try {
-                        return Double.parseDouble(s);
-                    } catch (NumberFormatException e2) {
-                        return StringEscapeUtils.unescapeJavaScript(s.substring(1, s.length() - 1));
-                    }
+                    return Double.parseDouble(s);
                 }
         }
     }
@@ -47,7 +46,7 @@ public class NodeUtils {
         if (!onlyChildren) {
             nodes.add(node);
         }
-        for (Node child: node.children()) {
+        for (Node child : node.children()) {
             expandNode(child, false, nodes);
         }
     }
