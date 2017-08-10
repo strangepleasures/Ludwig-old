@@ -2,12 +2,17 @@ package ludwig.ide;
 
 import com.sun.javafx.collections.ObservableListWrapper;
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
+import impl.org.controlsfx.autocompletion.AutoCompletionTextFieldBinding;
+import javafx.application.Platform;
+import javafx.geometry.Bounds;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
+import javafx.util.StringConverter;
 import lombok.Getter;
 import lombok.Setter;
 import ludwig.changes.*;
@@ -105,6 +110,10 @@ public class EditorPane extends SplitPane {
                 case DOWN:
                     selectNextLine();
                     break;
+                default:
+                    if (e.getText() != null && !e.getText().isEmpty()) {
+                        showEditor(e.getText());
+                    }
             }
             e.consume();
         });
@@ -272,16 +281,38 @@ public class EditorPane extends SplitPane {
         environment.getWorkspace().changeListeners().add(this::processChanges);
     }
 
+    private void showEditor(String text) {
+        Popup popup = new Popup();
+        TextField autoCompleteTextField = new TextField();
+
+        AutoCompletionTextFieldBinding autoCompletionTextFieldBinding =
+            new AutoCompletionTextFieldBinding<>(
+                autoCompleteTextField,
+                param -> environment.getSymbolRegistry().symbols(param.getUserText()),
+                new NamedNodeStringConverter());
+        autoCompletionTextFieldBinding.setVisibleRowCount(20);
+
+        popup.getContent().add(autoCompleteTextField);
+        TextAreaSkin skin = (TextAreaSkin) codeView.getSkin();
+        Bounds caretBounds = codeView.localToScreen(skin.getCaretBounds());
+        autoCompleteTextField.setOnAction(ev -> {
+            popup.hide();
+        });
+        autoCompleteTextField.focusedProperty().addListener(ev -> autoCompleteTextField.deselect());
+
+
+        popup.show(codeView, caretBounds.getMinX(), caretBounds.getMinY());
+        autoCompleteTextField.deselect();
+        Platform.runLater(() -> {
+            autoCompleteTextField.setText(text);
+            autoCompleteTextField.selectRange(text.length(), text.length());
+        });
+    }
+
     private void processChanges(Change change) {
         if (!environment.getWorkspace().isBatchUpdate()) {
             refresh();
         }
-    }
-
-
-    private int getPosition(MouseEvent e) {
-        TextAreaSkin skin = (TextAreaSkin) codeView.getSkin();
-        return skin.getInsertionPoint(e.getX(), e.getY());
     }
 
     private void gotoDefinition(ReferenceNode node) {
@@ -568,4 +599,15 @@ public class EditorPane extends SplitPane {
         codeView.selectRange(0, 0);
     }
 
+    private static class NamedNodeStringConverter extends StringConverter<NamedNode> {
+        @Override
+        public String toString(NamedNode object) {
+            return NodeUtils.signature(object);
+        }
+
+        @Override
+        public NamedNode fromString(String string) {
+            return null;
+        }
+    }
 }

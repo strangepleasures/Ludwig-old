@@ -21,6 +21,11 @@ public class SymbolRegistry {
     }
 
     public SortedSet<NamedNode> symbols(String s) {
+        if (s.isEmpty() || s.length() < 2 && Character.isAlphabetic(s.charAt(0))) {
+            return new TreeSet<>();
+        }
+
+
         return symbols.subSet(s, s + Character.MAX_VALUE);
     }
 

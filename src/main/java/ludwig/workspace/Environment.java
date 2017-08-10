@@ -8,4 +8,8 @@ public class Environment {
     private final UsageTracker usageTracker = new UsageTracker(workspace);
     private final SymbolRegistry symbolRegistry = new SymbolRegistry(workspace);
 
+    public Environment() {
+        workspace.init();
+    }
+
 }

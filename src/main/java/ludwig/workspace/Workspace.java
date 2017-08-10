@@ -20,7 +20,8 @@ public class Workspace {
     private boolean batchUpdate;
     private boolean loading;
 
-    public Workspace() {
+
+    public void init() {
         Runtime runtime = new Runtime();
         addNode(runtime);
 
