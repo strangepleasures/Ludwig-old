@@ -32,6 +32,10 @@ public class Parser {
         new Parser(tokens, workspace).parse(projectNode);
     }
 
+    public static NamedNode item(PackageNode findByName, String name) {
+        return findByName.children().stream().map(n -> (NamedNode) n).filter(it -> it.getName().equals(name)).findFirst().orElse(null);
+    }
+
     private void parse(ProjectNode projectNode) throws ParserException {
         PackageNode packageNode = parseSignatures(projectNode);
         parseBodies(packageNode);
@@ -114,7 +118,7 @@ public class Parser {
                 if (currentToken().equals("lazy")) {
                     consume("lazy");
                 }
-                FunctionNode node = (FunctionNode) packageNode.item(nextToken());
+                FunctionNode node = (FunctionNode) item(packageNode, nextToken());
                 locals = HashTreePMap.empty();
                 for (Node child : node.children()) {
                     if (child instanceof SeparatorNode) {
@@ -299,8 +303,8 @@ public class Parser {
         for (ProjectNode project : workspace.getProjects()) {
             for (Node node : project.children()) {
                 PackageNode packageNode = (PackageNode) node;
-                if (packageNode.item(name) != null) {
-                    return packageNode.item(name);
+                if (item(packageNode, name) != null) {
+                    return item(packageNode, name);
                 }
             }
         }

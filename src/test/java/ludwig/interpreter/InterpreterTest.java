@@ -2,6 +2,7 @@ package ludwig.interpreter;
 
 import ludwig.model.*;
 import ludwig.runtime.StdLib;
+import ludwig.script.Parser;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.pcollections.HashTreePMap;
@@ -25,7 +26,7 @@ public class InterpreterTest {
         functionNode.add(variableNode2);
         functionNode.add(new SeparatorNode());
 
-        FunctionNode minus = (FunctionNode) systemPackage.item("-");
+        FunctionNode minus = (FunctionNode) Parser.item(systemPackage, "-");
         ReferenceNode head = new ReferenceNode(minus);
         ReferenceNode referenceNode1 = new ReferenceNode(variableNode1);
         ReferenceNode referenceNode2 = new ReferenceNode(variableNode2);
@@ -44,7 +45,7 @@ public class InterpreterTest {
 
         lambda.add(new VariableNode());
         lambda.add(new SeparatorNode());
-        FunctionNode plus = (FunctionNode) systemPackage.item("+");
+        FunctionNode plus = (FunctionNode) Parser.item(systemPackage, "+");
         ReferenceNode head = new ReferenceNode(plus);
         ReferenceNode referenceNode = new ReferenceNode((NamedNode) lambda.children().get(0));
         head.add(referenceNode);
@@ -63,7 +64,7 @@ public class InterpreterTest {
     @Test
     @Ignore
     public void testDelayed() {
-        FunctionNode or = (FunctionNode) systemPackage.item("or");
+        FunctionNode or = (FunctionNode) Parser.item(systemPackage, "or");
         assertEquals(true, Interpreter.call(or, true, true));
         assertEquals(true, Interpreter.call(or, true, false));
         assertEquals(true, Interpreter.call(or, false, true));
