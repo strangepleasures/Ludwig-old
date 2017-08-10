@@ -437,6 +437,8 @@ public class EditorPane extends SplitPane {
                 insertNode(new LiteralNode(autoCompleteTextField.getText()).id(Change.newId()));
             } else if (ref[0] != null) {
                 insertNode(ref[0]);
+            } else if (!autoCompleteTextField.getText().isEmpty()) {
+                insertNode(new VariableNode().setName(autoCompleteTextField.getText()).id(Change.newId()));
             }
             popup.hide();
             autoCompletionTextFieldBinding.dispose();
@@ -520,7 +522,7 @@ public class EditorPane extends SplitPane {
         if (node instanceof Signature) {
             for (String arg : ((Signature)node).arguments()) {
                 InsertNode insertPlaceholder = new InsertNode()
-                    .setNode(new PlaceholderNode(arg).id(Change.newId()))
+                    .setNode(new PlaceholderNode().setParameter(arg).id(Change.newId()))
                     .setParent(((InsertReference) head).getId())
                     .setPrev(prev);
                 changes.add(insertPlaceholder);

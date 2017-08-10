@@ -1,11 +1,18 @@
 package ludwig.model;
 
 public class PlaceholderNode extends Node<PlaceholderNode> {
-    private final String parameter;
-
-    public PlaceholderNode(String parameter) {
-        this.parameter = parameter;
+    public String getParameter() {
+        return parameter;
     }
+
+    public PlaceholderNode setParameter(String parameter) {
+        this.parameter = parameter;
+        return this;
+    }
+
+    private String parameter;
+
+
 
     @Override
     public <T> T accept(NodeVisitor<T> visitor) {

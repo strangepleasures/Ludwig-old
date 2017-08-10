@@ -258,3 +258,43 @@ name: "foo"
 changeId: "0658ae11-ff65-4ca2-a21f-db5747d351c6"
 nodeId: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
 name: "foo"
+--- !<InsertReference>
+changeId: "c80e3a60-d3bc-4f6d-9598-d4552c5c4750"
+parent: "ad783d5c-355f-415c-b46f-4c7c74c9132f"
+prev: "f70e2fb5-9706-4bca-99d9-1b8a8b5ef84e"
+next: null
+id: "a9b12b41-90d7-4b38-a01b-8de8151bb828"
+ref: "Runtime:system-tests:tag"
+--- !<InsertNode>
+changeId: "96095bf5-d897-47dd-8546-f4ec52429601"
+parent: "a9b12b41-90d7-4b38-a01b-8de8151bb828"
+prev: null
+next: null
+node: !<PlaceholderNode>
+  id: "5e980f78-4b09-4eb0-b07a-bf340ae55532"
+  comment: null
+  children: []
+  deleted: false
+  parameter: "it"
+--- !<Delete>
+changeId: "f2af3b27-476e-46a6-8988-879da9735d25"
+id: "5e980f78-4b09-4eb0-b07a-bf340ae55532"
+--- !<InsertReference>
+changeId: "60430cd5-b89d-46df-8b3d-dca83fe207d0"
+parent: "a9b12b41-90d7-4b38-a01b-8de8151bb828"
+prev: null
+next: null
+id: "4661f9f1-d79a-47df-a424-a527273cdb0f"
+ref: "system:tail"
+--- !<InsertNode>
+changeId: "9fc06140-00cc-4e40-b20e-e1cf9b3768e9"
+parent: "4661f9f1-d79a-47df-a424-a527273cdb0f"
+prev: null
+next: null
+node: !<PlaceholderNode>
+  id: "2cc6b4f0-e27b-4628-bf81-543a13b67707"
+  comment: null
+  children: []
+  deleted: false
+  parameter: "seq"
+
