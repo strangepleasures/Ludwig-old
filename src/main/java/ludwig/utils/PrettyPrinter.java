@@ -17,6 +17,9 @@ public class PrettyPrinter implements NodeVisitor<Void> {
 
     @Override
     public String toString() {
+        if (builder.length() == 0 || builder.charAt(builder.length() - 1) != '\n') {
+            builder.append('\n');
+        }
         return builder.toString();
     }
 

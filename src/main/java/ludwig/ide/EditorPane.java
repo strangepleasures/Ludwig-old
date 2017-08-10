@@ -76,24 +76,53 @@ public class EditorPane extends SplitPane {
         });
         signatureToolbar = new ToolBar(addParameterButton, removeParameterButton, moveParameterUpButton, moveParameterDownButton);
 
-        codeView.setEditable(false);
         codeView.setPrefHeight(1E6);
 
-        codeView.setOnMouseClicked(e -> {
-            Node sel = selectedNode(getPosition(e));
-            if (e.isControlDown()) {
-                if (sel instanceof ReferenceNode) {
-                    gotoDefinition((ReferenceNode) sel);
-                }
+
+        MenuItem gotoDefinitionMenuItem = new MenuItem("Go to definition");
+        gotoDefinitionMenuItem.setOnAction(e -> {
+            Node sel = selectedNode();
+            if (sel instanceof ReferenceNode) {
+                gotoDefinition((ReferenceNode) sel);
             }
         });
+        codeView.setContextMenu(new ContextMenu(gotoDefinitionMenuItem));
 
+        codeView.setOnKeyPressed(e -> {
+            switch (e.getCode()) {
+                case LEFT:
+                    selectPrevNode();
+                    break;
+                case RIGHT:
+                    selectNextNode();
+                    break;
+                case UP:
+                    selectPrevLine();
+                    break;
+                case DOWN:
+                    selectNextLine();
+                    break;
+            }
+            e.consume();
+        });
+
+        codeView.setOnKeyReleased(e -> {
+            e.consume();
+        });
+
+        codeView.setOnKeyTyped(e -> {
+            e.consume();
+        });
 
         membersList.getSelectionModel().selectedItemProperty().addListener(observable -> {
             signatureView.getChildren().clear();
             codeView.setText("");
 
             NamedNode selectedItem = membersList.getSelectionModel().getSelectedItem();
+
+            if (selectedItem == null) {
+                return;
+            }
 
             signatureView.add(new Label("Name"), 1, 1);
             signatureView.add(new Label("Description"), 2, 1);
@@ -128,7 +157,7 @@ public class EditorPane extends SplitPane {
             }
         });
 
-        getItems().addAll(packageTree, membersList, new VBox(signatureView, signatureToolbar, lazyCheckbox, codeView));
+        getItems().addAll(packageTree, membersList, new VBox(signatureView, /*signatureToolbar,*/ lazyCheckbox, codeView));
 
         membersList.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getClickCount() == 2
@@ -472,7 +501,75 @@ public class EditorPane extends SplitPane {
         if (codeSelection != null) {
             locate(codeSelection);
         }
+    }
 
+    private void selectNextNode() {
+        int start = codeView.getSelection().getStart();
+        Node current = selectedNode(start);
+        int length = codeView.getText().length();
+        for (int i = start + 1; i < length; i++) {
+            if (selectedNode(i) != current) {
+                codeView.selectRange(i, i);
+                break;
+            }
+        }
+    }
+
+    private void selectPrevNode() {
+        int start = codeView.getSelection().getStart();
+        Node current = selectedNode(start);
+
+        for (int i = start - 1; i >= 0; i--) {
+            Node sel = selectedNode(i);
+            if (sel != current) {
+                codeView.selectRange(i, i);
+                for (int j = i - 1; j >= 0; j--) {
+                    if (selectedNode(j) != sel) {
+                        codeView.selectRange(j + 1, j + 1);
+                        return;
+                    }
+                }
+            }
+        }
+
+        codeView.selectRange(0, 0);
+    }
+
+    private void selectNextLine() {
+        String text = codeView.getText();
+        int start = codeView.getSelection().getStart();
+        int length = text.length();
+        for (int i = start + 1; i < length; i++) {
+            if (text.charAt(i) == '\n') {
+                for (int j = i + 1; j < length; j++) {
+                    if (text.charAt(j) != ' ') {
+                        codeView.selectRange(j, j);
+                        return;
+                    }
+                }
+
+                break;
+            }
+        }
+        codeView.selectRange(length + 1, length + 1);
+    }
+
+    private void selectPrevLine() {
+        String text = codeView.getText();
+        int start = codeView.getSelection().getStart();
+        boolean first = true;
+        for (int i = start - 1; i >= 0; i--) {
+            if (text.charAt(i) == '\n') {
+                if (first) {
+                    first = false;
+                } else {
+                    codeView.selectRange(i, i);
+                    selectNextNode();
+                    return;
+                }
+            }
+        }
+        codeView.selectRange(0, 0);
     }
 
 }
