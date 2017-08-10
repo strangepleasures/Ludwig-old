@@ -1,9 +1,11 @@
 package ludwig.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import ludwig.utils.NodeUtils;
 
 public class LiteralNode extends Node<LiteralNode> {
     private String text;
+    @JsonIgnore
     private Object value;
 
     public LiteralNode() {
@@ -23,6 +25,9 @@ public class LiteralNode extends Node<LiteralNode> {
     }
 
     public Object value() {
+        if (value == null) {
+            value = NodeUtils.parseLiteral(text);
+        }
         return value;
     }
 
