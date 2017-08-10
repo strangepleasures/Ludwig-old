@@ -112,8 +112,13 @@ public class EditorPane extends SplitPane {
                 case DOWN:
                     selectNextLine();
                     break;
+                case BACK_SPACE:
+                    selectPrevNode();
+                case DELETE:
+                    deleteNode();
+                    break;
                 default:
-                    if (!selectedMember().parentOfType(ProjectNode.class).isReadonly() && e.getText() != null && !e.getText().isEmpty()) {
+                    if (!isReadonly() && e.getText() != null && !e.getText().isEmpty()) {
                         showEditor(e.getText());
                     }
             }
@@ -159,6 +164,10 @@ public class EditorPane extends SplitPane {
         ));
 
         environment.getWorkspace().changeListeners().add(this::processChanges);
+    }
+
+    private void deleteNode() {
+
     }
 
     private void runFunction() {
@@ -387,7 +396,7 @@ public class EditorPane extends SplitPane {
         Insert head = (node instanceof NamedNode) ? new InsertReference().setId(Change.newId()).setRef(node.id()) : new InsertNode().setNode(node);
         List<Change> changes = new ArrayList<>();
         NamedNode<?> selectedItem = selectedMember();
-        if (!(selectedItem instanceof FunctionNode) || selectedItem.parentOfType(ProjectNode.class).isReadonly()) {
+        if (!(selectedItem instanceof FunctionNode) || isReadonly()) {
             return;
         }
         FunctionNode target = (FunctionNode) selectedItem;
@@ -451,7 +460,6 @@ public class EditorPane extends SplitPane {
         }
     }
 
-
     private Node selectedNode(int pos) {
         if (membersList.getSelectionModel() != null) {
             NamedNode selectedItem = selectedMember();
@@ -484,9 +492,7 @@ public class EditorPane extends SplitPane {
             private String saved;
 
             {
-                setOnAction(e -> {
-                    applyChanges();
-                });
+                setOnAction(e -> applyChanges());
 
                 this.focusedProperty().addListener(e -> {
                     if (focusedProperty().get()) {
@@ -498,7 +504,7 @@ public class EditorPane extends SplitPane {
                     }
                 });
 
-                setEditable(!node.parentOfType(ProjectNode.class).isReadonly());
+                setEditable(!isReadonly());
             }
 
             private void applyChanges() {
@@ -513,9 +519,7 @@ public class EditorPane extends SplitPane {
             private String saved;
 
             {
-                setOnAction(e -> {
-                    applyChanges();
-                });
+                setOnAction(e -> applyChanges());
 
                 this.focusedProperty().addListener(e -> {
                     if (focusedProperty().get()) {
@@ -527,7 +531,7 @@ public class EditorPane extends SplitPane {
                     }
                 });
 
-                setEditable(!node.parentOfType(ProjectNode.class).isReadonly());
+                setEditable(!isReadonly());
             }
 
             private void applyChanges() {
@@ -647,5 +651,13 @@ public class EditorPane extends SplitPane {
         public NamedNode fromString(String string) {
             return null;
         }
+    }
+
+    private boolean isReadonly() {
+        return isReadonly(membersList.getSelectionModel().getSelectedItem());
+    }
+
+    private static boolean isReadonly(Node<?> node) {
+        return node == null || node.parentOfType(ProjectNode.class).isReadonly();
     }
 }
