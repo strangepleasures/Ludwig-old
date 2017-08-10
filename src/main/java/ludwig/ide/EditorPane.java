@@ -517,8 +517,8 @@ public class EditorPane extends SplitPane {
         changes.add(head);
 
         String prev = null;
-        if (node instanceof ArgumentList) {
-            for (String arg : ((ArgumentList)node).arguments()) {
+        if (node instanceof Signature) {
+            for (String arg : ((Signature)node).arguments()) {
                 InsertNode insertPlaceholder = new InsertNode()
                     .setNode(new PlaceholderNode(arg).id(Change.newId()))
                     .setParent(((InsertReference) head).getId())

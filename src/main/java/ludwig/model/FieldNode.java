@@ -3,7 +3,7 @@ package ludwig.model;
 import java.util.Collections;
 import java.util.List;
 
-public class FieldNode extends NamedNode<FieldNode> implements ArgumentList {
+public class FieldNode extends NamedNode<FieldNode> implements Signature {
     private static final List<String> ARGS = Collections.singletonList("it");
 
     @Override

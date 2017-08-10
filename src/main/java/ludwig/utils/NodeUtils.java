@@ -53,8 +53,8 @@ public class NodeUtils {
     }
 
     public static String signature(NamedNode node) {
-        if (node instanceof ArgumentList) {
-            return ((ArgumentList) node).arguments().stream().collect(Collectors.joining(" ", node.getName() + " ", ""));
+        if (node instanceof Signature) {
+            return ((Signature) node).arguments().stream().collect(Collectors.joining(" ", node.getName() + " ", ""));
         }
         return node.getName();
     }
