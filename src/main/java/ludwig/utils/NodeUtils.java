@@ -1,6 +1,6 @@
 package ludwig.utils;
 
-import ludwig.model.Node;
+import ludwig.model.*;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.ArrayList;
@@ -49,5 +49,12 @@ public class NodeUtils {
         for (Node child: node.children()) {
             expandNode(child, false, nodes);
         }
+    }
+
+    public static String signature(NamedNode node) {
+        if (node instanceof FunctionNode) {
+            return ((FunctionNode) node).signature();
+        }
+        return node.getName();
     }
 }

@@ -17,6 +17,7 @@ import ludwig.script.Lexer;
 import ludwig.script.LexerException;
 import ludwig.utils.NodeUtils;
 import ludwig.utils.PrettyPrinter;
+import ludwig.workspace.Environment;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -24,7 +25,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class EditorPane extends SplitPane {
-    private final App app;
+    private final Environment environment;
+    private final Settings settings;
     private final ListView<NamedNode> membersList = new ListView<>();
     private final PackageTreeView packageTree;
     private final GridPane signatureView = new GridPane();
@@ -36,10 +38,11 @@ public class EditorPane extends SplitPane {
     @Setter
     private EditorPane anotherPane;
 
-    public EditorPane(App app) {
-        this.app = app;
+    public EditorPane(Environment environment, Settings settings) {
+        this.environment = environment;
+        this.settings = settings;
 
-        packageTree = new PackageTreeView(app.getWorkspace());
+        packageTree = new PackageTreeView(environment.getWorkspace());
         packageTree.setMinWidth(120);
 
         membersList.setMinWidth(120);
@@ -153,7 +156,7 @@ public class EditorPane extends SplitPane {
             protected void updateItem(NamedNode item, boolean empty) {
                 super.updateItem(item, empty);
 
-                setText((!empty && item != null) ? signature(item) : "");
+                setText((!empty && item != null) ? NodeUtils.signature(item) : "");
             }
         });
 
@@ -211,9 +214,9 @@ public class EditorPane extends SplitPane {
                             .setParent(insertFn.getNode().id())
                             .setPrev(prev));
 
-                        app.getWorkspace().apply(changes);
+                        environment.getWorkspace().apply(changes);
 
-                        FunctionNode fn = app.getWorkspace().node(insertFn.getNode().id());
+                        FunctionNode fn = environment.getWorkspace().node(insertFn.getNode().id());
                         navigateTo(fn);
                     }
 
@@ -266,11 +269,11 @@ public class EditorPane extends SplitPane {
             runMenu
         ));
 
-        app.getWorkspace().changeListeners().add(this::processChanges);
+        environment.getWorkspace().changeListeners().add(this::processChanges);
     }
 
     private void processChanges(Change change) {
-        if (!app.getWorkspace().isBatchUpdate()) {
+        if (!environment.getWorkspace().isBatchUpdate()) {
             refresh();
         }
     }
@@ -355,7 +358,7 @@ public class EditorPane extends SplitPane {
             prev = insertPlaceholder.getNode().id();
         }
 
-        app.getWorkspace().apply(changes);
+        environment.getWorkspace().apply(changes);
     }
 
 
@@ -371,17 +374,10 @@ public class EditorPane extends SplitPane {
                     .stream()
                     .filter(item -> !(item instanceof PackageNode))
                     .map(item -> (NamedNode) item)
-                    .sorted(Comparator.comparing(EditorPane::signature))
+                    .sorted(Comparator.comparing(NodeUtils::signature))
                     .collect(Collectors.toList())));
             }
         }
-    }
-
-    private static String signature(NamedNode node) {
-        if (node instanceof FunctionNode) {
-            return ((FunctionNode) node).signature();
-        }
-        return node.getName();
     }
 
 
@@ -437,7 +433,7 @@ public class EditorPane extends SplitPane {
             }
 
             private void applyChanges() {
-                app.getWorkspace().apply(Collections.singletonList(new Comment().setNodeId(node.id()).setComment(getText())));
+                environment.getWorkspace().apply(Collections.singletonList(new Comment().setNodeId(node.id()).setComment(getText())));
             }
         };
         return textField;
@@ -466,7 +462,7 @@ public class EditorPane extends SplitPane {
             }
 
             private void applyChanges() {
-                app.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(node.id()).setName(getText())));
+                environment.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(node.id()).setName(getText())));
             }
 
         };

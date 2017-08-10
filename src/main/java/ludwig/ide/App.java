@@ -9,9 +9,11 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import lombok.Getter;
 import ludwig.changes.Change;
 import ludwig.repository.ChangeRepository;
 import ludwig.repository.LocalChangeRepository;
+import ludwig.workspace.Environment;
 import ludwig.workspace.Workspace;
 
 import java.io.File;
@@ -26,7 +28,8 @@ public class App extends Application {
 
     private Settings settings;
     private ChangeRepository repository;
-    private Workspace workspace = new Workspace();
+    @Getter
+    private Environment environment = new Environment();
 
     public static void main(String[] args) {
         launch(args);
@@ -70,8 +73,8 @@ public class App extends Application {
         borderPane.setTop(menuBar);
 
         SplitPane splitPane = new SplitPane();
-        EditorPane leftEditorPane = new EditorPane(this);
-        EditorPane rightEditorPane = new EditorPane(this);
+        EditorPane leftEditorPane = new EditorPane(environment, settings);
+        EditorPane rightEditorPane = new EditorPane(environment, settings);
         leftEditorPane.setAnotherPane(rightEditorPane);
         rightEditorPane.setAnotherPane(leftEditorPane);
         splitPane.getItems().addAll(leftEditorPane, rightEditorPane);
@@ -106,21 +109,17 @@ public class App extends Application {
     }
 
     private void loadWorkspace() {
-        if (workspace != null){
-            //todo  any save etc?
-            workspace = new Workspace();
-        }
         if (settings.getProject() != null) {
             try {
                 if ("file".equals(settings.getProject().getProtocol())) {
                     repository = new LocalChangeRepository(new File(settings.getProject().getFile()));
                 }
                 List<Change> changes = repository.pull(null);
-                workspace.load(changes);
+                environment.getWorkspace().load(changes);
 
-                workspace.changeListeners().add(change -> {
+                environment.getWorkspace().changeListeners().add(change -> {
                     try {
-                        if (!workspace.isLoading()) {
+                        if (!environment.getWorkspace().isLoading()) {
                             repository.push(Collections.singletonList(change));
                         }
                     } catch (IOException e) {
@@ -131,9 +130,5 @@ public class App extends Application {
                 // TODO:
             }
         }
-    }
-
-    public Workspace getWorkspace() {
-        return workspace;
     }
 }

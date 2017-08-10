@@ -17,7 +17,6 @@ public class Workspace {
     private final List<Change> appliedChanges = new ArrayList<>();
     private final List<ProjectNode> projects = new ArrayList<>();
     private final List<Consumer<Change>> changeListeners = new ArrayList<>();
-    private final UsageTracker usageTracker = new UsageTracker(this);
     private boolean batchUpdate;
     private boolean loading;
 
@@ -171,10 +170,6 @@ public class Workspace {
             projects.add((ProjectNode) node);
         }
         node.children().forEach(this::addNode);
-    }
-
-    public UsageTracker getUsageTracker() {
-        return usageTracker;
     }
 
     public boolean isBatchUpdate() {
