@@ -4,6 +4,7 @@ import com.sun.javafx.collections.ObservableListWrapper;
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
 import impl.org.controlsfx.autocompletion.AutoCompletionTextFieldBinding;
 import javafx.application.Platform;
+import javafx.event.Event;
 import javafx.geometry.Bounds;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -112,53 +113,18 @@ public class EditorPane extends SplitPane {
                     selectNextLine();
                     break;
                 default:
-                    if (e.getText() != null && !e.getText().isEmpty()) {
+                    if (!selectedMember().parentOfType(ProjectNode.class).isReadonly() && e.getText() != null && !e.getText().isEmpty()) {
                         showEditor(e.getText());
                     }
             }
             e.consume();
         });
 
-        codeView.setOnKeyReleased(e -> {
-            e.consume();
-        });
-
-        codeView.setOnKeyTyped(e -> {
-            e.consume();
-        });
+        codeView.setOnKeyReleased(Event::consume);
+        codeView.setOnKeyTyped(e -> e.consume());
 
         membersList.getSelectionModel().selectedItemProperty().addListener(observable -> {
-            signatureView.getChildren().clear();
-            codeView.setText("");
-
-            NamedNode selectedItem = membersList.getSelectionModel().getSelectedItem();
-
-            if (selectedItem == null) {
-                return;
-            }
-
-            signatureView.add(new Label("Name"), 1, 1);
-            signatureView.add(new Label("Description"), 2, 1);
-            signatureView.add(nameTextField(selectedItem), 1, 2);
-            signatureView.add(commentTextField(selectedItem), 2, 2);
-
-            if (selectedItem instanceof FunctionNode) {
-                FunctionNode fn = (FunctionNode) selectedItem;
-
-                int row = 3;
-                for (Node n : fn.children()) {
-                    if (n instanceof SeparatorNode) {
-                        break;
-                    }
-                    signatureView.add(nameTextField((NamedNode) n), 1, row);
-                    signatureView.add(commentTextField(n), 2, row);
-                    row++;
-                }
-                lazyCheckbox.setSelected(fn.isLazy());
-
-                codeView.setText(PrettyPrinter.print(fn));
-            }
-
+            displayMember();
         });
 
         membersList.setCellFactory(listView -> new ListCell<NamedNode>() {
@@ -181,105 +147,143 @@ public class EditorPane extends SplitPane {
         });
 
 
-        MenuItem addFunction = new MenuItem("Add...", Icons.icon("add"));
-        addFunction.setOnAction(e -> {
-            TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
-            if (selectedItem != null && selectedItem.getValue() instanceof PackageNode) {
-                PackageNode packageNode = (PackageNode) selectedItem.getValue();
+        MenuItem addFunctionMenuItem = new MenuItem("Add...", Icons.icon("add"));
+        addFunctionMenuItem.setOnAction(e -> addFunction());
 
-                TextInputDialog dialog = new TextInputDialog();
-                dialog.setTitle("Add a function");
-                dialog.setHeaderText("Enter function signature");
-
-                dialog.showAndWait().ifPresent(signature -> {
-                    List<String> parts = Collections.emptyList();
-                    try {
-                        parts = Lexer.read(new StringReader(signature))
-                            .stream()
-                            .filter(s -> !s.equals("(") && !s.equals(")"))
-                            .collect(Collectors.toList());
-                    } catch (IOException | LexerException t) {
-                    }
-                    if (!parts.isEmpty()) {
-                        List<Change> changes = new ArrayList<>();
-
-                        InsertNode insertFn = new InsertNode()
-                            .setNode(new FunctionNode().setName(parts.get(0)).id(Change.newId()))
-                            .setParent(packageNode.id())
-                            .setPrev(packageNode.children().isEmpty() ? null : packageNode.children().get(packageNode.children().size() - 1).id());
-
-                        changes.add(insertFn);
-
-                        String prev = null;
-                        for (int i = 1; i < parts.size(); i++) {
-                            String id = Change.newId();
-                            changes.add(new InsertNode()
-                                .setNode(new VariableNode().setName(parts.get(i)).id(id))
-                                .setParent(insertFn.getNode().id())
-                                .setPrev(prev));
-                            prev = id;
-                        }
-                        changes.add(new InsertNode()
-                            .setNode(new SeparatorNode().id(Change.newId()))
-                            .setParent(insertFn.getNode().id())
-                            .setPrev(prev));
-
-                        environment.getWorkspace().apply(changes);
-
-                        FunctionNode fn = environment.getWorkspace().node(insertFn.getNode().id());
-                        navigateTo(fn);
-                    }
-
-                });
-            }
-        });
         MenuItem runMenu = new MenuItem("Run...", Icons.icon("run"));
-        runMenu.setOnAction(e -> {
-            NamedNode selectedItem = membersList.getSelectionModel().getSelectedItem();
-            if (!(selectedItem instanceof FunctionNode)) {
-                return;
-            }
-            FunctionNode fn = (FunctionNode) selectedItem;
-            if (fn != null) {
-
-                try {
-                    Callable callable = (fn instanceof Callable) ? (Callable) fn : new CallableFunction(fn);
-                    Object result;
-                    if (callable.argCount() > 0) {
-                        TextInputDialog dialog = new TextInputDialog();
-                        dialog.setTitle("Execute function");
-                        dialog.setHeaderText("Enter function arguments");
-                        dialog.setContentText(fn.getName());
-                        Optional<String> params = dialog.showAndWait();
-                        if (params.isPresent()) {
-                            Object[] args = Lexer.read(new StringReader(params.get()))
-                                .stream()
-                                .filter(s -> !s.equals("(") && !s.equals(")"))
-                                .map(NodeUtils::parseLiteral)
-                                .map(x -> callable.isLazy() ? (Delayed<?>) () -> x : x)
-                                .toArray();
-                            result = callable.call(args);
-                        } else {
-                            return;
-                        }
-
-                    } else {
-                        result = callable.call();
-                    }
-                    new Alert(Alert.AlertType.INFORMATION, "Result: " + NodeUtils.formatLiteral(result)).show();
-                } catch (Exception err) {
-                    err.printStackTrace();
-                    new Alert(Alert.AlertType.ERROR, "Error: " + err.toString()).show();
-                }
-            }
-        });
+        runMenu.setOnAction(e -> runFunction());
 
         membersList.setContextMenu(new ContextMenu(
-            addFunction,
+            addFunctionMenuItem,
             runMenu
         ));
 
         environment.getWorkspace().changeListeners().add(this::processChanges);
+    }
+
+    private void runFunction() {
+        NamedNode selectedItem = selectedMember();
+        if (!(selectedItem instanceof FunctionNode)) {
+            return;
+        }
+        FunctionNode fn = (FunctionNode) selectedItem;
+        try {
+            Callable callable = (fn instanceof Callable) ? (Callable) fn : new CallableFunction(fn);
+            Object result;
+            if (callable.argCount() > 0) {
+                TextInputDialog dialog = new TextInputDialog();
+                dialog.setTitle("Execute function");
+                dialog.setHeaderText("Enter function arguments");
+                dialog.setContentText(fn.getName());
+                Optional<String> params = dialog.showAndWait();
+                if (params.isPresent()) {
+                    Object[] args = Lexer.read(new StringReader(params.get()))
+                        .stream()
+                        .filter(s -> !s.equals("(") && !s.equals(")"))
+                        .map(NodeUtils::parseLiteral)
+                        .map(x -> callable.isLazy() ? (Delayed<?>) () -> x : x)
+                        .toArray();
+                    result = callable.call(args);
+                } else {
+                    return;
+                }
+
+            } else {
+                result = callable.call();
+            }
+            new Alert(Alert.AlertType.INFORMATION, "Result: " + NodeUtils.formatLiteral(result)).show();
+        } catch (Exception err) {
+            err.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Error: " + err.toString()).show();
+        }
+    }
+
+    private void addFunction() {
+        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+        if (selectedItem != null && selectedItem.getValue() instanceof PackageNode) {
+            PackageNode packageNode = (PackageNode) selectedItem.getValue();
+
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Add a function");
+            dialog.setHeaderText("Enter function signature");
+
+            dialog.showAndWait().ifPresent(signature -> {
+                List<String> parts = Collections.emptyList();
+                try {
+                    parts = Lexer.read(new StringReader(signature))
+                        .stream()
+                        .filter(s -> !s.equals("(") && !s.equals(")"))
+                        .collect(Collectors.toList());
+                } catch (IOException | LexerException t) {
+                }
+                if (!parts.isEmpty()) {
+                    List<Change> changes = new ArrayList<>();
+
+                    InsertNode insertFn = new InsertNode()
+                        .setNode(new FunctionNode().setName(parts.get(0)).id(Change.newId()))
+                        .setParent(packageNode.id())
+                        .setPrev(packageNode.children().isEmpty() ? null : packageNode.children().get(packageNode.children().size() - 1).id());
+
+                    changes.add(insertFn);
+
+                    String prev = null;
+                    for (int i = 1; i < parts.size(); i++) {
+                        String id = Change.newId();
+                        changes.add(new InsertNode()
+                            .setNode(new VariableNode().setName(parts.get(i)).id(id))
+                            .setParent(insertFn.getNode().id())
+                            .setPrev(prev));
+                        prev = id;
+                    }
+                    changes.add(new InsertNode()
+                        .setNode(new SeparatorNode().id(Change.newId()))
+                        .setParent(insertFn.getNode().id())
+                        .setPrev(prev));
+
+                    environment.getWorkspace().apply(changes);
+
+                    FunctionNode fn = environment.getWorkspace().node(insertFn.getNode().id());
+                    navigateTo(fn);
+                }
+
+            });
+        }
+    }
+
+    private void displayMember() {
+        NamedNode selectedItem = selectedMember();
+        signatureView.getChildren().clear();
+        codeView.setText("");
+
+        if (selectedItem == null) {
+            return;
+        }
+
+        signatureView.add(new Label("Name"), 1, 1);
+        signatureView.add(new Label("Description"), 2, 1);
+        signatureView.add(nameTextField(selectedItem), 1, 2);
+        signatureView.add(commentTextField(selectedItem), 2, 2);
+
+        if (selectedItem instanceof FunctionNode) {
+            FunctionNode fn = (FunctionNode) selectedItem;
+
+            int row = 3;
+            for (Node n : fn.children()) {
+                if (n instanceof SeparatorNode) {
+                    break;
+                }
+                signatureView.add(nameTextField((NamedNode) n), 1, row);
+                signatureView.add(commentTextField(n), 2, row);
+                row++;
+            }
+            lazyCheckbox.setSelected(fn.isLazy());
+
+            codeView.setText(PrettyPrinter.print(fn));
+        }
+    }
+
+    private NamedNode<?> selectedMember() {
+        return membersList.getSelectionModel().getSelectedItem();
     }
 
     private void showEditor(String text) {
@@ -289,10 +293,26 @@ public class EditorPane extends SplitPane {
         AutoCompletionTextFieldBinding<NamedNode> autoCompletionTextFieldBinding =
             new AutoCompletionTextFieldBinding<>(
                 autoCompleteTextField,
-                param -> environment.getSymbolRegistry().symbols(param.getUserText()),
+                param -> {
+                    List<NamedNode> locals = new ArrayList<>();
+                    if (selectedMember() instanceof FunctionNode) {
+                        for (Node child : selectedMember().children()) {
+                            if (child instanceof SeparatorNode) {
+                                break;
+                            }
+                            if (((VariableNode) child).getName().startsWith(param.getUserText())) {
+                                locals.add((VariableNode) child);
+                            }
+                        }
+                    }
+                    SortedSet<NamedNode> symbols = environment.getSymbolRegistry().symbols(param.getUserText());
+                    locals.addAll(symbols);
+                    return locals;
+                },
                 new NamedNodeStringConverter());
+
         autoCompletionTextFieldBinding.setVisibleRowCount(20);
-        NamedNode[] ref = { null };
+        NamedNode[] ref = {null};
         autoCompletionTextFieldBinding.setOnAutoCompleted(e -> {
             ref[0] = e.getCompletion();
         });
@@ -307,13 +327,14 @@ public class EditorPane extends SplitPane {
                 insertNode(ref[0]);
             }
             popup.hide();
+            autoCompletionTextFieldBinding.dispose();
         });
         autoCompleteTextField.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) {
                 popup.hide();
+                autoCompletionTextFieldBinding.dispose();
             }
         });
-
 
 
         popup.show(codeView, caretBounds.getMinX(), caretBounds.getMinY());
@@ -365,7 +386,7 @@ public class EditorPane extends SplitPane {
         Node<?> sel = selectedNode();
         Insert head = (node instanceof NamedNode) ? new InsertReference().setId(Change.newId()).setRef(node.id()) : new InsertNode().setNode(node);
         List<Change> changes = new ArrayList<>();
-        NamedNode<?> selectedItem = membersList.getSelectionModel().getSelectedItem();
+        NamedNode<?> selectedItem = selectedMember();
         if (!(selectedItem instanceof FunctionNode) || selectedItem.parentOfType(ProjectNode.class).isReadonly()) {
             return;
         }
@@ -387,7 +408,7 @@ public class EditorPane extends SplitPane {
         if (node instanceof FieldNode) {
             InsertNode insertPlaceholder = new InsertNode()
                 .setNode(new PlaceholderNode("it").id(Change.newId()))
-                .setParent(((InsertReference)head).getId())
+                .setParent(((InsertReference) head).getId())
                 .setPrev(prev);
             changes.add(insertPlaceholder);
         } else for (Node<?> child : node.children()) {
@@ -396,7 +417,7 @@ public class EditorPane extends SplitPane {
             }
             InsertNode insertPlaceholder = new InsertNode()
                 .setNode(new PlaceholderNode(((VariableNode) child).getName()).id(Change.newId()))
-                .setParent(((InsertReference)head).getId())
+                .setParent(((InsertReference) head).getId())
                 .setPrev(prev);
             changes.add(insertPlaceholder);
             prev = insertPlaceholder.getNode().id();
@@ -423,28 +444,30 @@ public class EditorPane extends SplitPane {
                     .sorted(Comparator.comparing(NodeUtils::signature))
                     .collect(Collectors.toList())));
             }
+
+            if (!membersList.getItems().isEmpty()) {
+                membersList.getSelectionModel().select(0);
+            }
         }
     }
 
 
     private Node selectedNode(int pos) {
         if (membersList.getSelectionModel() != null) {
-            NamedNode selectedItem = membersList.getSelectionModel().getSelectedItem();
+            NamedNode selectedItem = selectedMember();
             if (!(selectedItem instanceof FunctionNode)) {
                 return null;
             }
             FunctionNode node = (FunctionNode) selectedItem;
-            if (node instanceof FunctionNode) {
-                List<Node> nodes = NodeUtils.expandNode(node);
-                int index = EditorUtils.tokenIndex(codeView.getText(), pos);
-                if (index < 0) {
-                    return null;
-                }
-                for (int i = 0; i < nodes.size(); i++) {
-                    if (nodes.get(i) instanceof SeparatorNode) {
-                        if (index + i + 1 < nodes.size()) {
-                            return nodes.get(index + i + 1);
-                        }
+            List<Node> nodes = NodeUtils.expandNode(node);
+            int index = EditorUtils.tokenIndex(codeView.getText(), pos);
+            if (index < 0) {
+                return null;
+            }
+            for (int i = 0; i < nodes.size(); i++) {
+                if (nodes.get(i) instanceof SeparatorNode) {
+                    if (index + i + 1 < nodes.size()) {
+                        return nodes.get(index + i + 1);
                     }
                 }
             }
@@ -526,7 +549,7 @@ public class EditorPane extends SplitPane {
             packageSelection = selectedItem.getValue();
         }
 
-        memberSelection = membersList.getSelectionModel().getSelectedItem();
+        memberSelection = selectedMember();
 
         codeSelection = selectedNode();
 
