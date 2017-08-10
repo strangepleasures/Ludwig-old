@@ -167,7 +167,120 @@ public class EditorPane extends SplitPane {
     }
 
     private void deleteNode() {
+        if (isReadonly()) {
+            return;
+        }
+        Node<?> node = selectedNode();
+        if (node == null) {
+            return;
+        }
+        Node<?> parent = node.parent();
+        node.accept(new NodeVisitor<Void>() {
+            @Override
+            public Void visitProject(ProjectNode projectNode) {
+                return null;
+            }
 
+            @Override
+            public Void visitPackage(PackageNode packageNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitFunction(FunctionNode functionNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitVariable(VariableNode variableNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitSeparator(SeparatorNode separatorNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitAssignment(AssignmentNode assignmentNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitReference(ReferenceNode referenceNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitList(ListNode listNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitLiteral(LiteralNode literalNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitLambda(LambdaNode lambdaNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitCall(CallNode callNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitReturn(ReturnNode returnNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitIf(IfNode ifNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitElse(ElseNode elseNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitFor(ForNode forNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitFunctionReference(FunctionReferenceNode functionReference) {
+                return null;
+            }
+
+            @Override
+            public Void visitThrow(ThrowNode throwNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitPlaceholder(PlaceholderNode placeholderNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitBreak(BreakNode breakNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitContinue(ContinueNode continueNode) {
+                return null;
+            }
+
+            @Override
+            public Void visitField(FieldNode fieldNode) {
+                return null;
+            }
+        });
     }
 
     private void runFunction() {
@@ -303,17 +416,7 @@ public class EditorPane extends SplitPane {
             new AutoCompletionTextFieldBinding<>(
                 autoCompleteTextField,
                 param -> {
-                    List<NamedNode> locals = new ArrayList<>();
-                    if (selectedMember() instanceof FunctionNode) {
-                        for (Node child : selectedMember().children()) {
-                            if (child instanceof SeparatorNode) {
-                                break;
-                            }
-                            if (((VariableNode) child).getName().startsWith(param.getUserText())) {
-                                locals.add((VariableNode) child);
-                            }
-                        }
-                    }
+                    List<NamedNode> locals = collectLocals(selectedMember(), selectedNode(), param.getUserText());
                     SortedSet<NamedNode> symbols = environment.getSymbolRegistry().symbols(param.getUserText());
                     locals.addAll(symbols);
                     return locals;
@@ -659,5 +762,22 @@ public class EditorPane extends SplitPane {
 
     private static boolean isReadonly(Node<?> node) {
         return node == null || node.parentOfType(ProjectNode.class).isReadonly();
+    }
+
+    private static void collectLocals(Node<?> root, Node<?> stop, String filter, List<NamedNode> locals) {
+        if (root == stop) {
+            return;
+        }
+        if (root instanceof VariableNode && ((VariableNode) root).getName().startsWith(filter)) {
+            locals.add((VariableNode) root);
+        }
+        root.children().forEach(child -> collectLocals(child, stop, filter, locals));
+    }
+
+    private static List<NamedNode> collectLocals(Node<?> root, Node<?> stop, String filter) {
+        List<NamedNode> locals = new ArrayList<>();
+        collectLocals(root, stop, filter, locals);
+        locals.sort(Comparator.comparing(Object::toString));
+        return locals;
     }
 }
