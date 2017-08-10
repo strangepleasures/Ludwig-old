@@ -8,7 +8,7 @@ def test-fields-and-properties :
 	assert== 123 tag o
 
 def test-assert :
-	assert true "Shouldn't fail"
+	assert true 'Shouldn\'t fail'
 
 def test-compose :
 	= f compose ref exp λ x : sin x
@@ -16,7 +16,7 @@ def test-compose :
 		==
 			call f 1
 			exp sin 1
-		"Function composition"
+		'Function composition'
 
 def test-range :
 	= r range 0 10

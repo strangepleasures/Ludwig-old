@@ -77,7 +77,7 @@ public class Lexer {
                         start = false;
                     }
 
-                    if (c == '"') {
+                    if (c == '\'') {
                         readEscapedString();
                         applyToken();
                     } else {
@@ -88,7 +88,7 @@ public class Lexer {
     }
 
     public static boolean isLiteral(String token) {
-        if (token.startsWith("\"")) {
+        if (token.startsWith("\'")) {
             return true;
         }
         try {
@@ -118,7 +118,7 @@ public class Lexer {
 
 
     private void readEscapedString() throws IOException, LexerException {
-        builder.append('"');
+        builder.append('\'');
         boolean escaped = false;
         while (true) {
             int c = reader.read();
@@ -131,7 +131,7 @@ public class Lexer {
             if (escaped) {
                 escaped = false;
             } else {
-                if (c == '"') {
+                if (c == '\'') {
                     return;
                 }
                 escaped = c == '\\';

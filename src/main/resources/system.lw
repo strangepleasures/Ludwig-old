@@ -6,7 +6,7 @@ def assert condition message :
 
 def assert== a b :
 	assert == a b
-		concat list "!= " a " " b
+		concat list '!= ' a ' ' b
 
 def not x :
 	cond x false true
@@ -93,14 +93,14 @@ def any seq predicate :
 
 
 def concat seq :
-	join seq "" "" ""
+	join seq '' '' ''
 
 def each seq consumer :
 	for x seq
 		call consumer x
 
 def println x :
-	print concat list x "\n"
+	print concat list x '\n'
 
 def pi : 3.14159265358979323846
 
