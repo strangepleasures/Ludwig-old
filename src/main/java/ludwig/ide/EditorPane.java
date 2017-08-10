@@ -382,18 +382,20 @@ public class EditorPane extends SplitPane {
         }
 
         changes.add(head);
+
         String prev = null;
-        String firstParamId = null;
-        for (Node<?> child : node.children()) {
+        if (node instanceof FieldNode) {
+            InsertNode insertPlaceholder = new InsertNode()
+                .setNode(new PlaceholderNode("it").id(Change.newId()))
+                .setParent(((InsertReference)head).getId())
+                .setPrev(prev);
+            changes.add(insertPlaceholder);
+        } else for (Node<?> child : node.children()) {
             if (child instanceof SeparatorNode) {
                 break;
             }
-            String id = Change.newId();
-            if (firstParamId == null) {
-                firstParamId = id;
-            }
             InsertNode insertPlaceholder = new InsertNode()
-                .setNode(new PlaceholderNode(((VariableNode) child).getName()).id(id))
+                .setNode(new PlaceholderNode(((VariableNode) child).getName()).id(Change.newId()))
                 .setParent(((InsertReference)head).getId())
                 .setPrev(prev);
             changes.add(insertPlaceholder);
