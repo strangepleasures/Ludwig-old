@@ -5,8 +5,8 @@ import ludwig.runtime.StdLib;
 
 import java.util.Arrays;
 
-public class Runtime extends ProjectNode {
-    public Runtime() {
+public class Builtins extends ProjectNode {
+    public Builtins() {
         setName("Runtime").id("Runtime");
 
         Arrays.asList(StdLib.class)

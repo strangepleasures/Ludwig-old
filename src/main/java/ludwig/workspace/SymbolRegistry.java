@@ -18,6 +18,8 @@ public class SymbolRegistry {
                 }
             }
         });
+
+        workspace.getProjects().forEach(this::grab);
     }
 
     public SortedSet<NamedNode> symbols(String s) {
@@ -34,5 +36,14 @@ public class SymbolRegistry {
             return ((FunctionNode) o).signature();
         }
         return o.toString();
+    }
+
+    private void grab(Node<?> node) {
+        if (node instanceof FunctionNode || node instanceof FieldNode) {
+            symbols.add(node);
+        } else {
+            node.children().forEach(this::grab);
+        }
+
     }
 }

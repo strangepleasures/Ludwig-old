@@ -1,7 +1,7 @@
 package ludwig.workspace;
 
 import ludwig.changes.*;
-import ludwig.interpreter.Runtime;
+import ludwig.interpreter.Builtins;
 import ludwig.model.*;
 import ludwig.script.Parser;
 
@@ -17,20 +17,21 @@ public class Workspace {
     private final List<Change> appliedChanges = new ArrayList<>();
     private final List<ProjectNode> projects = new ArrayList<>();
     private final List<Consumer<Change>> changeListeners = new ArrayList<>();
+    private final Builtins builtins = new Builtins();
     private boolean batchUpdate;
     private boolean loading;
 
+    public Workspace() {
+        addNode(builtins);
+    }
 
     public void init() {
-        Runtime runtime = new Runtime();
-        addNode(runtime);
-
         try {
             try (Reader reader = new InputStreamReader(Workspace.class.getResourceAsStream("/system.lw"))) {
-                Parser.parse(reader, this, runtime);
+                Parser.parse(reader, this, builtins);
             }
             try (Reader reader = new InputStreamReader(Workspace.class.getResourceAsStream("/system-tests.lw"))) {
-                Parser.parse(reader, this, runtime);
+                Parser.parse(reader, this, builtins);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
