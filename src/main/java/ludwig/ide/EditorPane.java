@@ -517,22 +517,15 @@ public class EditorPane extends SplitPane {
         changes.add(head);
 
         String prev = null;
-        if (node instanceof FieldNode) {
-            InsertNode insertPlaceholder = new InsertNode()
-                .setNode(new PlaceholderNode("it").id(Change.newId()))
-                .setParent(((InsertReference) head).getId())
-                .setPrev(prev);
-            changes.add(insertPlaceholder);
-        } else for (Node<?> child : node.children()) {
-            if (child instanceof SeparatorNode) {
-                break;
+        if (node instanceof ArgumentList) {
+            for (String arg : ((ArgumentList)node).arguments()) {
+                InsertNode insertPlaceholder = new InsertNode()
+                    .setNode(new PlaceholderNode(arg).id(Change.newId()))
+                    .setParent(((InsertReference) head).getId())
+                    .setPrev(prev);
+                changes.add(insertPlaceholder);
+                prev = insertPlaceholder.getNode().id();
             }
-            InsertNode insertPlaceholder = new InsertNode()
-                .setNode(new PlaceholderNode(((VariableNode) child).getName()).id(Change.newId()))
-                .setParent(((InsertReference) head).getId())
-                .setPrev(prev);
-            changes.add(insertPlaceholder);
-            prev = insertPlaceholder.getNode().id();
         }
 
         environment.getWorkspace().apply(changes);

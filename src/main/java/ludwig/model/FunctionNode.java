@@ -1,7 +1,10 @@
 package ludwig.model;
 
 
-public class FunctionNode extends NamedNode<FunctionNode> {
+import java.util.ArrayList;
+import java.util.List;
+
+public class FunctionNode extends NamedNode<FunctionNode> implements ArgumentList {
     private boolean lazy;
 
     public boolean isLazy() {
@@ -27,5 +30,17 @@ public class FunctionNode extends NamedNode<FunctionNode> {
             builder.append(' ').append(node);
         }
         return builder.toString();
+    }
+
+    @Override
+    public List<String> arguments() {
+        List<String> args = new ArrayList<>();
+        for (Node node: children()) {
+            if (node instanceof SeparatorNode) {
+                break;
+            }
+            args.add(node.toString());
+        }
+        return args;
     }
 }

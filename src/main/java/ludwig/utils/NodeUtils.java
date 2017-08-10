@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NodeUtils {
 
@@ -52,8 +53,8 @@ public class NodeUtils {
     }
 
     public static String signature(NamedNode node) {
-        if (node instanceof FunctionNode) {
-            return ((FunctionNode) node).signature();
+        if (node instanceof ArgumentList) {
+            return ((ArgumentList) node).arguments().stream().collect(Collectors.joining(" ", node.getName() + " ", ""));
         }
         return node.getName();
     }
