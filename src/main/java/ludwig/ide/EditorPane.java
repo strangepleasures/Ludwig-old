@@ -8,6 +8,7 @@ import javafx.geometry.Bounds;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -285,20 +286,34 @@ public class EditorPane extends SplitPane {
         Popup popup = new Popup();
         TextField autoCompleteTextField = new TextField();
 
-        AutoCompletionTextFieldBinding autoCompletionTextFieldBinding =
+        AutoCompletionTextFieldBinding<NamedNode> autoCompletionTextFieldBinding =
             new AutoCompletionTextFieldBinding<>(
                 autoCompleteTextField,
                 param -> environment.getSymbolRegistry().symbols(param.getUserText()),
                 new NamedNodeStringConverter());
         autoCompletionTextFieldBinding.setVisibleRowCount(20);
+        NamedNode[] ref = { null };
+        autoCompletionTextFieldBinding.setOnAutoCompleted(e -> {
+            ref[0] = e.getCompletion();
+        });
 
         popup.getContent().add(autoCompleteTextField);
         TextAreaSkin skin = (TextAreaSkin) codeView.getSkin();
         Bounds caretBounds = codeView.localToScreen(skin.getCaretBounds());
         autoCompleteTextField.setOnAction(ev -> {
+            if (Lexer.isLiteral(autoCompleteTextField.getText())) {
+                insertNode(new LiteralNode(autoCompleteTextField.getText()).id(Change.newId()));
+            } else if (ref[0] != null) {
+                insertNode(ref[0]);
+            }
             popup.hide();
         });
-        autoCompleteTextField.focusedProperty().addListener(ev -> autoCompleteTextField.deselect());
+        autoCompleteTextField.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ESCAPE) {
+                popup.hide();
+            }
+        });
+
 
 
         popup.show(codeView, caretBounds.getMinX(), caretBounds.getMinY());
@@ -346,50 +361,48 @@ public class EditorPane extends SplitPane {
         }
     }
 
-    private void insertNode(NamedNode<?> node) {
+    private void insertNode(Node<?> node) {
         Node<?> sel = selectedNode();
-        InsertReference head = new InsertReference()
-            .setId(Change.newId())
-            .setRef(node.id());
+        Insert head = (node instanceof NamedNode) ? new InsertReference().setId(Change.newId()).setRef(node.id()) : new InsertNode().setNode(node);
         List<Change> changes = new ArrayList<>();
-        NamedNode selectedItem = membersList.getSelectionModel().getSelectedItem();
-        if (!(selectedItem instanceof FunctionNode)) {
+        NamedNode<?> selectedItem = membersList.getSelectionModel().getSelectedItem();
+        if (!(selectedItem instanceof FunctionNode) || selectedItem.parentOfType(ProjectNode.class).isReadonly()) {
             return;
         }
         FunctionNode target = (FunctionNode) selectedItem;
         if (sel != null) {
-            if (node.parentOfType(ProjectNode.class).isReadonly()) {
-                return;
-            }
             head.setParent(sel.parent().id());
             int index = sel.parent().children().indexOf(sel);
             head.setPrev(index == 0 ? null : sel.parent().children().get(index - 1).id());
             head.setNext(index == sel.parent().children().size() - 1 ? null : sel.parent().children().get(index + 1).id());
             changes.add(new Delete().setId(sel.id()));
         } else {
-
-            if (target.parentOfType(ProjectNode.class).isReadonly()) {
-                return;
-            }
             head.setParent(target.id());
             head.setPrev(target.children().get(target.children().size() - 1).id());
         }
 
         changes.add(head);
         String prev = null;
+        String firstParamId = null;
         for (Node<?> child : node.children()) {
             if (child instanceof SeparatorNode) {
                 break;
             }
+            String id = Change.newId();
+            if (firstParamId == null) {
+                firstParamId = id;
+            }
             InsertNode insertPlaceholder = new InsertNode()
-                .setNode(new PlaceholderNode(((VariableNode) child).getName()).id(Change.newId()))
-                .setParent(head.getId())
+                .setNode(new PlaceholderNode(((VariableNode) child).getName()).id(id))
+                .setParent(((InsertReference)head).getId())
                 .setPrev(prev);
             changes.add(insertPlaceholder);
             prev = insertPlaceholder.getNode().id();
         }
 
         environment.getWorkspace().apply(changes);
+
+        selectNextNode();
     }
 
 
