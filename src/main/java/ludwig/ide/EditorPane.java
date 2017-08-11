@@ -90,9 +90,9 @@ public class EditorPane extends SplitPane {
 
 
         MenuItem gotoDefinitionMenuItem = new MenuItem("Go to definition");
+        Node sel = selectedNode();
         gotoDefinitionMenuItem.setOnAction(e -> {
-            Node sel = selectedNode();
-            if (sel instanceof ReferenceNode) {
+                     if (sel instanceof ReferenceNode) {
                 gotoDefinition((ReferenceNode) sel);
             }
         });
@@ -119,14 +119,28 @@ public class EditorPane extends SplitPane {
                     break;
                 default:
                     if (!isReadonly() && e.getText() != null && !e.getText().isEmpty()) {
-                        showEditor(e.getText());
+                        showEditor(e.getText(), false);
                     }
             }
             e.consume();
         });
 
         codeView.setOnKeyReleased(Event::consume);
-        codeView.setOnKeyTyped(e -> e.consume());
+        codeView.setOnKeyTyped(Event::consume);
+
+        codeView.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                Node n = selectedNode();
+
+                if (n == null) {
+                    return;
+                }
+                if (n instanceof PlaceholderNode) {
+                    showEditor("", true);
+                }
+                showEditor(n.toString(), true);
+            }
+        });
 
         membersList.getSelectionModel().selectedItemProperty().addListener(observable -> {
             displayMember();
@@ -408,9 +422,10 @@ public class EditorPane extends SplitPane {
         return membersList.getSelectionModel().getSelectedItem();
     }
 
-    private void showEditor(String text) {
+    private void showEditor(String text, boolean selectAll) {
         Popup popup = new Popup();
         TextField autoCompleteTextField = new TextField();
+        autoCompleteTextField.setText(text);
 
         AutoCompletionTextFieldBinding<NamedNode> autoCompletionTextFieldBinding =
             new AutoCompletionTextFieldBinding<>(
@@ -450,13 +465,14 @@ public class EditorPane extends SplitPane {
             }
         });
 
-
         popup.show(codeView, caretBounds.getMinX(), caretBounds.getMinY());
-        autoCompleteTextField.deselect();
-        Platform.runLater(() -> {
-            autoCompleteTextField.setText(text);
-            autoCompleteTextField.selectRange(text.length(), text.length());
-        });
+
+        if (!selectAll) {
+            Platform.runLater(() -> {
+
+                autoCompleteTextField.selectRange(text.length(), text.length());
+            });
+        }
     }
 
     private void processChanges(Change change) {
