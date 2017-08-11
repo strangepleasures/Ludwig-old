@@ -22,12 +22,17 @@ public class SymbolRegistry {
             } else if (change instanceof Delete) {
                 Node node = nodesById.remove(((Delete) change).getId());
                 if (node != null) {
-                    symbols.remove(node);
+                    deleteNode(node);
                 }
             }
         });
 
         workspace.getProjects().forEach(this::grab);
+    }
+
+    private void deleteNode(Node<?> node) {
+        symbols.remove(node);
+        node.children().forEach(this::deleteNode);
     }
 
     public SortedSet<NamedNode> symbols(String s) {
