@@ -298,3 +298,59 @@ node: !<PlaceholderNode>
   deleted: false
   parameter: "seq"
 
+--- !<Delete>
+changeId: "c536e8d9-5b1a-4181-b626-787ff383b14d"
+id: "4661f9f1-d79a-47df-a424-a527273cdb0f"
+--- !<InsertReference>
+changeId: "c30b1f06-1ff0-401d-ad76-7d0b0c6cb10f"
+parent: "a9b12b41-90d7-4b38-a01b-8de8151bb828"
+prev: null
+next: null
+id: "f4365554-8b45-4665-af3d-2160214ed963"
+ref: "system:map"
+--- !<InsertNode>
+changeId: "af93b2dc-f42b-4370-bdca-ebbff1379cf5"
+parent: "f4365554-8b45-4665-af3d-2160214ed963"
+prev: null
+next: null
+node: !<PlaceholderNode>
+  id: "c72e9218-364b-48c0-8b3f-9283f0eaaf23"
+  comment: null
+  children: []
+  deleted: false
+  parameter: "seq"
+--- !<InsertNode>
+changeId: "be9ae633-f80d-4806-9163-d97108eacdf5"
+parent: "f4365554-8b45-4665-af3d-2160214ed963"
+prev: "c72e9218-364b-48c0-8b3f-9283f0eaaf23"
+next: null
+node: !<PlaceholderNode>
+  id: "c3d2176f-54ec-4d1e-870e-d6eccd7933e1"
+  comment: null
+  children: []
+  deleted: false
+  parameter: "f"
+--- !<Delete>
+changeId: "e0bf1de1-52ee-4fc3-ac65-55fc7c1efe3e"
+id: "c72e9218-364b-48c0-8b3f-9283f0eaaf23"
+--- !<InsertNode>
+changeId: "1f924541-2042-4e26-8147-d6f3a6257fc1"
+parent: "f4365554-8b45-4665-af3d-2160214ed963"
+prev: null
+next: "c3d2176f-54ec-4d1e-870e-d6eccd7933e1"
+node: !<LiteralNode>
+  id: "3b5c1402-f74c-438a-be60-ba3eca2e5dad"
+  comment: null
+  children: []
+  deleted: false
+  text: "123"
+--- !<InsertNode>
+changeId: "f35b2a0e-d8b3-4e8e-b74c-aac13ffe7b32"
+parent: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
+prev: "e999f9b5-10cf-4064-a310-0e0443e0f28d"
+next: null
+node: !<LambdaNode>
+  id: null
+  comment: null
+  children: []
+  deleted: false

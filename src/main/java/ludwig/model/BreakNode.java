@@ -5,4 +5,9 @@ public class BreakNode extends Node<BreakNode> {
     public <T> T accept(NodeVisitor<T> visitor) {
         return visitor.visitBreak(this);
     }
+
+    @Override
+    public String toString() {
+        return "break";
+    }
 }

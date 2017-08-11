@@ -51,10 +51,10 @@ public class NodeUtils {
         }
     }
 
-    public static String signature(NamedNode node) {
+    public static String signature(Node node) {
         if (node instanceof Signature) {
-            return ((Signature) node).arguments().stream().collect(Collectors.joining(" ", node.getName() + " ", ""));
+            return ((Signature) node).arguments().stream().collect(Collectors.joining(" ", node.toString() + " ", ""));
         }
-        return node.getName();
+        return node.toString();
     }
 }

@@ -5,4 +5,9 @@ public class ContinueNode extends Node<ContinueNode> {
     public <T> T accept(NodeVisitor<T> visitor) {
         return visitor.visitContinue(this);
     }
+
+    @Override
+    public String toString() {
+        return "continue";
+    }
 }
