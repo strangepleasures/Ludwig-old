@@ -427,19 +427,68 @@ public class EditorPane extends SplitPane {
         TextField autoCompleteTextField = new TextField();
         autoCompleteTextField.setText(text);
 
-        AutoCompletionTextFieldBinding<NamedNode> autoCompletionTextFieldBinding =
+        AutoCompletionTextFieldBinding<Node> autoCompletionTextFieldBinding =
             new AutoCompletionTextFieldBinding<>(
                 autoCompleteTextField,
                 param -> {
-                    List<NamedNode> locals = collectLocals(selectedMember(), selectedNode(), param.getUserText());
-                    SortedSet<NamedNode> symbols = environment.getSymbolRegistry().symbols(param.getUserText());
-                    locals.addAll(symbols);
-                    return locals;
+                    List<Node> suggestions = new ArrayList<>();
+                    if (param.getUserText().isEmpty() || "= variable value".startsWith(param.getUserText())) {
+                        suggestions.add(new AssignmentNode()
+                            .add(new PlaceholderNode().setParameter("variable").id(Change.newId()))
+                            .add(new PlaceholderNode().setParameter("value").id(Change.newId())));
+                    }
+                    if (param.getUserText().isEmpty() || param.getUserText().startsWith("λ") ||  param.getUserText().startsWith("\\") ) {
+                        suggestions.add(new LambdaNode()
+                            .add(new PlaceholderNode().setParameter("args...").id(Change.newId()))
+                            .add(new SeparatorNode().id(Change.newId()))
+                            .add(new PlaceholderNode().setParameter("body...").id(Change.newId())));
+                    }
+                    if (param.getUserText().isEmpty() || "ref fn".startsWith(param.getUserText())) {
+                        suggestions.add(new FunctionReferenceNode()
+                            .add(new PlaceholderNode().setParameter("fn").id(Change.newId())));
+                    }
+                    if (param.getUserText().isEmpty() || "call fn args...".startsWith(param.getUserText())) {
+                        suggestions.add(new CallNode()
+                            .add(new PlaceholderNode().setParameter("fn").id(Change.newId()))
+                            .add(new PlaceholderNode().setParameter("args...").id(Change.newId())));
+                    }
+                    if (param.getUserText().isEmpty() || "if condition statements...>".startsWith(param.getUserText())) {
+                        suggestions.add(new IfNode()
+                            .add(new PlaceholderNode().setParameter("condition").id(Change.newId()))
+                            .add(new PlaceholderNode().setParameter("statements...").id(Change.newId())));
+                    }
+                    if (param.getUserText().isEmpty() || "else statements...".startsWith(param.getUserText())) {
+                        suggestions.add(new ElseNode()
+                            .add(new PlaceholderNode().setParameter("statements...").id(Change.newId())));
+                    }
+                    if (param.getUserText().isEmpty() || "for var seq statements...".startsWith(param.getUserText())) {
+                        suggestions.add(new ForNode()
+                            .add(new PlaceholderNode().setParameter("var").id(Change.newId()))
+                            .add(new PlaceholderNode().setParameter("seq").id(Change.newId()))
+                            .add(new PlaceholderNode().setParameter("statements...").id(Change.newId())));
+                    }
+                    if (param.getUserText().isEmpty() || "break loop-var".startsWith(param.getUserText())) {
+                        suggestions.add(new BreakNode()
+                            .add(new PlaceholderNode().setParameter("loop-var").id(Change.newId())));
+                    }
+                    if (param.getUserText().isEmpty() || "continue loop-var".startsWith(param.getUserText())) {
+                        suggestions.add(new ContinueNode()
+                            .add(new PlaceholderNode().setParameter("loop-var").id(Change.newId())));
+                    }
+                    if (param.getUserText().isEmpty() || "return result".startsWith(param.getUserText())) {
+                        suggestions.add(new ReturnNode()
+                            .add(new PlaceholderNode().setParameter("result").id(Change.newId())));
+                    }
+
+                    suggestions.addAll(collectLocals(selectedMember(), selectedNode(), param.getUserText()));
+                    suggestions.addAll(environment.getSymbolRegistry().symbols(param.getUserText()));
+
+                    return suggestions;
                 },
-                new NamedNodeStringConverter());
+                new NodeStringConverter());
 
         autoCompletionTextFieldBinding.setVisibleRowCount(20);
-        NamedNode[] ref = {null};
+        Node[] ref = {null};
         autoCompletionTextFieldBinding.setOnAutoCompleted(e -> {
             ref[0] = e.getCompletion();
         });
@@ -755,9 +804,9 @@ public class EditorPane extends SplitPane {
         codeView.selectRange(0, 0);
     }
 
-    private static class NamedNodeStringConverter extends StringConverter<NamedNode> {
+    private static class NodeStringConverter extends StringConverter<Node> {
         @Override
-        public String toString(NamedNode object) {
+        public String toString(Node object) {
             return NodeUtils.signature(object);
         }
 
@@ -775,7 +824,7 @@ public class EditorPane extends SplitPane {
         return node == null || node.parentOfType(ProjectNode.class).isReadonly();
     }
 
-    private static void collectLocals(Node<?> root, Node<?> stop, String filter, List<NamedNode> locals) {
+    private static void collectLocals(Node<?> root, Node<?> stop, String filter, List<Node> locals) {
         if (root == stop) {
             return;
         }
@@ -785,8 +834,8 @@ public class EditorPane extends SplitPane {
         root.children().forEach(child -> collectLocals(child, stop, filter, locals));
     }
 
-    private static List<NamedNode> collectLocals(Node<?> root, Node<?> stop, String filter) {
-        List<NamedNode> locals = new ArrayList<>();
+    private static List<Node> collectLocals(Node<?> root, Node<?> stop, String filter) {
+        List<Node> locals = new ArrayList<>();
         collectLocals(root, stop, filter, locals);
         locals.sort(Comparator.comparing(Object::toString));
         return locals;

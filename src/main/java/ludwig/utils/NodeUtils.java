@@ -51,10 +51,19 @@ public class NodeUtils {
         }
     }
 
-    public static String signature(Node node) {
-        if (node instanceof Signature) {
-            return ((Signature) node).arguments().stream().collect(Collectors.joining(" ", node.toString() + " ", ""));
+    public static String signature(Node<?> node) {
+        StringBuilder builder = new StringBuilder(node.toString());
+        for (Node<?> child: node.children()) {
+            if (child instanceof SeparatorNode) {
+                break;
+            }
+            builder.append(' ');
+            if (child instanceof PlaceholderNode) {
+                builder.append(((PlaceholderNode) child).getParameter());
+            } else {
+                builder.append(child.toString());
+            }
         }
-        return node.toString();
+        return builder.toString();
     }
 }
