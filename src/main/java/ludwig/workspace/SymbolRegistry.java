@@ -20,7 +20,10 @@ public class SymbolRegistry {
                     nodesById.put(node.id(), node);
                 }
             } else if (change instanceof Delete) {
-                symbols.remove(nodesById.remove(((Delete) change).getId()));
+                Node node = nodesById.remove(((Delete) change).getId());
+                if (node != null) {
+                    symbols.remove(node);
+                }
             }
         });
 
