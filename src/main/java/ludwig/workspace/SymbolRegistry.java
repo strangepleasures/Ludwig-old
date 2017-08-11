@@ -1,6 +1,7 @@
 package ludwig.workspace;
 
 
+import ludwig.changes.Delete;
 import ludwig.changes.InsertNode;
 import ludwig.model.*;
 
@@ -8,6 +9,7 @@ import java.util.*;
 
 public class SymbolRegistry {
     private final TreeSet symbols = new TreeSet<>(Comparator.comparing(SymbolRegistry::stringify));
+    private final Map<String, Node> nodesById = new HashMap<>();
 
     public SymbolRegistry(Workspace workspace) {
         workspace.changeListeners().add(change -> {
@@ -15,7 +17,10 @@ public class SymbolRegistry {
                 Node node = ((InsertNode) change).getNode();
                 if (node instanceof FunctionNode || node instanceof FieldNode) {
                     symbols.add(node);
+                    nodesById.put(node.id(), node);
                 }
+            } else if (change instanceof Delete) {
+                symbols.remove(nodesById.remove(((Delete) change).getId()));
             }
         });
 
@@ -26,7 +31,6 @@ public class SymbolRegistry {
         if (s.isEmpty() || s.length() < 2 && Character.isAlphabetic(s.charAt(0))) {
             return new TreeSet<>();
         }
-
 
         return symbols.subSet(s, s + Character.MAX_VALUE);
     }
