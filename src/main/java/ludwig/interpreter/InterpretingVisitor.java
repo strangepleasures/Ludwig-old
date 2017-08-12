@@ -99,9 +99,14 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitFunctionReference(FunctionReferenceNode functionReference) {
-        FunctionNode node = (FunctionNode) ((ReferenceNode) functionReference.children().get(0)).ref();
+        Node node = ((ReferenceNode) functionReference.children().get(0)).ref();
         if (!(node instanceof Callable)) {
-            return new CallableFunction(node);
+            if (node instanceof FunctionNode) {
+                return new CallableFunction((FunctionNode) node);
+            }
+            if (node instanceof FieldNode) {
+                return new CallableField((FieldNode) node);
+            }
         }
         return node;
     }

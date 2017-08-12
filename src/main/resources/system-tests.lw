@@ -6,6 +6,8 @@ def test-fields-and-properties :
 	= o Object
 	= tag o 123
 	assert== 123 tag o
+	= r ref tag
+	assert== 123 call r o
 
 def test-assert :
 	assert true 'Shouldn\'t fail'
