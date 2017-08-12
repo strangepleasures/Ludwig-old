@@ -358,8 +358,7 @@ public class EditorPane extends SplitPane {
 
                     InsertNode insertFn = new InsertNode()
                         .setNode(new FunctionNode().setName(parts.get(0)).id(Change.newId()))
-                        .setParent(packageNode.id())
-                        .setPrev(packageNode.children().isEmpty() ? null : packageNode.children().get(packageNode.children().size() - 1).id());
+                        .setParent(packageNode.id());
 
                     changes.add(insertFn);
 

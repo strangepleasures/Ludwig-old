@@ -16,4 +16,9 @@ public class ProjectNode extends NamedNode<ProjectNode> {
         this.readonly = readonly;
         return this;
     }
+
+    @Override
+    public boolean isOrdered() {
+        return false;
+    }
 }

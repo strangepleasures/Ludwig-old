@@ -6,4 +6,8 @@ public class PackageNode extends NamedNode<PackageNode> {
         return visitor.visitPackage(this);
     }
 
+    @Override
+    public boolean isOrdered() {
+        return false;
+    }
 }

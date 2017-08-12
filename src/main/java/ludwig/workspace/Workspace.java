@@ -87,25 +87,28 @@ public class Workspace {
             Node prev = node(insert.getPrev());
             Node next = node(insert.getNext());
 
-            List items = parent.children();
-
-            if (next == null) {
-                if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {
-                    parent.add(node);
-                }
-            } else if (prev == null) {
-                if (!items.isEmpty() && items.get(0) == next) {
-                    items.add(0, node);
-                }
+            if (!parent.isOrdered()) {
+                parent.add(node);
             } else {
-                int prevIndex = items.indexOf(prev);
-                int nextIndex = items.indexOf(next);
+                List items = parent.children();
 
-                if (nextIndex == prevIndex + 1) {
-                    items.add(nextIndex, next);
+                if (next == null) {
+                    if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {
+                        parent.add(node);
+                    }
+                } else if (prev == null) {
+                    if (!items.isEmpty() && items.get(0) == next) {
+                        items.add(0, node);
+                    }
+                } else {
+                    int prevIndex = items.indexOf(prev);
+                    int nextIndex = items.indexOf(next);
+
+                    if (nextIndex == prevIndex + 1) {
+                        items.add(nextIndex, next);
+                    }
                 }
             }
-
         }
         return null;
     }
