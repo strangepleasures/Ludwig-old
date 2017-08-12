@@ -27,7 +27,7 @@ In fact every programming language supports multiple styles for expressing the s
 Such subtle difference between different styles provoke endless discussions ("holy wars") between their proponents.
 
 However code is not text!
-Code consists of abstractions, such as functions and types and can be represented as a graph of objects. In fact, all professional software developers think in terms of abstractions and just use textual representation as a notation to express their ideas. _"Mathematicians think in symbols, physicists in objects, philosophers in concepts, geometers in images, jurists in constructs, logicians in operators, writers in impressions, and idiots in words. - Nassim Taleb"_
+Code consists of abstractions, such as functions and types and can be represented as a graph of objects. In fact, all professional software developers think in terms of abstractions and just use textual representation as a notation to express their ideas. _"Mathematicians think in symbols, physicists in objects, philosophers in concepts, geometers in images, jurists in constructs, logicians in operators, writers in impressions, and idiots in words." - Nassim Taleb_
 As in mathematics, one abstract construction can be expressed in potentially infinite number of different notations.
 
 Another consideration is that nowdays software developers always work in IDE, and support of language features from IDE including autocompletion, refactoring and validation of code is crucial for programming language's ease of use and popularity. 
