@@ -137,8 +137,9 @@ public class EditorPane extends SplitPane {
                 }
                 if (n instanceof PlaceholderNode) {
                     showEditor("", true);
+                } else {
+                    showEditor(n.toString(), true);
                 }
-                showEditor(n.toString(), true);
             }
         });
 
@@ -517,10 +518,7 @@ public class EditorPane extends SplitPane {
         popup.show(codeView, caretBounds.getMinX(), caretBounds.getMinY());
 
         if (!selectAll) {
-            Platform.runLater(() -> {
-
-                autoCompleteTextField.selectRange(text.length(), text.length());
-            });
+            Platform.runLater(() -> autoCompleteTextField.selectRange(text.length(), text.length()));
         }
     }
 
