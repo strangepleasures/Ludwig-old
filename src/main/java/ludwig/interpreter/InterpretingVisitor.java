@@ -58,19 +58,37 @@ class InterpretingVisitor implements NodeVisitor<Object> {
         }
 
         if (node instanceof FunctionNode) {
+            boolean lazy = ((FunctionNode) node).isLazy();
             HashPMap<NamedNode, Object> savedLocals = locals;
             try {
-                FunctionNode fn = (FunctionNode) node;
                 Object result = null;
                 boolean params = true;
-                for (int i = 0; i < fn.children().size(); i++) {
-                    Node child = fn.children().get(i);
+                OverrideNode overrideNode = null;
+                for (int i = 0; i < node.children().size(); i++) {
+                    Node child = node.children().get(i);
+
                     if (params) {
                         if (child instanceof SeparatorNode) {
                             params = false;
+                            if (overrideNode != null) {
+                                for (int j = 1; j < overrideNode.children().size(); j++) {
+                                    result = overrideNode.children().get(j).accept(this);
+                                    if (result instanceof Signal) {
+                                        break;
+                                    }
+                                }
+                                return untail(result);
+                            }
                         } else {
                             Node arg = referenceNode.children().get(i);
-                            locals = locals.plus((VariableNode) child, fn.isLazy() ? new Return(arg, locals) : arg.accept(this));
+                            Object argValue = lazy ? new Return(arg, locals) : arg.accept(this);
+                            if (i == 0 && argValue instanceof Instance) {
+                                Signature implementation = ((Instance) argValue).type().implementation((Signature) node);
+                                if (implementation instanceof OverrideNode) {
+                                    overrideNode = (OverrideNode) implementation;
+                                }
+                            }
+                            locals = locals.plus((VariableNode) child, argValue);
                         }
                     } else {
                         result = child.accept(this);
@@ -133,6 +151,11 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitField(FieldNode fieldNode) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Object visitOverride(OverrideNode overrideNode) {
         throw new UnsupportedOperationException();
     }
 

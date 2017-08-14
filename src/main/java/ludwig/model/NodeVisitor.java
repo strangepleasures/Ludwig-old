@@ -42,4 +42,6 @@ public interface NodeVisitor<T> {
     T visitContinue(ContinueNode continueNode);
 
     T visitField(FieldNode fieldNode);
+
+    T visitOverride(OverrideNode overrideNode);
 }

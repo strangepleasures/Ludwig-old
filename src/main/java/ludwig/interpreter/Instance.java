@@ -6,7 +6,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Instance {
+    private final Type type;
     private final Map<FieldNode, Object> data = new HashMap<>();
+
+    public Instance(Type type) {
+        this.type = type;
+    }
+
+    public Type type() {
+        return type;
+    }
 
     public <R> R get(FieldNode field) {
         return (R) data.get(field);

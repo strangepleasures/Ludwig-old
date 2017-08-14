@@ -116,6 +116,14 @@ public class PrettyPrinter implements NodeVisitor<Void> {
     }
 
     @Override
+    public Void visitOverride(OverrideNode overrideNode) {
+        for (int i = 1; i < overrideNode.children().size(); i++) {
+            child(overrideNode.children().get(i), false);
+        }
+        return null;
+    }
+
+    @Override
     public Void visitCall(CallNode callNode) {
         print("call");
         child(callNode.children().get(0), true);

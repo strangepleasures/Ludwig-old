@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class EditorPane extends SplitPane {
     private final Environment environment;
     private final Settings settings;
-    private final ListView<NamedNode> membersList = new ListView<>();
+    private final ListView<Signature> membersList = new ListView<>();
     private final PackageTreeView packageTree;
     private final GridPane signatureView = new GridPane();
     private final ToolBar signatureToolbar;
@@ -147,12 +147,12 @@ public class EditorPane extends SplitPane {
             displayMember();
         });
 
-        membersList.setCellFactory(listView -> new ListCell<NamedNode>() {
+        membersList.setCellFactory(listView -> new ListCell<Signature>() {
             @Override
-            protected void updateItem(NamedNode item, boolean empty) {
+            protected void updateItem(Signature item, boolean empty) {
                 super.updateItem(item, empty);
 
-                setText((!empty && item != null) ? NodeUtils.signature(item) : "");
+                setText((!empty && item != null) ? NodeUtils.signature((Node)item) : "");
             }
         });
 
@@ -162,7 +162,7 @@ public class EditorPane extends SplitPane {
             if (event.getClickCount() == 2
                 && membersList.getSelectionModel().selectedItemProperty().getValue() != null
                 && anotherPane != null) {
-                anotherPane.insertNode(membersList.getSelectionModel().selectedItemProperty().getValue());
+                anotherPane.insertNode((Node<?>) membersList.getSelectionModel().selectedItemProperty().getValue());
             }
         });
 
@@ -190,116 +190,11 @@ public class EditorPane extends SplitPane {
             return;
         }
         Node<?> parent = node.parent();
-        node.accept(new NodeVisitor<Void>() {
-            @Override
-            public Void visitProject(ProjectNode projectNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitPackage(PackageNode packageNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitFunction(FunctionNode functionNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitVariable(VariableNode variableNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitSeparator(SeparatorNode separatorNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitAssignment(AssignmentNode assignmentNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitReference(ReferenceNode referenceNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitList(ListNode listNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitLiteral(LiteralNode literalNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitLambda(LambdaNode lambdaNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitCall(CallNode callNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitReturn(ReturnNode returnNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitIf(IfNode ifNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitElse(ElseNode elseNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitFor(ForNode forNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitFunctionReference(FunctionReferenceNode functionReference) {
-                return null;
-            }
-
-            @Override
-            public Void visitThrow(ThrowNode throwNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitPlaceholder(PlaceholderNode placeholderNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitBreak(BreakNode breakNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitContinue(ContinueNode continueNode) {
-                return null;
-            }
-
-            @Override
-            public Void visitField(FieldNode fieldNode) {
-                return null;
-            }
-        });
+        // TODO: implement
     }
 
     private void runFunction() {
-        NamedNode selectedItem = selectedMember();
+        Signature selectedItem = selectedMember();
         if (!(selectedItem instanceof FunctionNode)) {
             return;
         }
@@ -387,7 +282,7 @@ public class EditorPane extends SplitPane {
     }
 
     private void displayMember() {
-        NamedNode selectedItem = selectedMember();
+        Signature selectedItem = selectedMember();
         signatureView.getChildren().clear();
         codeView.setText("");
 
@@ -395,20 +290,22 @@ public class EditorPane extends SplitPane {
             return;
         }
 
+        NamedNode head = (selectedItem instanceof OverrideNode) ? (NamedNode) ((OverrideNode) selectedItem).children().get(0) : (NamedNode) selectedItem;
+
         signatureView.add(new Label("Name"), 1, 1);
         signatureView.add(new Label("Description"), 2, 1);
-        signatureView.add(nameTextField(selectedItem), 1, 2);
-        signatureView.add(commentTextField(selectedItem), 2, 2);
+        signatureView.add(nameTextField(head), 1, 2);
+        signatureView.add(commentTextField((Node)selectedItem), 2, 2);
 
-        if (selectedItem instanceof FunctionNode) {
-            FunctionNode fn = (FunctionNode) selectedItem;
+        if (head instanceof FunctionNode) {
+            FunctionNode fn = (FunctionNode) head;
 
             int row = 3;
             for (Node n : fn.children()) {
                 if (n instanceof SeparatorNode) {
                     break;
                 }
-                signatureView.add(nameTextField((NamedNode) n), 1, row);
+                signatureView.add(nameTextField((VariableNode)n), 1, row);
                 signatureView.add(commentTextField(n), 2, row);
                 row++;
             }
@@ -418,7 +315,7 @@ public class EditorPane extends SplitPane {
         }
     }
 
-    private NamedNode<?> selectedMember() {
+    private Signature selectedMember() {
         return membersList.getSelectionModel().getSelectedItem();
     }
 
@@ -480,7 +377,7 @@ public class EditorPane extends SplitPane {
                             .add(new PlaceholderNode().setParameter("result").id(Change.newId())));
                     }
 
-                    suggestions.addAll(collectLocals(selectedMember(), selectedNode(), param.getUserText()));
+                    suggestions.addAll(collectLocals((Node)selectedMember(), selectedNode(), param.getUserText()));
                     suggestions.addAll(environment.getSymbolRegistry().symbols(param.getUserText()));
 
                     return suggestions;
@@ -531,7 +428,7 @@ public class EditorPane extends SplitPane {
         navigateTo(node.ref());
     }
 
-    private void navigateTo(NamedNode<?> node) {
+    private void navigateTo(Node<?> node) {
         packageTree.select(node.parentOfType(PackageNode.class));
         FunctionNode fn = node.parentOfType(FunctionNode.class);
         if (fn != null) {
@@ -562,7 +459,7 @@ public class EditorPane extends SplitPane {
         Node<?> sel = selectedNode();
         Insert head = (node instanceof NamedNode) ? new InsertReference().setId(Change.newId()).setRef(node.id()) : new InsertNode().setNode(node);
         List<Change> changes = new ArrayList<>();
-        NamedNode<?> selectedItem = selectedMember();
+        Signature selectedItem = selectedMember();
         if (!(selectedItem instanceof FunctionNode) || isReadonly()) {
             return;
         }
@@ -609,8 +506,9 @@ public class EditorPane extends SplitPane {
                 membersList.setItems(new ObservableListWrapper<>(packageNode.children()
                     .stream()
                     .filter(item -> !(item instanceof PackageNode))
-                    .map(item -> (NamedNode) item)
+                    .map(item -> (NamedNode<?>) item)
                     .sorted(Comparator.comparing(NodeUtils::signature))
+                    .map(item -> (Signature) item)
                     .collect(Collectors.toList())));
             }
 
@@ -622,7 +520,7 @@ public class EditorPane extends SplitPane {
 
     private Node selectedNode(int pos) {
         if (membersList.getSelectionModel() != null) {
-            NamedNode selectedItem = selectedMember();
+            Signature selectedItem = selectedMember();
             if (!(selectedItem instanceof FunctionNode)) {
                 return null;
             }
@@ -674,7 +572,7 @@ public class EditorPane extends SplitPane {
         return textField;
     }
 
-    private TextField nameTextField(NamedNode<?> node) {
+    private TextField nameTextField(NamedNode node) {
         TextField textField = new TextField(node.getName()) {
             private String saved;
 
@@ -695,16 +593,17 @@ public class EditorPane extends SplitPane {
             }
 
             private void applyChanges() {
-                environment.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(node.id()).setName(getText())));
+                environment.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(((Node)node).id()).setName(getText())));
             }
 
         };
+        textField.setEditable(!isReadonly());
         return textField;
     }
 
     void refresh() {
-        NamedNode packageSelection = null;
-        NamedNode memberSelection = null;
+        Node packageSelection = null;
+        Node memberSelection = null;
         NamedNode signatureSelection = null;
         Node codeSelection = null;
 
@@ -713,7 +612,7 @@ public class EditorPane extends SplitPane {
             packageSelection = selectedItem.getValue();
         }
 
-        memberSelection = selectedMember();
+        memberSelection = (Node) selectedMember();
 
         codeSelection = selectedNode();
 
@@ -814,7 +713,7 @@ public class EditorPane extends SplitPane {
     }
 
     private boolean isReadonly() {
-        return isReadonly(membersList.getSelectionModel().getSelectedItem());
+        return isReadonly((Node)membersList.getSelectionModel().getSelectedItem());
     }
 
     private static boolean isReadonly(Node<?> node) {
