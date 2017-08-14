@@ -14,13 +14,13 @@ public class SymbolRegistry {
     public SymbolRegistry(Workspace workspace) {
         workspace.changeListeners().add(change -> {
             if (change instanceof InsertNode) {
-                Node node = ((InsertNode) change).getNode();
+                Node node = ((InsertNode) change).node();
                 if (node instanceof FunctionNode || node instanceof FieldNode) {
                     symbols.add(node);
                     nodesById.put(node.id(), node);
                 }
             } else if (change instanceof Delete) {
-                Node node = nodesById.remove(((Delete) change).getId());
+                Node node = nodesById.remove(((Delete) change).id());
                 if (node != null) {
                     deleteNode(node);
                 }

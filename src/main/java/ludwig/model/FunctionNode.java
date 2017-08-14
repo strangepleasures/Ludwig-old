@@ -22,7 +22,7 @@ public class FunctionNode extends NamedNode<FunctionNode> implements Signature {
     }
 
     public String signature() {
-        StringBuilder builder = new StringBuilder(getName());
+        StringBuilder builder = new StringBuilder(name());
         for (Node node: children()) {
             if (node instanceof SeparatorNode) {
                 break;

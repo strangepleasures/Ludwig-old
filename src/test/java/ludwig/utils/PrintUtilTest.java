@@ -7,12 +7,12 @@ public class PrintUtilTest {
 
     @Test
     public void testToString() {
-        Node packageNode = new PackageNode().setName("mypackage");
-        FunctionNode functionNode = (FunctionNode) new FunctionNode().setName("foo");
-        VariableNode variableNode1 = (VariableNode) new VariableNode().setName("x");
+        Node packageNode = new PackageNode().name("mypackage");
+        FunctionNode functionNode = (FunctionNode) new FunctionNode().name("foo");
+        VariableNode variableNode1 = (VariableNode) new VariableNode().name("x");
         functionNode.add(variableNode1);
         VariableNode variableNode2 = new VariableNode();
-        variableNode2.setName("y");
+        variableNode2.name("y");
         functionNode.add(variableNode2);
         ReferenceNode head = new ReferenceNode(functionNode);
         ReferenceNode referenceNode1 = new ReferenceNode(variableNode2);

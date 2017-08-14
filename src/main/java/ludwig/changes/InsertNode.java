@@ -8,11 +8,11 @@ import lombok.Setter;
 public class InsertNode extends Insert<InsertNode> {
     private Node node;
 
-    public Node getNode() {
+    public Node node() {
         return node;
     }
 
-    public InsertNode setNode(Node node) {
+    public InsertNode node(Node node) {
         this.node = node;
         return this;
     }

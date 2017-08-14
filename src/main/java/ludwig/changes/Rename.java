@@ -13,11 +13,11 @@ public class Rename extends Change<Rename> {
         return this;
     }
 
-    public String getName() {
+    public String name() {
         return name;
     }
 
-    public Rename setName(String name) {
+    public Rename name(String name) {
         this.name = name;
         return this;
     }

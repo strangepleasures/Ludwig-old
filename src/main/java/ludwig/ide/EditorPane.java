@@ -206,7 +206,7 @@ public class EditorPane extends SplitPane {
                 TextInputDialog dialog = new TextInputDialog();
                 dialog.setTitle("Execute function");
                 dialog.setHeaderText("Enter function arguments");
-                dialog.setContentText(fn.getName());
+                dialog.setContentText(fn.name());
                 Optional<String> params = dialog.showAndWait();
                 if (params.isPresent()) {
                     Object[] args = Lexer.read(new StringReader(params.get()))
@@ -252,8 +252,8 @@ public class EditorPane extends SplitPane {
                     List<Change> changes = new ArrayList<>();
 
                     InsertNode insertFn = new InsertNode()
-                        .setNode(new FunctionNode().setName(parts.get(0)).id(Change.newId()))
-                        .setParent(packageNode.id());
+                        .node(new FunctionNode().name(parts.get(0)).id(Change.newId()))
+                        .parent(packageNode.id());
 
                     changes.add(insertFn);
 
@@ -261,19 +261,19 @@ public class EditorPane extends SplitPane {
                     for (int i = 1; i < parts.size(); i++) {
                         String id = Change.newId();
                         changes.add(new InsertNode()
-                            .setNode(new VariableNode().setName(parts.get(i)).id(id))
-                            .setParent(insertFn.getNode().id())
-                            .setPrev(prev));
+                            .node(new VariableNode().name(parts.get(i)).id(id))
+                            .parent(insertFn.node().id())
+                            .prev(prev));
                         prev = id;
                     }
                     changes.add(new InsertNode()
-                        .setNode(new SeparatorNode().id(Change.newId()))
-                        .setParent(insertFn.getNode().id())
-                        .setPrev(prev));
+                        .node(new SeparatorNode().id(Change.newId()))
+                        .parent(insertFn.node().id())
+                        .prev(prev));
 
                     environment.getWorkspace().apply(changes);
 
-                    FunctionNode fn = environment.getWorkspace().node(insertFn.getNode().id());
+                    FunctionNode fn = environment.getWorkspace().node(insertFn.node().id());
                     navigateTo(fn);
                 }
 
@@ -399,7 +399,7 @@ public class EditorPane extends SplitPane {
             } else if (ref[0] != null) {
                 insertNode(ref[0]);
             } else if (!autoCompleteTextField.getText().isEmpty()) {
-                insertNode(new VariableNode().setName(autoCompleteTextField.getText()).id(Change.newId()));
+                insertNode(new VariableNode().name(autoCompleteTextField.getText()).id(Change.newId()));
             }
             popup.hide();
             autoCompletionTextFieldBinding.dispose();
@@ -457,7 +457,7 @@ public class EditorPane extends SplitPane {
 
     private void insertNode(Node<?> node) {
         Node<?> sel = selectedNode();
-        Insert head = (node instanceof NamedNode) ? new InsertReference().setId(Change.newId()).setRef(node.id()) : new InsertNode().setNode(node);
+        Insert head = (node instanceof NamedNode) ? new InsertReference().id(Change.newId()).ref(node.id()) : new InsertNode().node(node);
         List<Change> changes = new ArrayList<>();
         Signature selectedItem = selectedMember();
         if (!(selectedItem instanceof FunctionNode) || isReadonly()) {
@@ -465,14 +465,14 @@ public class EditorPane extends SplitPane {
         }
         FunctionNode target = (FunctionNode) selectedItem;
         if (sel != null) {
-            head.setParent(sel.parent().id());
+            head.parent(sel.parent().id());
             int index = sel.parent().children().indexOf(sel);
-            head.setPrev(index == 0 ? null : sel.parent().children().get(index - 1).id());
-            head.setNext(index == sel.parent().children().size() - 1 ? null : sel.parent().children().get(index + 1).id());
-            changes.add(new Delete().setId(sel.id()));
+            head.prev(index == 0 ? null : sel.parent().children().get(index - 1).id());
+            head.next(index == sel.parent().children().size() - 1 ? null : sel.parent().children().get(index + 1).id());
+            changes.add(new Delete().id(sel.id()));
         } else {
-            head.setParent(target.id());
-            head.setPrev(target.children().get(target.children().size() - 1).id());
+            head.parent(target.id());
+            head.prev(target.children().get(target.children().size() - 1).id());
         }
 
         changes.add(head);
@@ -481,11 +481,11 @@ public class EditorPane extends SplitPane {
         if (node instanceof Signature) {
             for (String arg : ((Signature)node).arguments()) {
                 InsertNode insertPlaceholder = new InsertNode()
-                    .setNode(new PlaceholderNode().setParameter(arg).id(Change.newId()))
-                    .setParent(((InsertReference) head).getId())
-                    .setPrev(prev);
+                    .node(new PlaceholderNode().setParameter(arg).id(Change.newId()))
+                    .parent(((InsertReference) head).id())
+                    .prev(prev);
                 changes.add(insertPlaceholder);
-                prev = insertPlaceholder.getNode().id();
+                prev = insertPlaceholder.node().id();
             }
         }
 
@@ -546,7 +546,7 @@ public class EditorPane extends SplitPane {
     }
 
     private TextField commentTextField(Node<?> node) {
-        TextField textField = new TextField(node.getComment()) {
+        TextField textField = new TextField(node.comment()) {
             private String saved;
 
             {
@@ -566,14 +566,14 @@ public class EditorPane extends SplitPane {
             }
 
             private void applyChanges() {
-                environment.getWorkspace().apply(Collections.singletonList(new Comment().setNodeId(node.id()).setComment(getText())));
+                environment.getWorkspace().apply(Collections.singletonList(new Comment().nodeId(node.id()).comment(getText())));
             }
         };
         return textField;
     }
 
     private TextField nameTextField(NamedNode node) {
-        TextField textField = new TextField(node.getName()) {
+        TextField textField = new TextField(node.name()) {
             private String saved;
 
             {
@@ -593,7 +593,7 @@ public class EditorPane extends SplitPane {
             }
 
             private void applyChanges() {
-                environment.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(((Node)node).id()).setName(getText())));
+                environment.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(((Node)node).id()).name(getText())));
             }
 
         };
@@ -724,7 +724,7 @@ public class EditorPane extends SplitPane {
         if (root == stop) {
             return;
         }
-        if (root instanceof VariableNode && ((VariableNode) root).getName().startsWith(filter)) {
+        if (root instanceof VariableNode && ((VariableNode) root).name().startsWith(filter)) {
             locals.add((VariableNode) root);
         }
         root.children().forEach(child -> collectLocals(child, stop, filter, locals));

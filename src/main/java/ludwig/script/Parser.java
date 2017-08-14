@@ -33,7 +33,7 @@ public class Parser {
     }
 
     public static NamedNode item(PackageNode findByName, String name) {
-        return findByName.children().stream().map(n -> (NamedNode) n).filter(it -> it.getName().equals(name)).findFirst().orElse(null);
+        return findByName.children().stream().map(n -> (NamedNode) n).filter(it -> it.name().equals(name)).findFirst().orElse(null);
     }
 
     private void parse(ProjectNode projectNode) throws ParserException {
@@ -47,9 +47,9 @@ public class Parser {
 
         String packageName = nextToken();
         PackageNode packageNode = projectNode.children().stream().map(n -> (PackageNode) n)
-            .filter(n -> n.getName().equals(packageName))
+            .filter(n -> n.name().equals(packageName))
             .findFirst()
-            .orElseGet(() -> append(projectNode, new PackageNode().setName(packageName)));
+            .orElseGet(() -> append(projectNode, new PackageNode().name(packageName)));
 
         consume(")");
 
@@ -71,9 +71,9 @@ public class Parser {
                     lazy = true;
                     consume("lazy");
                 }
-                FunctionNode fn = append(packageNode, new FunctionNode().setName(nextToken()).setLazy(lazy));
+                FunctionNode fn = append(packageNode, new FunctionNode().name(nextToken()).setLazy(lazy));
                 while (!currentToken().equals(")")) {
-                    append(fn, new VariableNode().setName(nextToken()));
+                    append(fn, new VariableNode().name(nextToken()));
                 }
                 consume(")");
                 append(fn, new SeparatorNode());
@@ -92,7 +92,7 @@ public class Parser {
                 }
                 break;
             case "field":
-                append(packageNode, new FieldNode().setName(nextToken()));
+                append(packageNode, new FieldNode().name(nextToken()));
                 consume(")");
                 break;
         }
@@ -125,7 +125,7 @@ public class Parser {
                         break;
                     }
                     VariableNode variableNode = (VariableNode) child;
-                    locals = locals.plus(variableNode.getName(), variableNode);
+                    locals = locals.plus(variableNode.name(), variableNode);
                 }
                 while (!nextToken().equals(")")) ;
                 consume("(");
@@ -178,11 +178,11 @@ public class Parser {
                 case "for": {
                     ForNode node = append(parent, new ForNode());
                     VariableNode var = new VariableNode();
-                    var.setName(nextToken());
+                    var.name(nextToken());
                     append(node, var);
 
                     HashPMap savedLocals = locals;
-                    locals = locals.plus(var.getName(), var);
+                    locals = locals.plus(var.name(), var);
 
                     while (!currentToken().equals(")")) {
                         parseChild(node);
@@ -214,7 +214,7 @@ public class Parser {
                             append(node, new ReferenceNode(locals.get(name)));
                             parseChild(node);
                         } else {
-                            VariableNode lhs = append(node, new VariableNode().setName(name));
+                            VariableNode lhs = append(node, new VariableNode().name(name));
                             locals = locals.plus(name, lhs);
                             parseChild(node);
                         }
@@ -226,8 +226,8 @@ public class Parser {
                     LambdaNode node = append(parent, new LambdaNode());
                     HashPMap<String, NamedNode> savedLocals = locals;
                     while (!currentToken().equals(")")) {
-                        VariableNode param = append(node, new VariableNode().setName(nextToken()));
-                        locals = locals.plus(param.getName(), param);
+                        VariableNode param = append(node, new VariableNode().name(nextToken()));
+                        locals = locals.plus(param.name(), param);
                     }
                     consume(")");
                     append(node, new SeparatorNode());
@@ -336,23 +336,23 @@ public class Parser {
     private <T extends Node> T append(Node<?> parent, T node) {
         if (node instanceof ReferenceNode) {
             InsertReference change = new InsertReference()
-                .setId(Change.newId())
-                .setParent(parent.id())
-                .setPrev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id())
-                .setNext(null)
-                .setRef(((ReferenceNode) node).ref().id());
+                .id(Change.newId())
+                .parent(parent.id())
+                .prev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id())
+                .next(null)
+                .ref(((ReferenceNode) node).ref().id());
             workspace.apply(Collections.singletonList(change));
-            return workspace.node(change.getId());
+            return workspace.node(change.id());
         } else {
             if (node instanceof NamedNode) {
-                node.id(parent.id() + ":" + ((NamedNode) node).getName());
+                node.id(parent.id() + ":" + ((NamedNode) node).name());
             } else {
                 node.id(Change.newId());
             }
             InsertNode change = new InsertNode()
-                .setNode(node)
-                .setParent(parent.id())
-                .setPrev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id());
+                .node(node)
+                .parent(parent.id())
+                .prev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id());
             workspace.apply(Collections.singletonList(change));
             return workspace.node(node.id());
         }

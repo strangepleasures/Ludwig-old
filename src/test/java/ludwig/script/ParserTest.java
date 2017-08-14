@@ -15,7 +15,7 @@ public class ParserTest {
         try(Reader reader = new InputStreamReader(ParserTest.class.getResourceAsStream("/all.foo"))) {
             Workspace workspace = new Workspace();
             ProjectNode project = new ProjectNode();
-            project.setName("System");
+            project.name("System");
             project.id("System");
             workspace.getProjects().add(project);
             Parser.parse(reader, workspace, project);

@@ -3,11 +3,11 @@ package ludwig.changes;
 public class Delete extends Change<Delete> {
     private String id;
 
-    public String getId() {
+    public String id() {
         return id;
     }
 
-    public Delete setId(String id) {
+    public Delete id(String id) {
         this.id = id;
         return this;
     }

@@ -46,18 +46,18 @@ public class Workspace {
 
         @Override
         public Problem visitInsertNode(InsertNode insert) {
-            return place(insert.getNode(), insert);
+            return place(insert.node(), insert);
         }
 
         @Override
         public Problem visitInsertReference(InsertReference insert) {
-            Node ref = new ReferenceNode(node(insert.getRef())).id(insert.getId());
+            Node ref = new ReferenceNode(node(insert.ref())).id(insert.id());
             return place(ref, insert);
         }
 
         @Override
         public Problem visitDelete(Delete delete) {
-            Node node = node(delete.getId());
+            Node node = node(delete.id());
             node.parent().children().remove(node);
             node.delete();
             return null;
@@ -65,27 +65,27 @@ public class Workspace {
 
         @Override
         public Problem visitComment(Comment comment) {
-            Node node = node(comment.getNodeId());
-            node.setComment(comment.getComment());
+            Node node = node(comment.nodeId());
+            node.comment(comment.comment());
             return null;
         }
 
         @Override
         public Problem visitRename(Rename rename) {
             NamedNode node = node(rename.getNodeId());
-            node.setName(rename.getName());
+            node.name(rename.name());
             return null;
         }
     };
 
     private Problem place(Node node, Insert insert) {
         addNode(node);
-        Node parent = node(insert.getParent());
+        Node parent = node(insert.parent());
         node.parent(parent);
 
         if (parent != null) {
-            Node prev = node(insert.getPrev());
-            Node next = node(insert.getNext());
+            Node prev = node(insert.prev());
+            Node next = node(insert.next());
 
             if (!parent.isOrdered()) {
                 parent.add(node);

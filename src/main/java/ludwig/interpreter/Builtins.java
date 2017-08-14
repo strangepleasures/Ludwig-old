@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class Builtins extends ProjectNode {
     public Builtins() {
-        setName("Runtime").id("Runtime");
+        name("Runtime").id("Runtime");
 
         Arrays.asList(StdLib.class)
             .stream()

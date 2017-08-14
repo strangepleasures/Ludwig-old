@@ -4,20 +4,20 @@ public class InsertReference extends Insert<InsertReference> {
     private String id;
     private String ref;
 
-    public String getId() {
+    public String id() {
         return id;
     }
 
-    public InsertReference setId(String id) {
+    public InsertReference id(String id) {
         this.id = id;
         return this;
     }
 
-    public String getRef() {
+    public String ref() {
         return ref;
     }
 
-    public InsertReference setRef(String ref) {
+    public InsertReference ref(String ref) {
         this.ref = ref;
         return this;
     }

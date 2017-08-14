@@ -4,20 +4,20 @@ public class Comment extends Change<Comment> {
     private String nodeId;
     private String comment;
 
-    public String getNodeId() {
+    public String nodeId() {
         return nodeId;
     }
 
-    public Comment setNodeId(String nodeId) {
+    public Comment nodeId(String nodeId) {
         this.nodeId = nodeId;
         return this;
     }
 
-    public String getComment() {
+    public String comment() {
         return comment;
     }
 
-    public Comment setComment(String comment) {
+    public Comment comment(String comment) {
         this.comment = comment;
         return this;
     }

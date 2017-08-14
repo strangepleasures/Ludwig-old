@@ -27,11 +27,11 @@ public abstract class Node<T extends Node> {
         return (T) this;
     }
 
-    public String getComment() {
+    public String comment() {
         return comment;
     }
 
-    public T setComment(String comment) {
+    public T comment(String comment) {
         this.comment = comment;
         return (T) this;
     }

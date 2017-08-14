@@ -15,7 +15,7 @@ public class UsageTracker {
         workspace.changeListeners().add(change -> {
             if (change instanceof InsertReference) {
                 InsertReference ref = (InsertReference) change;
-                refs.put(workspace.node(ref.getRef()), workspace.node(ref.getId()));
+                refs.put(workspace.node(ref.ref()), workspace.node(ref.id()));
             }
         });
     }

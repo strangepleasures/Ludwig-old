@@ -38,7 +38,7 @@ public class LocalChangeRepository implements ChangeRepository {
                 if (accept) {
                     changes.add(change);
                 }
-                accept = accept || change.getChangeId().equals(sinceChangeId);
+                accept = accept || change.changeId.equals(sinceChangeId);
             }
             return changes;
         }

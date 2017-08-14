@@ -7,8 +7,6 @@ import lombok.Setter;
 import java.util.UUID;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
-@Getter
-@Setter
 public abstract class Change<T extends Change> {
     public final String changeId = newId();
 

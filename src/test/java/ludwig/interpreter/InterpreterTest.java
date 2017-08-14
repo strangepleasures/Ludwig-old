@@ -17,12 +17,12 @@ public class InterpreterTest {
     @Test
     public void testSimpleFunction() {
         FunctionNode functionNode = new FunctionNode();
-        functionNode.setName("foo");
+        functionNode.name("foo");
         VariableNode variableNode1 = new VariableNode();
-        variableNode1.setName("x");
+        variableNode1.name("x");
         functionNode.add(variableNode1);
         VariableNode variableNode2 = new VariableNode();
-        variableNode2.setName("y");
+        variableNode2.name("y");
         functionNode.add(variableNode2);
         functionNode.add(new SeparatorNode());
 

@@ -9,8 +9,8 @@ public class OverrideNode extends Node<OverrideNode> implements Signature {
     }
 
     @Override
-    public String getName() {
-        return ((Signature) children().get(0)).getName();
+    public String name() {
+        return ((Signature) children().get(0)).name();
     }
 
     @Override
