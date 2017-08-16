@@ -3,8 +3,7 @@ package ludwig.utils;
 import ludwig.model.*;
 import org.apache.commons.lang.StringEscapeUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class NodeUtils {
@@ -68,5 +67,26 @@ public class NodeUtils {
             }
         }
         return builder.toString();
+    }
+
+    public static boolean isReadonly(Node<?> node) {
+        return node == null || node.parentOfType(ProjectNode.class).isReadonly();
+    }
+
+    private static void collectLocals(Node<?> root, Node<?> stop, String filter, List<Node> locals) {
+        if (root == stop) {
+            return;
+        }
+        if (root instanceof VariableNode && ((VariableNode) root).name().startsWith(filter)) {
+            locals.add(root);
+        }
+        root.children().forEach(child -> collectLocals(child, stop, filter, locals));
+    }
+
+    public static List<Node> collectLocals(Node<?> root, Node<?> stop, String filter) {
+        List<Node> locals = new ArrayList<>();
+        collectLocals(root, stop, filter, locals);
+        locals.sort(Comparator.comparing(Object::toString));
+        return locals;
     }
 }

@@ -14,7 +14,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
-import javafx.util.StringConverter;
 import lombok.Getter;
 import lombok.Setter;
 import ludwig.changes.*;
@@ -147,14 +146,7 @@ public class EditorPane extends SplitPane {
             displayMember();
         });
 
-        membersList.setCellFactory(listView -> new ListCell<Signature>() {
-            @Override
-            protected void updateItem(Signature item, boolean empty) {
-                super.updateItem(item, empty);
-
-                setText((!empty && item != null) ? NodeUtils.signature((Node) item) : "");
-            }
-        });
+        membersList.setCellFactory(listView -> new SignatureListCell());
 
         getItems().addAll(packageTree, membersList, new VBox(signatureView, /*signatureToolbar,*/ lazyCheckbox, codeView));
 
@@ -244,7 +236,7 @@ public class EditorPane extends SplitPane {
         TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             Node parent = selectedItem.getValue();
-            if (isReadonly(parent)) {
+            if (NodeUtils.isReadonly(parent)) {
                 return;
             }
 
@@ -459,7 +451,7 @@ public class EditorPane extends SplitPane {
                             .add(new PlaceholderNode().setParameter("result").id(Change.newId())));
                     }
 
-                    suggestions.addAll(collectLocals((Node) selectedMember(), selectedNode(), param.getUserText()));
+                    suggestions.addAll(NodeUtils.collectLocals((Node) selectedMember(), selectedNode(), param.getUserText()));
                     suggestions.addAll(environment.getSymbolRegistry().symbols(param.getUserText()));
 
                     return suggestions;
@@ -782,40 +774,7 @@ public class EditorPane extends SplitPane {
         codeView.selectRange(0, 0);
     }
 
-    private static class NodeStringConverter extends StringConverter<Node> {
-        @Override
-        public String toString(Node object) {
-            return NodeUtils.signature(object);
-        }
-
-        @Override
-        public NamedNode fromString(String string) {
-            return null;
-        }
-    }
-
     private boolean isReadonly() {
-        return isReadonly((Node) membersList.getSelectionModel().getSelectedItem());
-    }
-
-    private static boolean isReadonly(Node<?> node) {
-        return node == null || node.parentOfType(ProjectNode.class).isReadonly();
-    }
-
-    private static void collectLocals(Node<?> root, Node<?> stop, String filter, List<Node> locals) {
-        if (root == stop) {
-            return;
-        }
-        if (root instanceof VariableNode && ((VariableNode) root).name().startsWith(filter)) {
-            locals.add((VariableNode) root);
-        }
-        root.children().forEach(child -> collectLocals(child, stop, filter, locals));
-    }
-
-    private static List<Node> collectLocals(Node<?> root, Node<?> stop, String filter) {
-        List<Node> locals = new ArrayList<>();
-        collectLocals(root, stop, filter, locals);
-        locals.sort(Comparator.comparing(Object::toString));
-        return locals;
+        return NodeUtils.isReadonly((Node) membersList.getSelectionModel().getSelectedItem());
     }
 }
