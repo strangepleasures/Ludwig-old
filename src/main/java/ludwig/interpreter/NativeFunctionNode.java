@@ -47,6 +47,10 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
 
     @Override
     public Object tail(Object[] args) {
+        return new Evaluator(null).tail(this, args);
+    }
+
+    public Object eval(Object[] args) {
         try {
             for (int i = 0; i < args.length; i++) {
                 args[i] = cast(args[i], paramTypes[i]);

@@ -4,8 +4,6 @@ import ludwig.model.*;
 import org.pcollections.HashPMap;
 import org.pcollections.HashTreePMap;
 
-import java.util.Map;
-
 public class CallableFunction implements Callable {
     private final FunctionNode function;
     private int argCount;
@@ -23,24 +21,7 @@ public class CallableFunction implements Callable {
 
     @Override
     public Object tail(Object... args) {
-        HashPMap<NamedNode, Object> env = HashTreePMap.empty();
-
-        for (int i = 0; i < args.length; i++) {
-            env = env.plus((NamedNode) function.children().get(i), args[i]);
-        }
-
-        InterpretingVisitor visitor = new InterpretingVisitor(env);
-
-        Object result = null;
-
-        for (int i = argCount + 1; i < function.children().size(); i++) {
-            result = function.children().get(i).accept(visitor);
-            if (result instanceof Signal) {
-                break;
-            }
-        }
-
-        return result;
+        return new Evaluator(HashTreePMap.empty()).tail(function, args);
     }
 
     @Override

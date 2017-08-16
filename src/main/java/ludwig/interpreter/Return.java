@@ -15,7 +15,7 @@ public class Return<T> implements Signal, Delayed<T> {
         HashPMap<NamedNode, Object> l = locals;
 
         while (true) {
-            Object r = n.accept(new InterpretingVisitor(l));
+            Object r = n.accept(new Evaluator(l));
             if (r instanceof Return) {
                 Return inner = (Return) r;
                 n = inner.node;

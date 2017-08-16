@@ -1,11 +1,8 @@
 package ludwig.interpreter;
 
 import ludwig.model.*;
-import ludwig.utils.NodeUtils;
 import ludwig.utils.PrettyPrinter;
 import org.pcollections.HashPMap;
-
-import java.util.Map;
 
 public class Closure implements Callable {
     private final HashPMap<NamedNode, Object> locals;
@@ -28,7 +25,7 @@ public class Closure implements Callable {
     @Override
     public Object tail(Object[] args) {
         HashPMap<NamedNode, Object> env = locals;
-        InterpretingVisitor visitor = null;
+        Evaluator visitor = null;
         Object result = null;
 
         for (int i = 0; i < lambda.children().size(); i++) {
@@ -36,7 +33,7 @@ public class Closure implements Callable {
             if (node instanceof VariableNode) {
                 env = env.plus((NamedNode) node, args[i]);
             } else if (node instanceof SeparatorNode) {
-                visitor = new InterpretingVisitor(env);
+                visitor = new Evaluator(env);
             } else {
                 result = node.accept(visitor);
                 if (result instanceof Signal) {

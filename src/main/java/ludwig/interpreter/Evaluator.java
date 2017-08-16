@@ -1,14 +1,13 @@
 package ludwig.interpreter;
 
 import ludwig.model.*;
-import org.pcollections.HashPMap;
-import org.pcollections.TreePVector;
+import org.pcollections.*;
 
-class InterpretingVisitor implements NodeVisitor<Object> {
+class Evaluator implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
     private boolean doElse;
 
-    InterpretingVisitor(HashPMap<NamedNode, Object> locals) {
+    Evaluator(HashPMap<NamedNode, Object> locals) {
         this.locals = locals;
     }
 
@@ -44,75 +43,18 @@ class InterpretingVisitor implements NodeVisitor<Object> {
 
     @Override
     public Object visitReference(ReferenceNode referenceNode) {
-        Node<?> node = referenceNode.ref();
+        Node<?> head = referenceNode.ref();
 
-        if (node instanceof NativeFunctionNode) {
-            NativeFunctionNode fn = (NativeFunctionNode) node;
-            boolean delayed = fn.isLazy();
-
-            Object[] args = new Object[fn.argCount()];
-            for (int i = 0; i < args.length; i++) {
-                args[i] = delayed ? new Return(referenceNode.children().get(i), locals) : referenceNode.children().get(i).accept(this);
-            }
-            return untail(fn.tail(args));
+        boolean isLazy = (head instanceof FunctionNode) && ((FunctionNode) head).isLazy();
+        Object[] args = new Object[referenceNode.children().size()];
+        for (int i = 0; i < args.length; i++) {
+            args[i] = isLazy ? new Return(referenceNode.children().get(i), locals) : referenceNode.children().get(i).accept(this);
         }
 
-        if (node instanceof FunctionNode) {
-            boolean lazy = ((FunctionNode) node).isLazy();
-            HashPMap<NamedNode, Object> savedLocals = locals;
-            try {
-                Object result = null;
-                boolean params = true;
-                OverrideNode overrideNode = null;
-                for (int i = 0; i < node.children().size(); i++) {
-                    Node child = node.children().get(i);
+        return untail(tail(head, args));
 
-                    if (params) {
-                        if (child instanceof SeparatorNode) {
-                            params = false;
-                            if (overrideNode != null) {
-                                for (int j = 1; j < overrideNode.children().size(); j++) {
-                                    result = overrideNode.children().get(j).accept(this);
-                                    if (result instanceof Signal) {
-                                        break;
-                                    }
-                                }
-                                return untail(result);
-                            }
-                        } else {
-                            Node arg = referenceNode.children().get(i);
-                            Object argValue = lazy ? new Return(arg, locals) : arg.accept(this);
-                            if (i == 0 && argValue instanceof Instance) {
-                                Signature implementation = ((Instance) argValue).type().implementation((Signature) node);
-                                if (implementation instanceof OverrideNode) {
-                                    overrideNode = (OverrideNode) implementation;
-                                }
-                            }
-                            locals = locals.plus((VariableNode) child, argValue);
-                        }
-                    } else {
-                        result = child.accept(this);
-                        if (result instanceof Signal) {
-                            break;
-                        }
-                    }
-                }
-                return untail(result);
-            } finally {
-                locals = savedLocals;
-            }
-        }
 
-        if (node instanceof FieldNode) {
-            Instance instance = (Instance) referenceNode.children().get(0).accept(this);
-            return instance.get((FieldNode) node);
-        }
 
-        Object value = locals.get(node);
-        if (value instanceof Delayed) {
-            value = ((Delayed) value).get();
-        }
-        return value;
     }
 
     @Override
@@ -290,5 +232,55 @@ class InterpretingVisitor implements NodeVisitor<Object> {
             }
         }
         return result;
+    }
+
+    Object tail(Node<?> head, Object[] args) {
+        Node<?> impl = head;
+        if (args.length > 0 && args[0] instanceof Instance) {
+            Instance obj = (Instance) args[0];
+            impl = (Node<?>) obj.type().implementation((Signature) head);
+        }
+
+        if (impl instanceof FieldNode) {
+            return ((Instance) args[0]).get((FieldNode) impl);
+        }
+        if (impl instanceof NativeFunctionNode) {
+            return ((NativeFunctionNode) impl).eval(args);
+        }
+        if (head instanceof FunctionNode) {
+            FunctionNode fn  = (FunctionNode) head;
+            HashPMap<NamedNode, Object> savedLocals = locals;
+
+            try {
+                for (int i = 0; i < args.length; i++) {
+                    locals = locals.plus((NamedNode) fn.children().get(i), args[i]);
+                }
+
+                Object result = null;
+
+                if (impl instanceof OverrideNode) {
+                    for (Node child : impl.children()) {
+                        result = child.accept(this);
+                        if (result instanceof Signal) {
+                            break;
+                        }
+                    }
+                } else {
+                    for (int i = args.length + 1; i < fn.children().size(); i++) {
+                        result = fn.children().get(i).accept(this);
+                        if (result instanceof Signal) {
+                            break;
+                        }
+                    }
+
+                }
+
+                return result;
+            } finally {
+                locals = savedLocals;
+            }
+        }
+
+        return locals.get(head);
     }
 }

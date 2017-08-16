@@ -1,6 +1,7 @@
 package ludwig.interpreter;
 
 import ludwig.model.FieldNode;
+import org.pcollections.HashTreePMap;
 
 public class CallableField implements Callable {
     private final FieldNode field;
@@ -11,7 +12,7 @@ public class CallableField implements Callable {
 
     @Override
     public Object tail(Object... args) {
-        return ((Instance)args[0]).get(field);
+        return new Evaluator(HashTreePMap.empty()).tail(field, args);
     }
 
     @Override
