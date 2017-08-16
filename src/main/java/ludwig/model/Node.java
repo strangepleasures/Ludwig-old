@@ -71,6 +71,7 @@ public abstract class Node<T extends Node> {
         this.deleted = true;
     }
 
+    @JsonIgnore
     public boolean isOrdered() {
         return true;
     }
