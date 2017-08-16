@@ -52,6 +52,9 @@ public class NodeUtils {
     }
 
     public static String signature(Node<?> node) {
+        if (node instanceof OverrideNode) {
+            return signature(((ReferenceNode)node.children().get(0)).ref());
+        }
         StringBuilder builder = new StringBuilder(node.toString());
         for (Node<?> child: node.children()) {
             if (child instanceof SeparatorNode) {

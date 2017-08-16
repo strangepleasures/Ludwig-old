@@ -171,18 +171,73 @@ public class EditorPane extends SplitPane {
         packageTree.setContextMenu(new ContextMenu(addPackageMenuItem));
 
 
-        MenuItem addFunctionMenuItem = new MenuItem("Add...", Icons.icon("add"));
+        MenuItem addFunctionMenuItem = new MenuItem("Add Function...", Icons.icon("add"));
         addFunctionMenuItem.setOnAction(e -> addFunction());
+
+        MenuItem overrideFunctionMenuItem = new MenuItem("Override...", Icons.icon("add"));
+        overrideFunctionMenuItem.setOnAction(e -> overrideFunction());
 
         MenuItem runMenu = new MenuItem("Run...", Icons.icon("run"));
         runMenu.setOnAction(e -> runFunction());
 
         membersList.setContextMenu(new ContextMenu(
             addFunctionMenuItem,
+            overrideFunctionMenuItem,
             runMenu
         ));
 
         environment.getWorkspace().changeListeners().add(this::processChanges);
+    }
+
+    private void overrideFunction() {
+        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+        if (selectedItem != null && selectedItem.getValue() instanceof PackageNode) {
+            PackageNode packageNode = (PackageNode) selectedItem.getValue();
+
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Override");
+            dialog.setHeaderText("");
+
+            AutoCompletionTextFieldBinding<Node> autoCompletionTextFieldBinding =
+                new AutoCompletionTextFieldBinding<>(
+                    dialog.getEditor(),
+                    param -> {
+                        List<Node> suggestions = new ArrayList<>();
+                        suggestions.addAll(environment.getSymbolRegistry().symbols(param.getUserText()));
+
+                        return suggestions;
+                    },
+                    new NodeStringConverter());
+
+            autoCompletionTextFieldBinding.setVisibleRowCount(20);
+            Node[] ref = {null};
+            autoCompletionTextFieldBinding.setOnAutoCompleted(e -> {
+                ref[0] = e.getCompletion();
+            });
+
+
+            dialog.showAndWait().ifPresent(signature -> {
+                if (ref[0] != null) {
+                    List<Change> changes = new ArrayList<>();
+
+                    InsertNode insertOverride = new InsertNode()
+                        .node(new OverrideNode().id(Change.newId()))
+                        .parent(packageNode.id());
+
+                    changes.add(insertOverride);
+
+                    changes.add(new InsertReference()
+                        .ref(ref[0].id())
+                        .id(Change.newId())
+                        .parent(insertOverride.node().id()));
+
+                    environment.getWorkspace().apply(changes);
+
+                    OverrideNode o = environment.getWorkspace().node(insertOverride.node().id());
+                    navigateTo(o);
+                }
+            });
+        }
     }
 
     private void addPackage() {
@@ -317,7 +372,7 @@ public class EditorPane extends SplitPane {
             return;
         }
 
-        NamedNode head = (selectedItem instanceof OverrideNode) ? (NamedNode) ((OverrideNode) selectedItem).children().get(0) : (NamedNode) selectedItem;
+        NamedNode head = (selectedItem instanceof OverrideNode) ? ((ReferenceNode) ((OverrideNode) selectedItem).children().get(0)).ref() : (NamedNode) selectedItem;
 
         signatureView.add(new Label("Name"), 1, 1);
         signatureView.add(new Label("Description"), 2, 1);
@@ -533,7 +588,7 @@ public class EditorPane extends SplitPane {
                 membersList.setItems(new ObservableListWrapper<>(packageNode.children()
                     .stream()
                     .filter(item -> !(item instanceof PackageNode))
-                    .map(item -> (NamedNode<?>) item)
+                    .map(item -> (Node<?>) item)
                     .sorted(Comparator.comparing(NodeUtils::signature))
                     .map(item -> (Signature) item)
                     .collect(Collectors.toList())));

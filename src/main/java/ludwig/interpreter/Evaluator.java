@@ -259,8 +259,8 @@ class Evaluator implements NodeVisitor<Object> {
                 Object result = null;
 
                 if (impl instanceof OverrideNode) {
-                    for (Node child : impl.children()) {
-                        result = child.accept(this);
+                    for (int i = 1; i < impl.children().size(); i++) {
+                        result = impl.children().get(i).accept(this);
                         if (result instanceof Signal) {
                             break;
                         }
