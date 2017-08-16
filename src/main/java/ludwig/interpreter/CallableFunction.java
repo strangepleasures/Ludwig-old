@@ -22,17 +22,6 @@ public class CallableFunction implements Callable {
     }
 
     @Override
-    public Object call(Object[] args) {
-        Object result = tail(args);
-
-        if (result instanceof Delayed) {
-            return ((Delayed) result).get();
-        }
-
-        return result;
-    }
-
-    @Override
     public Object tail(Object... args) {
         HashPMap<NamedNode, Object> env = HashTreePMap.empty();
 
