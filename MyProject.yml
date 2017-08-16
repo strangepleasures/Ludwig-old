@@ -1,363 +1,74 @@
 --- !InsertNode
-node: !ProjectNode
-  id: 1
-  name: My Project
---- !InsertNode
-node: !PackageNode
-  id: 2
-  name: mypackage
-parent: 1
---- !<InsertNode>
 changeId: "fc870967-5de6-4508-973f-ab5135b75ef8"
-parent: "2"
-prev: null
-next: null
-node: !<FunctionNode>
+node: !ProjectNode
   id: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
-  comment: null
-  children: []
-  deleted: false
-  name: "foo"
---- !<InsertNode>
+  name: MyProject
+--- !InsertNode
 changeId: "6e72aad5-87c1-4eb4-86bd-49a373f89e5f"
+node: !PackageNode
+  id: "f888ac7c-4dca-496a-8eb6-957be2ca9adf"
+  name: mypackage
 parent: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
-prev: null
-next: null
-node: !<VariableNode>
-  id: "70d68930-ca9f-41c3-8647-a59e70c82935"
-  comment: null
-  children: []
-  deleted: false
-  name: "x"
 --- !<InsertNode>
-changeId: "631b52a0-2d5c-49f1-8da6-bf86f87f09d1"
-parent: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
-prev: "70d68930-ca9f-41c3-8647-a59e70c82935"
-next: null
-node: !<VariableNode>
-  id: "f36c4498-4252-408b-a484-a98ea323b54d"
-  comment: null
-  children: []
-  deleted: false
-  name: "y"
---- !<InsertNode>
-changeId: "f888ac7c-4dca-496a-8eb6-957be2ca9adf"
-parent: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
-prev: "f36c4498-4252-408b-a484-a98ea323b54d"
-next: null
-node: !<VariableNode>
-  id: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-  comment: null
-  children: []
-  deleted: false
-  name: "z"
---- !<InsertNode>
-changeId: "1c736bc2-046a-4a3d-85df-f8cecc9e7e7d"
-parent: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
-prev: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-next: null
-node: !<SeparatorNode>
-  id: "e999f9b5-10cf-4064-a310-0e0443e0f28d"
-  comment: null
-  children: []
-  deleted: false
---- !<InsertNode>
-changeId: "0daaf277-b2dc-437e-a3c3-3086edc1ac58"
-parent: "2"
-prev: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
-next: null
+changeId: "225caebc-40d0-41ec-a040-333b185f181c"
+parent: "f888ac7c-4dca-496a-8eb6-957be2ca9adf"
 node: !<FunctionNode>
-  id: "ad783d5c-355f-415c-b46f-4c7c74c9132f"
-  comment: null
-  children: []
-  deleted: false
-  name: "bar"
---- !<InsertNode>
-changeId: "2c6e0bb0-086e-4d9c-a6c4-9ca79859870d"
-parent: "ad783d5c-355f-415c-b46f-4c7c74c9132f"
-prev: null
-next: null
-node: !<SeparatorNode>
-  id: "f70e2fb5-9706-4bca-99d9-1b8a8b5ef84e"
-  comment: null
-  children: []
-  deleted: false
---- !<InsertNode>
-changeId: "54ffcd51-3e7f-4503-8809-38af627ebc7c"
-parent: "2"
-prev: "ad783d5c-355f-415c-b46f-4c7c74c9132f"
-next: null
-node: !<FunctionNode>
-  id: "70882823-ab45-4f14-a0d9-a76509a07741"
-  comment: null
-  children: []
-  deleted: false
-  name: "baz"
+  id: "be0f94a7-0958-4dd5-affe-82f2f791bda2"
+  name: "foo"
   lazy: false
 --- !<InsertNode>
-changeId: "888fdaa2-e747-410f-a07f-fe51dc827807"
-parent: "70882823-ab45-4f14-a0d9-a76509a07741"
-prev: null
-next: null
+changeId: "0e46df55-8b42-4025-9aed-cdcf573089ca"
+parent: "be0f94a7-0958-4dd5-affe-82f2f791bda2"
 node: !<VariableNode>
-  id: "5afa267d-c0b5-46b9-8ffe-a96d6abff2b6"
-  comment: null
-  children: []
-  deleted: false
-  name: "a"
+  id: "c82c559d-6c76-485f-8ea8-5e3f5cf651d3"
+  name: "x"
 --- !<InsertNode>
-changeId: "141c03f3-3047-46f5-a8b6-621554d406fe"
-parent: "70882823-ab45-4f14-a0d9-a76509a07741"
-prev: "5afa267d-c0b5-46b9-8ffe-a96d6abff2b6"
-next: null
+changeId: "2bd8e076-3c36-4167-9f9d-bb80717a5c0f"
+parent: "be0f94a7-0958-4dd5-affe-82f2f791bda2"
+prev: "c82c559d-6c76-485f-8ea8-5e3f5cf651d3"
 node: !<VariableNode>
-  id: "9180b076-0b64-4d09-a82a-b617fcd8434f"
-  comment: null
-  children: []
-  deleted: false
-  name: "b"
+  id: "886f6441-8f42-4122-9b5b-0889318917b1"
+  name: "y"
 --- !<InsertNode>
-changeId: "63390fdb-e029-4626-bb57-48fa786245c5"
-parent: "70882823-ab45-4f14-a0d9-a76509a07741"
-prev: "9180b076-0b64-4d09-a82a-b617fcd8434f"
-next: null
+changeId: "0ed198fa-ec19-400c-8c9e-9aec8b5194cb"
+parent: "be0f94a7-0958-4dd5-affe-82f2f791bda2"
+prev: "886f6441-8f42-4122-9b5b-0889318917b1"
 node: !<SeparatorNode>
-  id: "f5b232ec-33aa-4533-8dc9-404f3cfee8b3"
-  comment: null
-  children: []
-  deleted: false
---- !<Comment>
-changeId: "c42e987d-1405-4fc1-8435-eb6e21a8ae2e"
-nodeId: "70882823-ab45-4f14-a0d9-a76509a07741"
-comment: "BBB"
---- !<Comment>
-changeId: "9b008053-50d9-40ca-9e2c-827f27fce3bd"
-nodeId: "system:all"
-comment: "hmm"
---- !<Rename>
-changeId: "2af2e7dc-663f-4847-b0b6-89f5c70ad284"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "zzz"
---- !<Rename>
-changeId: "f481f9db-089b-4200-b822-5907716d95f3"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "f584a727-a6e2-4022-9374-5e33fdddd024"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z1"
---- !<Comment>
-changeId: "c2fc0491-9d8d-4503-9531-c2a51e69ddab"
-nodeId: "70882823-ab45-4f14-a0d9-a76509a07741"
-comment: ""
---- !<Rename>
-changeId: "87ba316a-d046-40b0-9aec-6e289c2f9c88"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "daf6d3ca-8d59-498b-be24-0a8fd18e073d"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "6dfe1bc0-6689-4596-8e38-0a611dad183e"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z1"
---- !<Rename>
-changeId: "6b1e085b-415b-43e8-9028-ddbb49764ca2"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "5da7a190-88e1-4ee0-a48e-34a8b47a16ec"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "9dd957ff-2e56-4f67-9e01-18f96440c99d"
-nodeId: "f36c4498-4252-408b-a484-a98ea323b54d"
-name: "y2"
---- !<Rename>
-changeId: "63255b70-2504-477a-b8fb-e72d94126681"
-nodeId: "f36c4498-4252-408b-a484-a98ea323b54d"
-name: "y"
---- !<Rename>
-changeId: "2a705552-1f7d-4db6-b050-2e27f7f387e1"
-nodeId: "f36c4498-4252-408b-a484-a98ea323b54d"
-name: "y"
---- !<Rename>
-changeId: "d28fb67b-2605-409b-962d-5ae8dc429b91"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z1"
---- !<Rename>
-changeId: "4009a97c-c47a-4613-90fa-14a4088d1ca0"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "e3c114f9-771e-4b74-b7af-423b7ecfd248"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z1"
---- !<Rename>
-changeId: "8e0d1bb7-5589-491f-bf50-aaf0a5c0ea44"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z1"
---- !<Rename>
-changeId: "9bb76ded-1a91-4010-b1da-1f321572c077"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z11"
---- !<Rename>
-changeId: "2ba45c39-8873-498b-a866-57989c533488"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "07e13348-9472-43ff-ba15-a77374004bc2"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "84a28e63-d3f1-499e-8ef6-29136b7b6ee5"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z1"
---- !<Rename>
-changeId: "c9e2ebb6-7a10-4b4d-978f-02800d8bdcf3"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "f9ab928d-0ddb-4ef7-9047-95869c13f1bd"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "bacff4a0-f211-45ff-8192-cf9a74a1c5ea"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z1"
---- !<Rename>
-changeId: "5ef20096-1878-46fe-8064-b6b5dda51db3"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "82261320-3ea0-4e54-aaf8-7c534c5bba2b"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "533b54cb-5b6a-4b93-8fa6-77d2f6f5fbd3"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z1"
---- !<Rename>
-changeId: "a6cbc088-0796-4210-82d0-315f33e069a3"
-nodeId: "2249eec4-bd07-4e2e-bc43-43b185996a33"
-name: "z"
---- !<Rename>
-changeId: "3a872eff-eb4c-4a1a-ab5e-5a87a4d8314d"
-nodeId: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
-name: "afoo"
---- !<Rename>
-changeId: "96e0a628-5655-47c2-b0e9-ef0e3cde68e2"
-nodeId: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
-name: "afoo"
---- !<Rename>
-changeId: "4e98f465-2985-4a20-9218-6e91ed139327"
-nodeId: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
-name: "foo"
---- !<Rename>
-changeId: "0658ae11-ff65-4ca2-a21f-db5747d351c6"
-nodeId: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
-name: "foo"
+  id: "1e1787c7-dea0-490e-881f-d5412a923508"
 --- !<InsertReference>
-changeId: "c80e3a60-d3bc-4f6d-9598-d4552c5c4750"
-parent: "ad783d5c-355f-415c-b46f-4c7c74c9132f"
-prev: "f70e2fb5-9706-4bca-99d9-1b8a8b5ef84e"
-next: null
-id: "a9b12b41-90d7-4b38-a01b-8de8151bb828"
-ref: "Runtime:system-tests:tag"
+changeId: "6d4ea0c1-09a5-49b1-b6c9-7c054b82a98f"
+parent: "be0f94a7-0958-4dd5-affe-82f2f791bda2"
+prev: "1e1787c7-dea0-490e-881f-d5412a923508"
+id: "4f3bc282-0242-4c2b-a903-25a3528c4d82"
+ref: "system:*"
 --- !<InsertNode>
-changeId: "96095bf5-d897-47dd-8546-f4ec52429601"
-parent: "a9b12b41-90d7-4b38-a01b-8de8151bb828"
-prev: null
-next: null
+changeId: "0ce2debe-2b87-4d98-add7-1d2019c224a5"
+parent: "4f3bc282-0242-4c2b-a903-25a3528c4d82"
 node: !<PlaceholderNode>
-  id: "5e980f78-4b09-4eb0-b07a-bf340ae55532"
-  comment: null
-  children: []
-  deleted: false
-  parameter: "it"
+  id: "67df3239-9aa1-4b7e-9519-e3e7e268be1a"
+  parameter: "x"
+--- !<InsertNode>
+changeId: "5a4065f8-3110-4f94-b7d6-b9db643055e0"
+parent: "4f3bc282-0242-4c2b-a903-25a3528c4d82"
+prev: "67df3239-9aa1-4b7e-9519-e3e7e268be1a"
+node: !<PlaceholderNode>
+  id: "15fd39da-2e31-41d2-bd80-0c0389790a73"
+  parameter: "y"
 --- !<Delete>
-changeId: "f2af3b27-476e-46a6-8988-879da9735d25"
-id: "5e980f78-4b09-4eb0-b07a-bf340ae55532"
+changeId: "10f037e2-322f-449b-b88d-ee5c06829e21"
+id: "67df3239-9aa1-4b7e-9519-e3e7e268be1a"
 --- !<InsertReference>
-changeId: "60430cd5-b89d-46df-8b3d-dca83fe207d0"
-parent: "a9b12b41-90d7-4b38-a01b-8de8151bb828"
-prev: null
-next: null
-id: "4661f9f1-d79a-47df-a424-a527273cdb0f"
-ref: "system:tail"
---- !<InsertNode>
-changeId: "9fc06140-00cc-4e40-b20e-e1cf9b3768e9"
-parent: "4661f9f1-d79a-47df-a424-a527273cdb0f"
-prev: null
-next: null
-node: !<PlaceholderNode>
-  id: "2cc6b4f0-e27b-4628-bf81-543a13b67707"
-  comment: null
-  children: []
-  deleted: false
-  parameter: "seq"
-
+changeId: "2cf4353e-95a6-441f-a0b6-fc57ea43903d"
+parent: "4f3bc282-0242-4c2b-a903-25a3528c4d82"
+next: "15fd39da-2e31-41d2-bd80-0c0389790a73"
+id: "0681ffeb-bd66-4857-9d63-87582d9b868e"
+ref: "c82c559d-6c76-485f-8ea8-5e3f5cf651d3"
 --- !<Delete>
-changeId: "c536e8d9-5b1a-4181-b626-787ff383b14d"
-id: "4661f9f1-d79a-47df-a424-a527273cdb0f"
+changeId: "5a4eaa8c-ab58-45b6-857e-42a6302133d2"
+id: "15fd39da-2e31-41d2-bd80-0c0389790a73"
 --- !<InsertReference>
-changeId: "c30b1f06-1ff0-401d-ad76-7d0b0c6cb10f"
-parent: "a9b12b41-90d7-4b38-a01b-8de8151bb828"
-prev: null
-next: null
-id: "f4365554-8b45-4665-af3d-2160214ed963"
-ref: "system:map"
---- !<InsertNode>
-changeId: "af93b2dc-f42b-4370-bdca-ebbff1379cf5"
-parent: "f4365554-8b45-4665-af3d-2160214ed963"
-prev: null
-next: null
-node: !<PlaceholderNode>
-  id: "c72e9218-364b-48c0-8b3f-9283f0eaaf23"
-  comment: null
-  children: []
-  deleted: false
-  parameter: "seq"
---- !<InsertNode>
-changeId: "be9ae633-f80d-4806-9163-d97108eacdf5"
-parent: "f4365554-8b45-4665-af3d-2160214ed963"
-prev: "c72e9218-364b-48c0-8b3f-9283f0eaaf23"
-next: null
-node: !<PlaceholderNode>
-  id: "c3d2176f-54ec-4d1e-870e-d6eccd7933e1"
-  comment: null
-  children: []
-  deleted: false
-  parameter: "f"
---- !<Delete>
-changeId: "e0bf1de1-52ee-4fc3-ac65-55fc7c1efe3e"
-id: "c72e9218-364b-48c0-8b3f-9283f0eaaf23"
---- !<InsertNode>
-changeId: "1f924541-2042-4e26-8147-d6f3a6257fc1"
-parent: "f4365554-8b45-4665-af3d-2160214ed963"
-prev: null
-next: "c3d2176f-54ec-4d1e-870e-d6eccd7933e1"
-node: !<LiteralNode>
-  id: "3b5c1402-f74c-438a-be60-ba3eca2e5dad"
-  comment: null
-  children: []
-  deleted: false
-  text: "123"
---- !<InsertNode>
-changeId: "f35b2a0e-d8b3-4e8e-b74c-aac13ffe7b32"
-parent: "9e7e1be7-8bd7-4fa7-b73e-694fa4bbb15c"
-prev: "e999f9b5-10cf-4064-a310-0e0443e0f28d"
-next: null
-node: !<LambdaNode>
-  id: null
-  comment: null
-  children: []
-  deleted: false
---- !<InsertReference>
-changeId: "08f67f22-2c13-41f5-b907-0303c12676b0"
-parent: "70882823-ab45-4f14-a0d9-a76509a07741"
-prev: "f5b232ec-33aa-4533-8dc9-404f3cfee8b3"
-next: null
-id: "6c7ef8a8-5edd-43a6-9d50-c0b692b3256e"
-ref: "f45c451a-c9f8-4b90-b282-89eb68a39c02"
+changeId: "f3cb9c9f-888a-4ba0-b71b-01e280334491"
+parent: "4f3bc282-0242-4c2b-a903-25a3528c4d82"
+prev: "0681ffeb-bd66-4857-9d63-87582d9b868e"
+id: "7e08a0e1-ffcf-4a78-8959-8c50b008f0d9"
+ref: "886f6441-8f42-4122-9b5b-0889318917b1"
