@@ -92,7 +92,7 @@ public class EditorPane extends SplitPane {
         MenuItem gotoDefinitionMenuItem = new MenuItem("Go to definition");
         Node sel = selectedNode();
         gotoDefinitionMenuItem.setOnAction(e -> {
-                     if (sel instanceof ReferenceNode) {
+            if (sel instanceof ReferenceNode) {
                 gotoDefinition((ReferenceNode) sel);
             }
         });
@@ -152,7 +152,7 @@ public class EditorPane extends SplitPane {
             protected void updateItem(Signature item, boolean empty) {
                 super.updateItem(item, empty);
 
-                setText((!empty && item != null) ? NodeUtils.signature((Node)item) : "");
+                setText((!empty && item != null) ? NodeUtils.signature((Node) item) : "");
             }
         });
 
@@ -165,6 +165,10 @@ public class EditorPane extends SplitPane {
                 anotherPane.insertNode((Node<?>) membersList.getSelectionModel().selectedItemProperty().getValue());
             }
         });
+
+        MenuItem addPackageMenuItem = new MenuItem("Add...", Icons.icon("add"));
+        addPackageMenuItem.setOnAction(e -> addPackage());
+        packageTree.setContextMenu(new ContextMenu(addPackageMenuItem));
 
 
         MenuItem addFunctionMenuItem = new MenuItem("Add...", Icons.icon("add"));
@@ -179,6 +183,29 @@ public class EditorPane extends SplitPane {
         ));
 
         environment.getWorkspace().changeListeners().add(this::processChanges);
+    }
+
+    private void addPackage() {
+        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            Node parent = selectedItem.getValue();
+            if (isReadonly(parent)) {
+                return;
+            }
+
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Add a package");
+            dialog.setHeaderText("");
+            dialog.setContentText("Package name");
+
+            dialog.showAndWait().ifPresent(name -> {
+                InsertNode insert = new InsertNode()
+                    .node(new PackageNode().name(name).id(Change.newId()))
+                    .parent(parent.id());
+                environment.getWorkspace().apply(Collections.singletonList(insert));
+                navigateTo(environment.getWorkspace().node(insert.node().id()));
+            });
+        }
     }
 
     private void deleteNode() {
@@ -295,7 +322,7 @@ public class EditorPane extends SplitPane {
         signatureView.add(new Label("Name"), 1, 1);
         signatureView.add(new Label("Description"), 2, 1);
         signatureView.add(nameTextField(head), 1, 2);
-        signatureView.add(commentTextField((Node)selectedItem), 2, 2);
+        signatureView.add(commentTextField((Node) selectedItem), 2, 2);
 
         if (head instanceof FunctionNode) {
             FunctionNode fn = (FunctionNode) head;
@@ -305,7 +332,7 @@ public class EditorPane extends SplitPane {
                 if (n instanceof SeparatorNode) {
                     break;
                 }
-                signatureView.add(nameTextField((VariableNode)n), 1, row);
+                signatureView.add(nameTextField((VariableNode) n), 1, row);
                 signatureView.add(commentTextField(n), 2, row);
                 row++;
             }
@@ -334,7 +361,7 @@ public class EditorPane extends SplitPane {
                             .add(new PlaceholderNode().setParameter("variable").id(Change.newId()))
                             .add(new PlaceholderNode().setParameter("value").id(Change.newId())));
                     }
-                    if (param.getUserText().isEmpty() || param.getUserText().startsWith("λ") ||  param.getUserText().startsWith("\\") ) {
+                    if (param.getUserText().isEmpty() || param.getUserText().startsWith("λ") || param.getUserText().startsWith("\\")) {
                         suggestions.add(new LambdaNode()
                             .add(new PlaceholderNode().setParameter("args...").id(Change.newId()))
                             .add(new SeparatorNode().id(Change.newId()))
@@ -377,7 +404,7 @@ public class EditorPane extends SplitPane {
                             .add(new PlaceholderNode().setParameter("result").id(Change.newId())));
                     }
 
-                    suggestions.addAll(collectLocals((Node)selectedMember(), selectedNode(), param.getUserText()));
+                    suggestions.addAll(collectLocals((Node) selectedMember(), selectedNode(), param.getUserText()));
                     suggestions.addAll(environment.getSymbolRegistry().symbols(param.getUserText()));
 
                     return suggestions;
@@ -479,7 +506,7 @@ public class EditorPane extends SplitPane {
 
         String prev = null;
         if (node instanceof Signature) {
-            for (String arg : ((Signature)node).arguments()) {
+            for (String arg : ((Signature) node).arguments()) {
                 InsertNode insertPlaceholder = new InsertNode()
                     .node(new PlaceholderNode().setParameter(arg).id(Change.newId()))
                     .parent(((InsertReference) head).id())
@@ -593,7 +620,7 @@ public class EditorPane extends SplitPane {
             }
 
             private void applyChanges() {
-                environment.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(((Node)node).id()).name(getText())));
+                environment.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(((Node) node).id()).name(getText())));
             }
 
         };
@@ -713,7 +740,7 @@ public class EditorPane extends SplitPane {
     }
 
     private boolean isReadonly() {
-        return isReadonly((Node)membersList.getSelectionModel().getSelectedItem());
+        return isReadonly((Node) membersList.getSelectionModel().getSelectedItem());
     }
 
     private static boolean isReadonly(Node<?> node) {
