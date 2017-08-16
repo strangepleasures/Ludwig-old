@@ -620,7 +620,7 @@ public class EditorPane extends SplitPane {
     }
 
     private TextField commentTextField(Node<?> node) {
-        TextField textField = new TextField(node.comment()) {
+        return new TextField(node.comment()) {
             private String saved;
 
             {
@@ -643,11 +643,10 @@ public class EditorPane extends SplitPane {
                 environment.getWorkspace().apply(Collections.singletonList(new Comment().nodeId(node.id()).comment(getText())));
             }
         };
-        return textField;
     }
 
     private TextField nameTextField(NamedNode node) {
-        TextField textField = new TextField(node.name()) {
+        return new TextField(node.name()) {
             private String saved;
 
             {
@@ -669,10 +668,7 @@ public class EditorPane extends SplitPane {
             private void applyChanges() {
                 environment.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(((Node) node).id()).name(getText())));
             }
-
         };
-        textField.setEditable(!isReadonly());
-        return textField;
     }
 
     void refresh() {
