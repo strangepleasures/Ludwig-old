@@ -56,6 +56,9 @@ def test-refs :
 
 field tag
 
+class Point2D Any x y
+
+class Point3D Point2D z
 
 def test-oop :
 	= p2 Point2D 1 2
