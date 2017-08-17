@@ -1,7 +1,8 @@
 package ludwig.interpreter;
 
 import ludwig.model.*;
-import org.pcollections.*;
+import org.pcollections.HashPMap;
+import org.pcollections.TreePVector;
 
 class Evaluator implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
@@ -52,9 +53,6 @@ class Evaluator implements NodeVisitor<Object> {
         }
 
         return untail(tail(head, args));
-
-
-
     }
 
     @Override
@@ -99,6 +97,11 @@ class Evaluator implements NodeVisitor<Object> {
     @Override
     public Object visitOverride(OverrideNode overrideNode) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Object visitClass(ClassNode classNode) {
+        return null;
     }
 
     @Override
@@ -236,6 +239,16 @@ class Evaluator implements NodeVisitor<Object> {
 
     Object tail(Node<?> head, Object[] args) {
         Node<?> impl = head;
+
+        if (head instanceof ClassNode) {
+            ClassType type = ClassType.of((ClassNode) head);
+            Instance instance = new Instance(type);
+            for (int i = 0; i < args.length; i++) {
+                instance.set(type.fields().get(i), args[i]);
+            }
+            return instance;
+        }
+
         if (args.length > 0 && args[0] instanceof Instance) {
             Instance obj = (Instance) args[0];
             impl = (Node<?>) obj.type().implementation((Signature) head);
@@ -248,7 +261,7 @@ class Evaluator implements NodeVisitor<Object> {
             return ((NativeFunctionNode) impl).eval(args);
         }
         if (head instanceof FunctionNode) {
-            FunctionNode fn  = (FunctionNode) head;
+            FunctionNode fn = (FunctionNode) head;
             HashPMap<NamedNode, Object> savedLocals = locals;
 
             try {

@@ -44,4 +44,6 @@ public interface NodeVisitor<T> {
     T visitField(FieldNode fieldNode);
 
     T visitOverride(OverrideNode overrideNode);
+
+    T visitClass(ClassNode classNode);
 }

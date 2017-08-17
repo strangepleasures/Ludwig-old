@@ -65,6 +65,18 @@ public class Parser {
         consume("(");
 
         switch (nextToken()) {
+            case "class" : {
+                ClassNode classNode =  append(packageNode, new ClassNode().name(nextToken()));
+                if (!currentToken().equals(")")) {
+                    ClassNode superClass = (ClassNode) find(nextToken());
+                    append(classNode, new ReferenceNode(superClass));
+                }
+                while (!currentToken().equals(")")) {
+                    append(classNode, new FieldNode().name(nextToken()));
+                }
+                consume(")");
+                break;
+            }
             case "def":
                 boolean lazy = false;
                 if (currentToken().equals("lazy")) {
@@ -114,6 +126,9 @@ public class Parser {
     private void parseBody(PackageNode packageNode) throws ParserException {
         consume("(");
         switch (nextToken()) {
+            case "class":
+                while (!nextToken().equals(")"));
+                break;
             case "def":
                 if (currentToken().equals("lazy")) {
                     consume("lazy");
@@ -266,7 +281,13 @@ public class Parser {
                             }
                             parseChild(r);
                         }
-                    } else if (Lexer.isLiteral(head)) {
+                    } else if (headNode instanceof ClassNode) {
+                        ClassNode cn = (ClassNode) headNode;
+                        ReferenceNode r = append(parent, new ReferenceNode(cn));
+                        while (!currentToken().equals(")")) {
+                            parseChild(r);
+                        }
+                    }else if (Lexer.isLiteral(head)) {
                         append(parent, new LiteralNode(head));
                     } else {
                         throw new ParserException("Unknown symbol: " + head);

@@ -3,7 +3,7 @@ package system-tests
 def test-fields-and-properties :
 	= tag 1
 	assert== 1 tag
-	= o Object
+	= o Any
 	= tag o 123
 	assert== 123 tag o
 	= r ref tag
@@ -56,3 +56,6 @@ def test-refs :
 
 field tag
 
+
+def test-oop :
+	= p Point3D 1 2 3

@@ -48,6 +48,13 @@ public class PrettyPrinter implements NodeVisitor<Void> {
         return null;
     }
 
+
+    @Override
+    public Void visitClass(ClassNode classNode) {
+        return null;
+    }
+
+
     @Override
     public Void visitLiteral(LiteralNode literalNode) {
         print(literalNode.text());

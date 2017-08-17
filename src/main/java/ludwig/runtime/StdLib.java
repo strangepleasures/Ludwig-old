@@ -9,8 +9,6 @@ import java.util.stream.StreamSupport;
 
 @Name("system")
 public class StdLib {
-    private static final Type OBJECT_TYPE = new Type();
-
     @Name("true")
     public static boolean _true() {
         return true;
@@ -205,10 +203,6 @@ public class StdLib {
             result++;
         }
         return result;
-    }
-
-    public static Object Object() {
-        return new Instance(OBJECT_TYPE);
     }
 
     private static class Cons<T> implements Iterable<T> {
