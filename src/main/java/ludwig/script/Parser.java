@@ -1,6 +1,7 @@
 package ludwig.script;
 
 import ludwig.changes.*;
+import ludwig.interpreter.ClassType;
 import ludwig.model.*;
 import ludwig.workspace.Workspace;
 import org.pcollections.HashPMap;
@@ -33,7 +34,7 @@ public class Parser {
     }
 
     public static NamedNode item(PackageNode findByName, String name) {
-        return findByName.children().stream().map(n -> (NamedNode) n).filter(it -> it.name().equals(name)).findFirst().orElse(null);
+        return findByName.children().stream().filter(n -> n instanceof NamedNode).map(n -> (NamedNode) n).filter(it -> it.name().equals(name)).findFirst().orElse(null);
     }
 
     private void parse(ProjectNode projectNode) throws ParserException {
@@ -77,7 +78,7 @@ public class Parser {
                 consume(")");
                 break;
             }
-            case "def":
+            case "def": {
                 boolean lazy = false;
                 if (currentToken().equals("lazy")) {
                     lazy = true;
@@ -89,8 +90,8 @@ public class Parser {
                 }
                 consume(")");
                 append(fn, new SeparatorNode());
-                consume("(");
 
+                consume("(");
                 int level = 1;
                 while (level != 0 && pos < tokens.size()) {
                     switch (nextToken()) {
@@ -103,6 +104,24 @@ public class Parser {
                     }
                 }
                 break;
+            }
+            case "method": {
+                while (!nextToken().equals(")"));
+
+                consume("(");
+                int level = 1;
+                while (level != 0 && pos < tokens.size()) {
+                    switch (nextToken()) {
+                        case "(":
+                            level++;
+                            break;
+                        case ")":
+                            level--;
+                            break;
+                    }
+                }
+                break;
+            }
             case "field":
                 append(packageNode, new FieldNode().name(nextToken()));
                 consume(")");
@@ -129,7 +148,7 @@ public class Parser {
             case "class":
                 while (!nextToken().equals(")"));
                 break;
-            case "def":
+            case "def": {
                 if (currentToken().equals("lazy")) {
                     consume("lazy");
                 }
@@ -152,6 +171,37 @@ public class Parser {
                     nextToken();
                 }
                 break;
+            }
+            case "method": {
+                ClassNode classNode = (ClassNode) find(nextToken());
+                FunctionNode fn = (FunctionNode) find(nextToken());
+                OverrideNode node = append(packageNode, new OverrideNode());
+                append(node, new ReferenceNode(fn));
+
+
+                locals = HashTreePMap.empty();
+
+                for (Node child : fn.children()) {
+                    if (child instanceof SeparatorNode) {
+                        break;
+                    }
+                    VariableNode variableNode = (VariableNode) child;
+                    locals = locals.plus(variableNode.name(), variableNode);
+                }
+
+                while (!nextToken().equals(")")) ;
+                consume("(");
+                while (pos < tokens.size() && !currentToken().equals(")")) {
+                    parseChild(node);
+                }
+
+                if (pos < tokens.size()) {
+                    nextToken();
+                }
+
+                ClassType.of(classNode).overrides().put(fn, node);
+                break;
+            }
             case "field":
                 nextToken();
                 consume(")");

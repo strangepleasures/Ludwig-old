@@ -20,7 +20,7 @@ public class ClassType {
 
     private ClassType(ClassNode node) {
         this.name = node.name();
-        this.superClass = node.children().isEmpty() ? null : of((ClassNode) node.children().get(0));
+        this.superClass = node.children().isEmpty() ? null : of((ClassNode) ((ReferenceNode) node.children().get(0)).ref());
         TreePVector<FieldNode> fields = superClass != null ? superClass.fields : TreePVector.empty();
         for (int i  = 1; i < node.children().size(); i++) {
             fields = fields.plus((FieldNode) node.children().get(i));
@@ -34,5 +34,9 @@ public class ClassType {
 
     public TreePVector<FieldNode> fields() {
         return fields;
+    }
+
+    public Map<Signature, Signature> overrides() {
+        return overrides;
     }
 }

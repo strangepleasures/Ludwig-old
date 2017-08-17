@@ -58,4 +58,16 @@ field tag
 
 
 def test-oop :
-	= p Point3D 1 2 3
+	= p2 Point2D 1 2
+	assert== 2 dim p2
+	= p3 Point3D 1 2 3
+	assert== 3 dim p3
+
+def dim o :
+	0
+
+method Point2D dim o :
+	2
+
+method Point3D dim o :
+	3
