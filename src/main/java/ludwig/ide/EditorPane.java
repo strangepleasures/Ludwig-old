@@ -340,10 +340,6 @@ public class EditorPane extends SplitPane {
                             .prev(prev));
                         prev = id;
                     }
-                    changes.add(new InsertNode()
-                        .node(new SeparatorNode().id(Change.newId()))
-                        .parent(insertFn.node().id())
-                        .prev(prev));
 
                     environment.getWorkspace().apply(changes);
 
@@ -364,7 +360,7 @@ public class EditorPane extends SplitPane {
             return;
         }
 
-        NamedNode head = (selectedItem instanceof OverrideNode) ? ((ReferenceNode) ((OverrideNode) selectedItem).children().get(0)).ref() : (NamedNode) selectedItem;
+        NamedNode head = (selectedItem instanceof OverrideNode) ? (NamedNode) ((ReferenceNode) ((OverrideNode) selectedItem).children().get(0)).ref() : (NamedNode) selectedItem;
 
         signatureView.add(new Label("Name"), 1, 1);
         signatureView.add(new Label("Description"), 2, 1);
@@ -376,7 +372,7 @@ public class EditorPane extends SplitPane {
 
             int row = 3;
             for (Node n : fn.children()) {
-                if (n instanceof SeparatorNode) {
+                if (!(n instanceof VariableNode)) {
                     break;
                 }
                 signatureView.add(nameTextField((VariableNode) n), 1, row);
@@ -410,9 +406,7 @@ public class EditorPane extends SplitPane {
                     }
                     if (param.getUserText().isEmpty() || param.getUserText().startsWith("λ") || param.getUserText().startsWith("\\")) {
                         suggestions.add(new LambdaNode()
-                            .add(new PlaceholderNode().setParameter("args...").id(Change.newId()))
-                            .add(new SeparatorNode().id(Change.newId()))
-                            .add(new PlaceholderNode().setParameter("body...").id(Change.newId())));
+                            .add(new PlaceholderNode().setParameter("args...").id(Change.newId())));
                     }
                     if (param.getUserText().isEmpty() || "ref fn".startsWith(param.getUserText())) {
                         suggestions.add(new FunctionReferenceNode()
@@ -604,13 +598,8 @@ public class EditorPane extends SplitPane {
             if (index < 0) {
                 return null;
             }
-            for (int i = 0; i < nodes.size(); i++) {
-                if (nodes.get(i) instanceof SeparatorNode) {
-                    if (index + i + 1 < nodes.size()) {
-                        return nodes.get(index + i + 1);
-                    }
-                }
-            }
+
+            return nodes.get(index + node.arguments().size());
         }
         return null;
     }

@@ -4,7 +4,6 @@ import ludwig.model.*;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class NodeUtils {
 
@@ -56,14 +55,14 @@ public class NodeUtils {
         }
         StringBuilder builder = new StringBuilder(node.toString());
         for (Node<?> child: node.children()) {
-            if (child instanceof SeparatorNode) {
-                break;
-            }
-            builder.append(' ');
             if (child instanceof PlaceholderNode) {
+                builder.append(' ');
                 builder.append(((PlaceholderNode) child).getParameter());
-            } else {
+            } else if (child instanceof VariableNode) {
+                builder.append(' ');
                 builder.append(child.toString());
+            } else {
+                break;
             }
         }
         return builder.toString();
@@ -88,5 +87,9 @@ public class NodeUtils {
         collectLocals(root, stop, filter, locals);
         locals.sort(Comparator.comparing(Object::toString));
         return locals;
+    }
+
+    public static boolean isField(Node node) {
+        return (node instanceof VariableNode) && (node.parent() instanceof ClassNode);
     }
 }

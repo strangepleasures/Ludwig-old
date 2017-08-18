@@ -9,8 +9,6 @@ public interface NodeVisitor<T> {
 
     T visitVariable(VariableNode variableNode);
 
-    T visitSeparator(SeparatorNode separatorNode);
-
     T visitAssignment(AssignmentNode assignmentNode);
 
     T visitReference(ReferenceNode referenceNode);
@@ -40,8 +38,6 @@ public interface NodeVisitor<T> {
     T visitBreak(BreakNode breakNode);
 
     T visitContinue(ContinueNode continueNode);
-
-    T visitField(FieldNode fieldNode);
 
     T visitOverride(OverrideNode overrideNode);
 

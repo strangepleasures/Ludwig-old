@@ -12,7 +12,7 @@ public class CallableFunction implements Callable {
         this.function = function;
 
         for (int i = 0; i < function.children().size(); i++) {
-            if (function.children().get(i) instanceof SeparatorNode) {
+            if (!(function.children().get(i) instanceof VariableNode)) {
                 argCount = i;
                 break;
             }

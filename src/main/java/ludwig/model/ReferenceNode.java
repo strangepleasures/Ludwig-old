@@ -2,13 +2,13 @@ package ludwig.model;
 
 
 public class ReferenceNode extends Node<ReferenceNode> {
-    private final NamedNode ref;
+    private final Node ref;
 
-    public ReferenceNode(NamedNode ref) {
+    public ReferenceNode(Node ref) {
         this.ref = ref;
     }
 
-    public NamedNode ref() {
+    public Node ref() {
         return ref;
     }
 

@@ -7,7 +7,8 @@ import java.util.Comparator;
 public class PrettyPrinter implements NodeVisitor<Void> {
     private final StringBuilder builder = new StringBuilder();
 
-    private PrettyPrinter() {}
+    private PrettyPrinter() {
+    }
 
     public static String print(Node parent) {
         PrettyPrinter printer = new PrettyPrinter();
@@ -29,7 +30,7 @@ public class PrettyPrinter implements NodeVisitor<Void> {
     public Void visitList(ListNode node) {
         print("list");
         boolean inline = level(node) < 4;
-        for (Node n: node.children()) {
+        for (Node n : node.children()) {
             child(n, inline);
         }
         return null;
@@ -38,10 +39,11 @@ public class PrettyPrinter implements NodeVisitor<Void> {
     @Override
     public Void visitFunction(FunctionNode functionNode) {
         boolean body = false;
-        for (Node child: functionNode.children()) {
-            if (child instanceof SeparatorNode) {
+        for (Node child : functionNode.children()) {
+            if (!(child instanceof VariableNode)) {
                 body = true;
-            } else if (body) {
+            }
+            if (body) {
                 child(child, false);
             }
         }
@@ -74,7 +76,7 @@ public class PrettyPrinter implements NodeVisitor<Void> {
 
     @Override
     public Void visitReference(ReferenceNode referenceNode) {
-        print(referenceNode.ref().name());
+        print(referenceNode.ref().toString());
         boolean inline = level(referenceNode) < 4;
         referenceNode.children().forEach(node -> child(node, inline));
         return null;
@@ -117,12 +119,6 @@ public class PrettyPrinter implements NodeVisitor<Void> {
     }
 
     @Override
-    public Void visitField(FieldNode fieldNode) {
-        print(fieldNode.toString());
-        return null;
-    }
-
-    @Override
     public Void visitOverride(OverrideNode overrideNode) {
         for (int i = 1; i < overrideNode.children().size(); i++) {
             child(overrideNode.children().get(i), false);
@@ -148,14 +144,15 @@ public class PrettyPrinter implements NodeVisitor<Void> {
 
         boolean body = false;
         boolean inline = level(lambdaNode) < 4;
-        for (Node n: lambdaNode.children()) {
+        for (Node n : lambdaNode.children()) {
+            if (!body && !(n instanceof VariableNode)) {
+                body = true;
+                print(" : ");
+            }
             if (body) {
                 child(n, inline);
             } else {
                 print(" " + n);
-            }
-            if (n instanceof SeparatorNode) {
-                body = true;
             }
         }
         return null;
@@ -208,12 +205,6 @@ public class PrettyPrinter implements NodeVisitor<Void> {
         for (int i = 0; i < forNode.children().size(); i++) {
             child(forNode.children().get(i), i < 2);
         }
-        return null;
-    }
-
-    @Override
-    public Void visitSeparator(SeparatorNode separatorNode) {
-        print(": ");
         return null;
     }
 

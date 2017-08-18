@@ -4,26 +4,12 @@ import ludwig.interpreter.*;
 import org.pcollections.*;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Name("system")
 public class StdLib {
-    @Name("true")
-    public static boolean _true() {
-        return true;
-    }
-
-    @Name("false")
-    public static boolean _false() {
-        return false;
-    }
-
-    @Name("null")
-    public static Object _null() {
-        return null;
-    }
-
     public static String str(Object x) {
         return String.valueOf(x);
     }
@@ -203,6 +189,28 @@ public class StdLib {
             result++;
         }
         return result;
+    }
+
+    public static Callable bind(Callable callable, Object o) {
+        return new Callable() {
+            @Override
+            public Object tail(Object... args) {
+                Object[] a = new Object[args.length + 1];
+                a[0] = isLazy() ? (Delayed) () -> o : o;
+                System.arraycopy(args, 0, a, 1, args.length);
+                return callable.tail(a);
+            }
+
+            @Override
+            public int argCount() {
+                return callable.argCount() - 1;
+            }
+
+            @Override
+            public boolean isLazy() {
+                return callable.isLazy() && argCount() > 0;
+            }
+        };
     }
 
     private static class Cons<T> implements Iterable<T> {

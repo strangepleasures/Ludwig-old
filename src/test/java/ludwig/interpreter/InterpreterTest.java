@@ -24,7 +24,6 @@ public class InterpreterTest {
         VariableNode variableNode2 = new VariableNode();
         variableNode2.name("y");
         functionNode.add(variableNode2);
-        functionNode.add(new SeparatorNode());
 
         FunctionNode minus = (FunctionNode) Parser.item(systemPackage, "-");
         ReferenceNode head = new ReferenceNode(minus);
@@ -44,7 +43,6 @@ public class InterpreterTest {
         LambdaNode lambda = new LambdaNode();
 
         lambda.add(new VariableNode());
-        lambda.add(new SeparatorNode());
         FunctionNode plus = (FunctionNode) Parser.item(systemPackage, "+");
         ReferenceNode head = new ReferenceNode(plus);
         ReferenceNode referenceNode = new ReferenceNode((NamedNode) lambda.children().get(0));

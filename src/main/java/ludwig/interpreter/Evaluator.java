@@ -4,6 +4,8 @@ import ludwig.model.*;
 import org.pcollections.HashPMap;
 import org.pcollections.TreePVector;
 
+import static ludwig.utils.NodeUtils.isField;
+
 class Evaluator implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
     private boolean doElse;
@@ -62,8 +64,8 @@ class Evaluator implements NodeVisitor<Object> {
             if (node instanceof FunctionNode) {
                 return new CallableFunction((FunctionNode) node);
             }
-            if (node instanceof FieldNode) {
-                return new CallableField((FieldNode) node);
+            if (node instanceof VariableNode) {
+                return new CallableField((VariableNode) node);
             }
         }
         return node;
@@ -81,17 +83,12 @@ class Evaluator implements NodeVisitor<Object> {
 
     @Override
     public Object visitBreak(BreakNode breakNode) {
-        return new Break(((ReferenceNode) breakNode.children().get(0)).ref());
+        return new Break((NamedNode) ((ReferenceNode) breakNode.children().get(0)).ref());
     }
 
     @Override
     public Object visitContinue(ContinueNode continueNode) {
-        return new Continue(((ReferenceNode) continueNode.children().get(0)).ref());
-    }
-
-    @Override
-    public Object visitField(FieldNode fieldNode) {
-        throw new UnsupportedOperationException();
+        return new Continue((NamedNode) ((ReferenceNode) continueNode.children().get(0)).ref());
     }
 
     @Override
@@ -164,9 +161,9 @@ class Evaluator implements NodeVisitor<Object> {
         Node lhs = assignmentNode.children().get(0);
         if (lhs instanceof ReferenceNode) {
             lhs = ((ReferenceNode) lhs).ref();
-            if (lhs instanceof FieldNode) {
+            if (isField(lhs)) {
                 Instance instance = (Instance) assignmentNode.children().get(0).children().get(0).accept(this);
-                instance.set((FieldNode) lhs, value);
+                instance.set((VariableNode) lhs, value);
                 return value;
             }
         }
@@ -218,11 +215,6 @@ class Evaluator implements NodeVisitor<Object> {
         return null;
     }
 
-    @Override
-    public Object visitSeparator(SeparatorNode separatorNode) {
-        return null;
-    }
-
     private Object untail(Object result) {
         while (result instanceof Return) {
             Return tail = (Return) result;
@@ -254,8 +246,8 @@ class Evaluator implements NodeVisitor<Object> {
             impl = (Node<?>) obj.type().implementation((Signature) head);
         }
 
-        if (impl instanceof FieldNode) {
-            return ((Instance) args[0]).get((FieldNode) impl);
+        if (isField(impl)) {
+            return ((Instance) args[0]).get((VariableNode) impl);
         }
         if (impl instanceof NativeFunctionNode) {
             return ((NativeFunctionNode) impl).eval(args);
@@ -279,13 +271,38 @@ class Evaluator implements NodeVisitor<Object> {
                         }
                     }
                 } else {
-                    for (int i = args.length + 1; i < fn.children().size(); i++) {
+                    for (int i = args.length; i < fn.children().size(); i++) {
                         result = fn.children().get(i).accept(this);
                         if (result instanceof Signal) {
                             break;
                         }
                     }
 
+                }
+
+                return result;
+            } finally {
+                locals = savedLocals;
+            }
+        }
+        if (head instanceof OverrideNode) {
+            FunctionNode fn = (FunctionNode) ((ReferenceNode) head.children().get(0)).ref();
+            HashPMap<NamedNode, Object> savedLocals = locals;
+
+            try {
+                for (int i = 0; i < args.length; i++) {
+                    locals = locals.plus((NamedNode) fn.children().get(i), args[i]);
+                }
+
+                Object result = null;
+
+                if (impl instanceof OverrideNode) {
+                    for (int i = 1; i < impl.children().size(); i++) {
+                        result = impl.children().get(i).accept(this);
+                        if (result instanceof Signal) {
+                            break;
+                        }
+                    }
                 }
 
                 return result;

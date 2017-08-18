@@ -40,7 +40,6 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
             }
             add(param);
         }
-        add(new SeparatorNode());
 
         lazy = method.isAnnotationPresent(Lazy.class);
     }

@@ -24,7 +24,7 @@ public class FunctionNode extends NamedNode<FunctionNode> implements Signature {
     public String signature() {
         StringBuilder builder = new StringBuilder(name());
         for (Node node: children()) {
-            if (node instanceof SeparatorNode) {
+            if (!(node instanceof VariableNode)) {
                 break;
             }
             builder.append(' ').append(node);
@@ -36,7 +36,7 @@ public class FunctionNode extends NamedNode<FunctionNode> implements Signature {
     public List<String> arguments() {
         List<String> args = new ArrayList<>();
         for (Node node: children()) {
-            if (node instanceof SeparatorNode) {
+            if (!(node instanceof VariableNode)) {
                 break;
             }
             args.add(node.toString());

@@ -1,12 +1,12 @@
 package ludwig.interpreter;
 
-import ludwig.model.FieldNode;
+import ludwig.model.VariableNode;
 import org.pcollections.HashTreePMap;
 
 public class CallableField implements Callable {
-    private final FieldNode field;
+    private final VariableNode field;
 
-    public CallableField(FieldNode field) {
+    public CallableField(VariableNode field) {
         this.field = field;
     }
 

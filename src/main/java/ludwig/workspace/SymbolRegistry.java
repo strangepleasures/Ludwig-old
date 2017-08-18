@@ -7,6 +7,8 @@ import ludwig.model.*;
 
 import java.util.*;
 
+import static ludwig.utils.NodeUtils.isField;
+
 public class SymbolRegistry {
     private final TreeSet symbols = new TreeSet<>(Comparator.comparing(SymbolRegistry::stringify));
     private final Map<String, Node> nodesById = new HashMap<>();
@@ -15,7 +17,7 @@ public class SymbolRegistry {
         workspace.changeListeners().add(change -> {
             if (change instanceof InsertNode) {
                 Node node = ((InsertNode) change).node();
-                if (node instanceof FunctionNode || node instanceof FieldNode) {
+                if (node instanceof FunctionNode || isField(node)) {
                     symbols.add(node);
                     nodesById.put(node.id(), node);
                 }
@@ -51,7 +53,7 @@ public class SymbolRegistry {
     }
 
     private void grab(Node<?> node) {
-        if (node instanceof FunctionNode || node instanceof FieldNode) {
+        if (node instanceof FunctionNode || isField(node)) {
             symbols.add(node);
         } else {
             node.children().forEach(this::grab);

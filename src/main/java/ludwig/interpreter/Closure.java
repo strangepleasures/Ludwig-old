@@ -15,7 +15,7 @@ public class Closure implements Callable {
 
         for (int i = 0; i < lambda.children().size(); i++) {
             Node node = lambda.children().get(i);
-            if (node instanceof SeparatorNode) {
+            if (!(node instanceof VariableNode)) {
                 argCount = i;
                 break;
             }
@@ -32,9 +32,10 @@ public class Closure implements Callable {
             Node node = lambda.children().get(i);
             if (node instanceof VariableNode) {
                 env = env.plus((NamedNode) node, args[i]);
-            } else if (node instanceof SeparatorNode) {
-                visitor = new Evaluator(env);
             } else {
+                if (visitor == null) {
+                    visitor = new Evaluator(env);
+                }
                 result = node.accept(visitor);
                 if (result instanceof Signal) {
                     break;

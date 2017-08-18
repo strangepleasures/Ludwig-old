@@ -127,7 +127,7 @@ public class App extends Application {
                     }
                 });
             } catch (IOException e) {
-                // TODO:
+                e.printStackTrace();
             }
         }
     }

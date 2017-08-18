@@ -2,11 +2,23 @@ package system
 
 class Any
 
+def null :
+	if false
+
+def true :
+	<= 0 1
+
+def false :
+	<= 1 0
+
 def assert condition message :
 	if not condition
 		throw message
 
-def assert== a b :
+def assert-that condition :
+	assert condition 'Assertion failed'
+
+def assert-equals a b :
 	assert == a b
 		concat list '!= ' a ' ' b
 
@@ -162,3 +174,6 @@ def append l x :
 
 def prepend l x :
 	plus l 0 x
+
+def abstract :
+	throw 'Abstract function'

@@ -1,6 +1,8 @@
 package ludwig.script;
 
-import ludwig.changes.*;
+import ludwig.changes.Change;
+import ludwig.changes.InsertNode;
+import ludwig.changes.InsertReference;
 import ludwig.interpreter.ClassType;
 import ludwig.model.*;
 import ludwig.workspace.Workspace;
@@ -12,12 +14,16 @@ import java.io.Reader;
 import java.util.Collections;
 import java.util.List;
 
+import static ludwig.utils.NodeUtils.isField;
+
 public class Parser {
     private final List<String> tokens;
     private final Workspace workspace;
 
     private int pos;
     private HashPMap<String, NamedNode> locals = HashTreePMap.empty();
+    private Signature superFunction;
+
 
     private Parser(List<String> tokens, Workspace workspace) {
         this.tokens = tokens;
@@ -48,9 +54,9 @@ public class Parser {
 
         String packageName = nextToken();
         PackageNode packageNode = projectNode.children().stream().map(n -> (PackageNode) n)
-            .filter(n -> n.name().equals(packageName))
-            .findFirst()
-            .orElseGet(() -> append(projectNode, new PackageNode().name(packageName)));
+                .filter(n -> n.name().equals(packageName))
+                .findFirst()
+                .orElseGet(() -> append(projectNode, new PackageNode().name(packageName)));
 
         consume(")");
 
@@ -66,14 +72,14 @@ public class Parser {
         consume("(");
 
         switch (nextToken()) {
-            case "class" : {
-                ClassNode classNode =  append(packageNode, new ClassNode().name(nextToken()));
+            case "class": {
+                ClassNode classNode = append(packageNode, new ClassNode().name(nextToken()));
                 if (!currentToken().equals(")")) {
                     ClassNode superClass = (ClassNode) find(nextToken());
                     append(classNode, new ReferenceNode(superClass));
                 }
                 while (!currentToken().equals(")")) {
-                    append(classNode, new FieldNode().name(nextToken()));
+                    append(classNode, new VariableNode().name(nextToken()));
                 }
                 consume(")");
                 break;
@@ -89,43 +95,30 @@ public class Parser {
                     append(fn, new VariableNode().name(nextToken()));
                 }
                 consume(")");
-                append(fn, new SeparatorNode());
 
-                consume("(");
-                int level = 1;
-                while (level != 0 && pos < tokens.size()) {
-                    switch (nextToken()) {
-                        case "(":
-                            level++;
-                            break;
-                        case ")":
-                            level--;
-                            break;
-                    }
-                }
+                skipBody();
                 break;
             }
             case "method": {
-                while (!nextToken().equals(")"));
-
-                consume("(");
-                int level = 1;
-                while (level != 0 && pos < tokens.size()) {
-                    switch (nextToken()) {
-                        case "(":
-                            level++;
-                            break;
-                        case ")":
-                            level--;
-                            break;
-                    }
-                }
+                while (!nextToken().equals(")")) ;
+                skipBody();
                 break;
             }
-            case "field":
-                append(packageNode, new FieldNode().name(nextToken()));
-                consume(")");
-                break;
+        }
+    }
+
+    private void skipBody() throws ParserException {
+        consume("(");
+        int level = 1;
+        while (level != 0 && pos < tokens.size()) {
+            switch (nextToken()) {
+                case "(":
+                    level++;
+                    break;
+                case ")":
+                    level--;
+                    break;
+            }
         }
     }
 
@@ -146,7 +139,7 @@ public class Parser {
         consume("(");
         switch (nextToken()) {
             case "class":
-                while (!nextToken().equals(")"));
+                while (!nextToken().equals(")")) ;
                 break;
             case "def": {
                 if (currentToken().equals("lazy")) {
@@ -155,7 +148,7 @@ public class Parser {
                 FunctionNode node = (FunctionNode) item(packageNode, nextToken());
                 locals = HashTreePMap.empty();
                 for (Node child : node.children()) {
-                    if (child instanceof SeparatorNode) {
+                    if (!(child instanceof VariableNode)) {
                         break;
                     }
                     VariableNode variableNode = (VariableNode) child;
@@ -178,11 +171,13 @@ public class Parser {
                 OverrideNode node = append(packageNode, new OverrideNode());
                 append(node, new ReferenceNode(fn));
 
+                superFunction = findSuper(classNode, fn);
+
 
                 locals = HashTreePMap.empty();
 
                 for (Node child : fn.children()) {
-                    if (child instanceof SeparatorNode) {
+                    if (!(child instanceof VariableNode)) {
                         break;
                     }
                     VariableNode variableNode = (VariableNode) child;
@@ -208,6 +203,21 @@ public class Parser {
                 break;
 
         }
+    }
+
+    private Signature findSuper(ClassNode classNode, FunctionNode fn) {
+        ClassType t = ClassType.of(classNode);
+        Signature s = t.implementation(fn);
+
+        while (t != null) {
+            Signature s1 = t.implementation(fn);
+            if (s1 != s) {
+                return s1;
+            }
+
+            t = t.superClass();
+        }
+        return fn;
     }
 
 
@@ -263,7 +273,7 @@ public class Parser {
                     int savedPos = pos;
 
                     NamedNode f = find(name);
-                    if (f instanceof FieldNode) {
+                    if (isField(f)) {
                         ReferenceNode r = append(node, new ReferenceNode(f));
                         parseChild(r);
                         if (!currentToken().equals(")")) {
@@ -295,7 +305,6 @@ public class Parser {
                         locals = locals.plus(param.name(), param);
                     }
                     consume(")");
-                    append(node, new SeparatorNode());
                     consume("(");
                     while (!currentToken().equals(")")) {
                         parseChild(node);
@@ -305,11 +314,11 @@ public class Parser {
                 }
 
                 default: {
-                    NamedNode headNode = find(head);
+                    Node headNode = "super".equals(head) ? (Node) superFunction : find(head);
 
-                    if (headNode instanceof FieldNode) {
+                    if (isField(headNode)) {
                         int savedPos = pos;
-                        FieldNode fn = (FieldNode) headNode;
+                        VariableNode fn = (VariableNode) headNode;
                         ReferenceNode r = append(parent, new ReferenceNode(fn));
                         if (currentToken().equals(")")) {
                             pos = savedPos;
@@ -326,7 +335,16 @@ public class Parser {
                         FunctionNode fn = (FunctionNode) headNode;
                         ReferenceNode r = append(parent, new ReferenceNode(fn));
                         for (Node param : fn.children()) {
-                            if (param instanceof SeparatorNode) {
+                            if (!(param instanceof VariableNode)) {
+                                break;
+                            }
+                            parseChild(r);
+                        }
+                    } else if (headNode instanceof OverrideNode) {
+                        FunctionNode fn = (FunctionNode) ((ReferenceNode) headNode.children().get(0)).ref();
+                        ReferenceNode r = append(parent, new ReferenceNode(headNode));
+                        for (Node param : fn.children()) {
+                            if (!(param instanceof VariableNode)) {
                                 break;
                             }
                             parseChild(r);
@@ -337,7 +355,7 @@ public class Parser {
                         while (!currentToken().equals(")")) {
                             parseChild(r);
                         }
-                    }else if (Lexer.isLiteral(head)) {
+                    } else if (Lexer.isLiteral(head)) {
                         append(parent, new LiteralNode(head));
                     } else {
                         throw new ParserException("Unknown symbol: " + head);
@@ -407,11 +425,11 @@ public class Parser {
     private <T extends Node> T append(Node<?> parent, T node) {
         if (node instanceof ReferenceNode) {
             InsertReference change = new InsertReference()
-                .id(Change.newId())
-                .parent(parent.id())
-                .prev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id())
-                .next(null)
-                .ref(((ReferenceNode) node).ref().id());
+                    .id(Change.newId())
+                    .parent(parent.id())
+                    .prev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id())
+                    .next(null)
+                    .ref(((ReferenceNode) node).ref().id());
             workspace.apply(Collections.singletonList(change));
             return workspace.node(change.id());
         } else {
@@ -421,9 +439,9 @@ public class Parser {
                 node.id(Change.newId());
             }
             InsertNode change = new InsertNode()
-                .node(node)
-                .parent(parent.id())
-                .prev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id());
+                    .node(node)
+                    .parent(parent.id())
+                    .prev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id());
             workspace.apply(Collections.singletonList(change));
             return workspace.node(node.id());
         }
