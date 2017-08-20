@@ -542,7 +542,7 @@ public class EditorPane extends SplitPane {
             changes.add(new Delete().id(sel.id()));
         } else {
             head.parent(target.id());
-            head.prev(target.children().get(target.children().size() - 1).id());
+            head.prev(target.children().isEmpty() ? null : target.children().get(target.children().size() - 1).id());
         }
 
         changes.add(head);
