@@ -29,16 +29,10 @@ prev: "c82c559d-6c76-485f-8ea8-5e3f5cf651d3"
 node: !<VariableNode>
   id: "886f6441-8f42-4122-9b5b-0889318917b1"
   name: "y"
---- !<InsertNode>
-changeId: "0ed198fa-ec19-400c-8c9e-9aec8b5194cb"
-parent: "be0f94a7-0958-4dd5-affe-82f2f791bda2"
-prev: "886f6441-8f42-4122-9b5b-0889318917b1"
-node: !<SeparatorNode>
-  id: "1e1787c7-dea0-490e-881f-d5412a923508"
 --- !<InsertReference>
 changeId: "6d4ea0c1-09a5-49b1-b6c9-7c054b82a98f"
 parent: "be0f94a7-0958-4dd5-affe-82f2f791bda2"
-prev: "1e1787c7-dea0-490e-881f-d5412a923508"
+prev: "886f6441-8f42-4122-9b5b-0889318917b1"
 id: "4f3bc282-0242-4c2b-a903-25a3528c4d82"
 ref: "system:*"
 --- !<InsertNode>
