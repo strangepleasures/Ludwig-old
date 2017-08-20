@@ -180,7 +180,7 @@ public class EditorPane extends SplitPane {
         runMenuItem.setOnAction(e -> runFunction());
 
         MenuItem deleteFunctionMenuItem = new MenuItem("Delete", null);
-        deleteFunctionMenuItem.setOnAction(e -> deleteFunction());
+        deleteFunctionMenuItem.setOnAction(e -> deleteMember());
 
         membersList.setContextMenu(new ContextMenu(
             addFunctionMenuItem,
@@ -192,7 +192,7 @@ public class EditorPane extends SplitPane {
         environment.getWorkspace().changeListeners().add(this::processChanges);
     }
 
-    private void deleteFunction() {
+    private void deleteMember() {
         if (isReadonly()) {
             return;
         }
@@ -254,6 +254,9 @@ public class EditorPane extends SplitPane {
     }
 
     private void addPackage() {
+        if (isReadonly()) {
+            return;
+        }
         TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             Node parent = selectedItem.getValue();
@@ -326,6 +329,9 @@ public class EditorPane extends SplitPane {
     }
 
     private void addFunction() {
+        if (isReadonly()) {
+            return;
+        }
         TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
         if (selectedItem != null && selectedItem.getValue() instanceof PackageNode) {
             PackageNode packageNode = (PackageNode) selectedItem.getValue();
@@ -646,6 +652,7 @@ public class EditorPane extends SplitPane {
                 });
 
                 setEditable(!isReadonly());
+                setPrefWidth(1000);
             }
 
             private void applyChanges() {
@@ -672,6 +679,7 @@ public class EditorPane extends SplitPane {
                 });
 
                 setEditable(!isReadonly());
+                setMinWidth(100);
             }
 
             private void applyChanges() {
