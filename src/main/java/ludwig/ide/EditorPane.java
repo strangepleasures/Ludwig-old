@@ -92,8 +92,9 @@ public class EditorPane extends SplitPane {
 
 
         MenuItem gotoDefinitionMenuItem = new MenuItem("Go to definition");
-        Node sel = selectedNode();
+
         gotoDefinitionMenuItem.setOnAction(e -> {
+            Node sel = selectedNode();
             if (sel instanceof ReferenceNode) {
                 gotoDefinition((ReferenceNode) sel);
             }
@@ -149,9 +150,7 @@ public class EditorPane extends SplitPane {
             }
         });
 
-        membersList.getSelectionModel().selectedItemProperty().addListener(observable -> {
-            displayMember();
-        });
+        membersList.getSelectionModel().selectedItemProperty().addListener(observable -> displayMember());
 
         membersList.setCellFactory(listView -> new SignatureListCell());
 
