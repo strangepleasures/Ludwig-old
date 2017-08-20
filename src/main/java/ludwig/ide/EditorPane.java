@@ -132,6 +132,10 @@ public class EditorPane extends SplitPane {
 
         codeView.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
+                if (isReadonly()) {
+                    return;
+                }
+
                 Node n = selectedNode();
 
                 if (n == null) {
@@ -389,6 +393,9 @@ public class EditorPane extends SplitPane {
     }
 
     private Node selectedMember() {
+        if (membersList.getSelectionModel() == null) {
+            return null;
+        }
         return membersList.getSelectionModel().getSelectedItem();
     }
 
@@ -589,21 +596,18 @@ public class EditorPane extends SplitPane {
     }
 
     private Node selectedNode(int pos) {
-        if (membersList.getSelectionModel() != null) {
-            Node selectedItem = selectedMember();
-            if (!(selectedItem instanceof FunctionNode)) {
-                return null;
-            }
-            FunctionNode node = (FunctionNode) selectedItem;
-            List<Node> nodes = NodeUtils.expandNode(node);
-            int index = EditorUtils.tokenIndex(codeView.getText(), pos);
-            if (index < 0) {
-                return null;
-            }
-
-            return nodes.get(index + arguments(node).size());
+        Node selectedItem = selectedMember();
+        if (!(selectedItem instanceof FunctionNode)) {
+            return null;
         }
-        return null;
+        FunctionNode node = (FunctionNode) selectedItem;
+        List<Node> nodes = NodeUtils.expandNode(node);
+        int index = EditorUtils.tokenIndex(codeView.getText(), pos);
+        if (index < 0) {
+            return null;
+        }
+
+        return nodes.get(index + arguments(node).size());
     }
 
     private Node selectedNode() {

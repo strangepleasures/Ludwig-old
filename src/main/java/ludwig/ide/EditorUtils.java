@@ -13,6 +13,7 @@ public class EditorUtils {
                 case '\t':
                 case '\r':
                 case ' ':
+                case ':':
                     t = false;
                     break;
                 default:
