@@ -22,7 +22,7 @@ public class Parser {
 
     private int pos;
     private HashPMap<String, NamedNode> locals = HashTreePMap.empty();
-    private Signature superFunction;
+    private Node superFunction;
 
 
     private Parser(List<String> tokens, Workspace workspace) {
@@ -206,12 +206,12 @@ public class Parser {
         }
     }
 
-    private Signature findSuper(ClassNode classNode, FunctionNode fn) {
+    private Node findSuper(ClassNode classNode, FunctionNode fn) {
         ClassType t = ClassType.of(classNode);
-        Signature s = t.implementation(fn);
+        Node s = t.implementation(fn);
 
         while (t != null) {
-            Signature s1 = t.implementation(fn);
+            Node s1 = t.implementation(fn);
             if (s1 != s) {
                 return s1;
             }

@@ -51,7 +51,7 @@ public class NodeUtils {
 
     public static String signature(Node<?> node) {
         if (node instanceof OverrideNode) {
-            return signature(((ReferenceNode)node.children().get(0)).ref());
+            return signature(declaration((OverrideNode) node));
         }
         StringBuilder builder = new StringBuilder(node.toString());
         for (Node<?> child: node.children()) {
@@ -66,6 +66,24 @@ public class NodeUtils {
             }
         }
         return builder.toString();
+    }
+
+    public static List<String> arguments(Node<?> node) {
+        if (node instanceof OverrideNode) {
+            return arguments(declaration((OverrideNode) node));
+        }
+        List<String> args = new ArrayList<>();
+        for (Node child: node.children()) {
+            if (!(child instanceof VariableNode)) {
+                 break;
+            }
+            args.add(((VariableNode) child).name());
+        }
+        return args;
+    }
+
+    public static FunctionNode declaration(OverrideNode node) {
+        return (FunctionNode) ((ReferenceNode)node.children().get(0)).ref();
     }
 
     public static boolean isReadonly(Node<?> node) {

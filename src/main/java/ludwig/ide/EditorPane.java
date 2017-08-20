@@ -30,10 +30,12 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ludwig.utils.NodeUtils.arguments;
+
 public class EditorPane extends SplitPane {
     private final Environment environment;
     private final Settings settings;
-    private final ListView<Signature> membersList = new ListView<>();
+    private final ListView<Node> membersList = new ListView<>();
     private final PackageTreeView packageTree;
     private final GridPane signatureView = new GridPane();
     private final ToolBar signatureToolbar;
@@ -268,7 +270,7 @@ public class EditorPane extends SplitPane {
     }
 
     private void runFunction() {
-        Signature selectedItem = selectedMember();
+        Node selectedItem = selectedMember();
         if (!(selectedItem instanceof FunctionNode)) {
             return;
         }
@@ -352,7 +354,7 @@ public class EditorPane extends SplitPane {
     }
 
     private void displayMember() {
-        Signature selectedItem = selectedMember();
+        Node selectedItem = selectedMember();
         signatureView.getChildren().clear();
         codeView.setText("");
 
@@ -385,8 +387,8 @@ public class EditorPane extends SplitPane {
         }
     }
 
-    private Signature selectedMember() {
-        return membersList.getSelectionModel().getSelectedItem();
+    private Node selectedMember() {
+        return (Node) membersList.getSelectionModel().getSelectedItem();
     }
 
     private void showEditor(String text, boolean selectAll) {
@@ -527,7 +529,7 @@ public class EditorPane extends SplitPane {
         Node<?> sel = selectedNode();
         Insert head = (node instanceof NamedNode) ? new InsertReference().id(Change.newId()).ref(node.id()) : new InsertNode().node(node);
         List<Change> changes = new ArrayList<>();
-        Signature selectedItem = selectedMember();
+        Node selectedItem = selectedMember();
         if (!(selectedItem instanceof FunctionNode) || isReadonly()) {
             return;
         }
@@ -546,16 +548,16 @@ public class EditorPane extends SplitPane {
         changes.add(head);
 
         String prev = null;
-        if (node instanceof Signature) {
-            for (String arg : ((Signature) node).arguments()) {
-                InsertNode insertPlaceholder = new InsertNode()
-                    .node(new PlaceholderNode().setParameter(arg).id(Change.newId()))
-                    .parent(((InsertReference) head).id())
-                    .prev(prev);
-                changes.add(insertPlaceholder);
-                prev = insertPlaceholder.node().id();
-            }
+
+        for (String arg : arguments(node)) {
+            InsertNode insertPlaceholder = new InsertNode()
+                .node(new PlaceholderNode().setParameter(arg).id(Change.newId()))
+                .parent(((InsertReference) head).id())
+                .prev(prev);
+            changes.add(insertPlaceholder);
+            prev = insertPlaceholder.node().id();
         }
+
 
         environment.getWorkspace().apply(changes);
 
@@ -576,7 +578,6 @@ public class EditorPane extends SplitPane {
                     .filter(item -> !(item instanceof PackageNode))
                     .map(item -> (Node<?>) item)
                     .sorted(Comparator.comparing(NodeUtils::signature))
-                    .map(item -> (Signature) item)
                     .collect(Collectors.toList())));
             }
 
@@ -588,7 +589,7 @@ public class EditorPane extends SplitPane {
 
     private Node selectedNode(int pos) {
         if (membersList.getSelectionModel() != null) {
-            Signature selectedItem = selectedMember();
+            Node selectedItem = selectedMember();
             if (!(selectedItem instanceof FunctionNode)) {
                 return null;
             }
@@ -599,7 +600,7 @@ public class EditorPane extends SplitPane {
                 return null;
             }
 
-            return nodes.get(index + node.arguments().size());
+            return nodes.get(index + arguments(node).size());
         }
         return null;
     }

@@ -243,7 +243,7 @@ class Evaluator implements NodeVisitor<Object> {
         }
 
         if (args.length > 0 && args[0] instanceof Instance) {
-            impl = (Node<?>) StdLib.type(args[0]).implementation((Signature) head);
+            impl = (Node<?>) StdLib.type(args[0]).implementation(head);
         }
 
         if (isField(impl)) {

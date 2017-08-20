@@ -4,13 +4,14 @@ package ludwig.workspace;
 import ludwig.changes.Delete;
 import ludwig.changes.InsertNode;
 import ludwig.model.*;
+import ludwig.utils.NodeUtils;
 
 import java.util.*;
 
 import static ludwig.utils.NodeUtils.isField;
 
 public class SymbolRegistry {
-    private final TreeSet symbols = new TreeSet<>(Comparator.comparing(SymbolRegistry::stringify));
+    private final TreeSet symbols = new TreeSet<>(Comparator.comparing(NodeUtils::signature));
     private final Map<String, Node> nodesById = new HashMap<>();
 
     public SymbolRegistry(Workspace workspace) {
@@ -45,12 +46,6 @@ public class SymbolRegistry {
         return symbols.subSet(s, s + Character.MAX_VALUE);
     }
 
-    private static String stringify(Object o) {
-        if (o instanceof FunctionNode) {
-            return ((FunctionNode) o).signature();
-        }
-        return o.toString();
-    }
 
     private void grab(Node<?> node) {
         if (node instanceof FunctionNode || isField(node)) {

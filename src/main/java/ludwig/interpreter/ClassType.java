@@ -13,7 +13,7 @@ public class ClassType {
     private final String name;
     private final ClassType superClass;
     private final TreePVector<VariableNode> fields;
-    private final Map<Signature, Signature> overrides = new HashMap<>();
+    private final Map<Node, Node> overrides = new HashMap<>();
 
     public static ClassType of(ClassNode node) {
         return types.computeIfAbsent(node, ClassType::new);
@@ -30,7 +30,7 @@ public class ClassType {
         typesByName.put(node.parent() + ":" + node.name(), this);
     }
 
-    public Signature implementation(Signature signature) {
+    public Node implementation(Node signature) {
         return overrides.getOrDefault(signature, signature);
     }
 
@@ -38,7 +38,7 @@ public class ClassType {
         return fields;
     }
 
-    public Map<Signature, Signature> overrides() {
+    public Map<Node, Node> overrides() {
         return overrides;
     }
 

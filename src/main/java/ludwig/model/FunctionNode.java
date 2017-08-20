@@ -4,7 +4,7 @@ package ludwig.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FunctionNode extends NamedNode<FunctionNode> implements Signature {
+public class FunctionNode extends NamedNode<FunctionNode>  {
     private boolean lazy;
 
     public boolean isLazy() {
@@ -30,17 +30,5 @@ public class FunctionNode extends NamedNode<FunctionNode> implements Signature {
             builder.append(' ').append(node);
         }
         return builder.toString();
-    }
-
-    @Override
-    public List<String> arguments() {
-        List<String> args = new ArrayList<>();
-        for (Node node: children()) {
-            if (!(node instanceof VariableNode)) {
-                break;
-            }
-            args.add(node.toString());
-        }
-        return args;
     }
 }

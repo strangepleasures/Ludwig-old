@@ -2,14 +2,13 @@ package ludwig.ide;
 
 import javafx.scene.control.ListCell;
 import ludwig.model.Node;
-import ludwig.model.Signature;
 import ludwig.utils.NodeUtils;
 
-class SignatureListCell extends ListCell<Signature> {
+class SignatureListCell extends ListCell<Node> {
     @Override
-    protected void updateItem(Signature item, boolean empty) {
+    protected void updateItem(Node item, boolean empty) {
         super.updateItem(item, empty);
 
-        setText((!empty && item != null) ? NodeUtils.signature((Node) item) : "");
+        setText((!empty && item != null) ? NodeUtils.signature(item) : "");
     }
 }
