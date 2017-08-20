@@ -30,6 +30,7 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static ludwig.utils.NodeUtils.arguments;
 
 public class EditorPane extends SplitPane {
@@ -175,16 +176,30 @@ public class EditorPane extends SplitPane {
         MenuItem overrideFunctionMenuItem = new MenuItem("Override...", Icons.icon("add"));
         overrideFunctionMenuItem.setOnAction(e -> overrideFunction());
 
-        MenuItem runMenu = new MenuItem("Run...", Icons.icon("run"));
-        runMenu.setOnAction(e -> runFunction());
+        MenuItem runMenuItem = new MenuItem("Run...", Icons.icon("run"));
+        runMenuItem.setOnAction(e -> runFunction());
+
+        MenuItem deleteFunctionMenuItem = new MenuItem("Delete", null);
+        deleteFunctionMenuItem.setOnAction(e -> deleteFunction());
 
         membersList.setContextMenu(new ContextMenu(
             addFunctionMenuItem,
             overrideFunctionMenuItem,
-            runMenu
+            runMenuItem,
+            deleteFunctionMenuItem
         ));
 
         environment.getWorkspace().changeListeners().add(this::processChanges);
+    }
+
+    private void deleteFunction() {
+        if (isReadonly()) {
+            return;
+        }
+        Node selectedItem = selectedMember();
+        if (selectedItem != null) {
+            environment.getWorkspace().apply(singletonList(new Delete().id(selectedItem.id())));
+        }
     }
 
     private void overrideFunction() {
@@ -255,7 +270,7 @@ public class EditorPane extends SplitPane {
                 InsertNode insert = new InsertNode()
                     .node(new PackageNode().name(name).id(Change.newId()))
                     .parent(parent.id());
-                environment.getWorkspace().apply(Collections.singletonList(insert));
+                environment.getWorkspace().apply(singletonList(insert));
                 navigateTo(environment.getWorkspace().node(insert.node().id()));
             });
         }
@@ -634,7 +649,7 @@ public class EditorPane extends SplitPane {
             }
 
             private void applyChanges() {
-                environment.getWorkspace().apply(Collections.singletonList(new Comment().nodeId(node.id()).comment(getText())));
+                environment.getWorkspace().apply(singletonList(new Comment().nodeId(node.id()).comment(getText())));
             }
         };
     }
@@ -660,7 +675,7 @@ public class EditorPane extends SplitPane {
             }
 
             private void applyChanges() {
-                environment.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(node.id()).name(getText())));
+                environment.getWorkspace().apply(singletonList(new Rename().setNodeId(node.id()).name(getText())));
             }
         };
     }
