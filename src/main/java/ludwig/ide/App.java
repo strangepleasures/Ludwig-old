@@ -14,7 +14,6 @@ import ludwig.changes.Change;
 import ludwig.repository.ChangeRepository;
 import ludwig.repository.LocalChangeRepository;
 import ludwig.workspace.Environment;
-import ludwig.workspace.Workspace;
 
 import java.io.File;
 import java.io.IOException;

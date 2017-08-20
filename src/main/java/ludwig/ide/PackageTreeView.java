@@ -1,9 +1,9 @@
 package ludwig.ide;
 
-import ludwig.model.*;
-import ludwig.workspace.Workspace;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import ludwig.model.*;
+import ludwig.workspace.Workspace;
 
 public class PackageTreeView extends TreeView<NamedNode> {
     private final Workspace workspace;

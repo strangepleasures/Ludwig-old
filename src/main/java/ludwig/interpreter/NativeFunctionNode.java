@@ -1,6 +1,7 @@
 package ludwig.interpreter;
 
-import ludwig.model.*;
+import ludwig.model.FunctionNode;
+import ludwig.model.VariableNode;
 
 import java.lang.reflect.*;
 
@@ -73,7 +74,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
         }
 
         if (type == long.class) {
-            return (Long) o;
+            return o;
         }
 
         if (o instanceof Callable) {

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class LexerTest {
     @Test

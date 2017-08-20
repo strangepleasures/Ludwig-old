@@ -2,7 +2,8 @@ package ludwig.interpreter;
 
 import ludwig.model.PackageNode;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 public class SystemPackage extends PackageNode {
     public SystemPackage(Class<?> clazz) {

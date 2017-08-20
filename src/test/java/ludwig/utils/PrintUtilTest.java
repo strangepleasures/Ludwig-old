@@ -8,8 +8,8 @@ public class PrintUtilTest {
     @Test
     public void testToString() {
         Node packageNode = new PackageNode().name("mypackage");
-        FunctionNode functionNode = (FunctionNode) new FunctionNode().name("foo");
-        VariableNode variableNode1 = (VariableNode) new VariableNode().name("x");
+        FunctionNode functionNode = new FunctionNode().name("foo");
+        VariableNode variableNode1 = new VariableNode().name("x");
         functionNode.add(variableNode1);
         VariableNode variableNode2 = new VariableNode();
         variableNode2.name("y");

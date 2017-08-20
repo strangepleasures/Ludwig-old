@@ -30,7 +30,7 @@ public class LocalChangeRepository implements ChangeRepository {
     @Override
     public List<Change> pull(String sinceChangeId) throws IOException {
         try (YAMLParser parser = YamlConfiguration.YAML_FACTORY.createParser(file);
-             MappingIterator<Change> it = YamlConfiguration.OBJECT_MAPPER.readValues(parser, Change.class);) {
+             MappingIterator<Change> it = YamlConfiguration.OBJECT_MAPPER.readValues(parser, Change.class)) {
             List<Change> changes = new ArrayList<>();
             boolean accept = sinceChangeId == null;
             while (it.hasNext()) {

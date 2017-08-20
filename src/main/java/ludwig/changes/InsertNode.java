@@ -2,8 +2,6 @@ package ludwig.changes;
 
 
 import ludwig.model.Node;
-import lombok.Getter;
-import lombok.Setter;
 
 public class InsertNode extends Insert<InsertNode> {
     private Node node;

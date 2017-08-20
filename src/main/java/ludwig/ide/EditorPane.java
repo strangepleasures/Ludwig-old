@@ -73,6 +73,7 @@ public class EditorPane extends SplitPane {
 
 
         });
+
         Button removeParameterButton = new Button("", Icons.icon("delete"));
         removeParameterButton.setOnAction(e -> {
 
@@ -367,7 +368,7 @@ public class EditorPane extends SplitPane {
         signatureView.add(new Label("Name"), 1, 1);
         signatureView.add(new Label("Description"), 2, 1);
         signatureView.add(nameTextField(head), 1, 2);
-        signatureView.add(commentTextField((Node) selectedItem), 2, 2);
+        signatureView.add(commentTextField(selectedItem), 2, 2);
 
         if (head instanceof FunctionNode) {
             FunctionNode fn = (FunctionNode) head;
@@ -388,7 +389,7 @@ public class EditorPane extends SplitPane {
     }
 
     private Node selectedMember() {
-        return (Node) membersList.getSelectionModel().getSelectedItem();
+        return membersList.getSelectionModel().getSelectedItem();
     }
 
     private void showEditor(String text, boolean selectAll) {
@@ -447,7 +448,7 @@ public class EditorPane extends SplitPane {
                             .add(new PlaceholderNode().setParameter("result").id(Change.newId())));
                     }
 
-                    suggestions.addAll(NodeUtils.collectLocals((Node) selectedMember(), selectedNode(), param.getUserText()));
+                    suggestions.addAll(NodeUtils.collectLocals(selectedMember(), selectedNode(), param.getUserText()));
                     suggestions.addAll(environment.getSymbolRegistry().symbols(param.getUserText()));
 
                     return suggestions;
@@ -656,12 +657,12 @@ public class EditorPane extends SplitPane {
             }
 
             private void applyChanges() {
-                environment.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(((Node) node).id()).name(getText())));
+                environment.getWorkspace().apply(Collections.singletonList(new Rename().setNodeId(node.id()).name(getText())));
             }
         };
     }
 
-    void refresh() {
+    private void refresh() {
         Node packageSelection = null;
         Node memberSelection = null;
         NamedNode signatureSelection = null;
@@ -672,7 +673,7 @@ public class EditorPane extends SplitPane {
             packageSelection = selectedItem.getValue();
         }
 
-        memberSelection = (Node) selectedMember();
+        memberSelection = selectedMember();
 
         codeSelection = selectedNode();
 
@@ -761,6 +762,6 @@ public class EditorPane extends SplitPane {
     }
 
     private boolean isReadonly() {
-        return NodeUtils.isReadonly((Node) membersList.getSelectionModel().getSelectedItem());
+        return NodeUtils.isReadonly(membersList.getSelectionModel().getSelectedItem());
     }
 }

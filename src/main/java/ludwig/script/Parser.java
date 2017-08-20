@@ -1,8 +1,6 @@
 package ludwig.script;
 
-import ludwig.changes.Change;
-import ludwig.changes.InsertNode;
-import ludwig.changes.InsertReference;
+import ludwig.changes.*;
 import ludwig.interpreter.ClassType;
 import ludwig.model.*;
 import ludwig.workspace.Workspace;
@@ -315,7 +313,7 @@ public class Parser {
                 }
 
                 default: {
-                    Node headNode = "super".equals(head) ? (Node) superFunction : find(head);
+                    Node headNode = "super".equals(head) ? superFunction : find(head);
 
                     if (isField(headNode)) {
                         int savedPos = pos;

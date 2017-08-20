@@ -45,7 +45,7 @@ public class InterpreterTest {
         lambda.add(new VariableNode());
         FunctionNode plus = (FunctionNode) Parser.item(systemPackage, "+");
         ReferenceNode head = new ReferenceNode(plus);
-        ReferenceNode referenceNode = new ReferenceNode((NamedNode) lambda.children().get(0));
+        ReferenceNode referenceNode = new ReferenceNode(lambda.children().get(0));
         head.add(referenceNode);
         head.add(LiteralNode.ofValue(3.0));
         lambda.add(head);

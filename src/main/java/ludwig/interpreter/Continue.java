@@ -1,7 +1,7 @@
 package ludwig.interpreter;
 
-import ludwig.model.NamedNode;
 import lombok.Value;
+import ludwig.model.NamedNode;
 
 @Value
 public class Continue implements Signal {

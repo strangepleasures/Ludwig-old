@@ -1,9 +1,6 @@
 package ludwig.model;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class FunctionNode extends NamedNode<FunctionNode>  {
     private boolean lazy;
 

@@ -1,7 +1,7 @@
 package ludwig.interpreter;
 
-import ludwig.model.*;
-import org.pcollections.HashPMap;
+import ludwig.model.FunctionNode;
+import ludwig.model.VariableNode;
 import org.pcollections.HashTreePMap;
 
 public class CallableFunction implements Callable {

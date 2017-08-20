@@ -3,8 +3,8 @@ package ludwig.interpreter;
 import ludwig.model.*;
 import org.pcollections.TreePVector;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ClassType {
     private static final Map<ClassNode, ClassType> types = new HashMap<>();
