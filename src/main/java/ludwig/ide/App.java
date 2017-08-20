@@ -80,7 +80,10 @@ public class App extends Application {
         splitPane.getItems().addAll(leftEditorPane, rightEditorPane);
         borderPane.setCenter(splitPane);
 
-        primaryStage.setScene(new Scene(borderPane, 1024, 768));
+        Scene scene = new Scene(borderPane, 1024, 768);
+        primaryStage.setScene(scene);
+        scene.getStylesheets().add
+            (App.class.getResource("/style.css").toExternalForm());
         primaryStage.show();
     }
 
