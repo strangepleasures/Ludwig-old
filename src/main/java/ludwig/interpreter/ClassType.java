@@ -7,7 +7,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ClassType {
-    private static final Map<ClassNode, ClassType> types = new ConcurrentHashMap<>();
+    private static final Map<ClassNode, ClassType> types = new HashMap<>();
+    private static final Map<String, ClassType> typesByName = new HashMap<>();
 
     private final String name;
     private final ClassType superClass;
@@ -26,6 +27,7 @@ public class ClassType {
             fields = fields.plus((VariableNode) node.children().get(i));
         }
         this.fields = fields;
+        typesByName.put(node.parent() + ":" + node.name(), this);
     }
 
     public Signature implementation(Signature signature) {
@@ -42,5 +44,14 @@ public class ClassType {
 
     public ClassType superClass() {
         return superClass;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    public static ClassType byName(String name) {
+        return typesByName.get(name);
     }
 }

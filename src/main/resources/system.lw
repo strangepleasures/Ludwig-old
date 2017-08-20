@@ -2,6 +2,26 @@ package system
 
 class Any
 
+class Null Any
+
+class String Any
+
+class Real Any
+
+class Integer Real
+
+class Boolean Any
+
+class Function Any
+
+class Sequence Any
+
+class List Sequence
+
+class Set Sequence
+
+class Class Any
+
 def null :
 	if false
 

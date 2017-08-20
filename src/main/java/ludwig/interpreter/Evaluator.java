@@ -1,6 +1,7 @@
 package ludwig.interpreter;
 
 import ludwig.model.*;
+import ludwig.runtime.StdLib;
 import org.pcollections.HashPMap;
 import org.pcollections.TreePVector;
 
@@ -242,8 +243,7 @@ class Evaluator implements NodeVisitor<Object> {
         }
 
         if (args.length > 0 && args[0] instanceof Instance) {
-            Instance obj = (Instance) args[0];
-            impl = (Node<?>) obj.type().implementation((Signature) head);
+            impl = (Node<?>) StdLib.type(args[0]).implementation((Signature) head);
         }
 
         if (isField(impl)) {

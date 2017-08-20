@@ -82,6 +82,7 @@ public class Parser {
                     append(classNode, new VariableNode().name(nextToken()));
                 }
                 consume(")");
+                ClassType.of(classNode);
                 break;
             }
             case "def": {

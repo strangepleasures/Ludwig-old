@@ -10,6 +10,45 @@ import java.util.stream.StreamSupport;
 
 @Name("system")
 public class StdLib {
+
+
+    public static ClassType type(Object o) {
+        if (o == null) {
+            return ClassType.byName("system:Null");
+        }
+        if (o instanceof Instance) {
+            return ((Instance) o).type();
+        }
+        if (o instanceof String) {
+            return ClassType.byName("system:String");
+        }
+        if (o instanceof PVector) {
+            return ClassType.byName("system:List");
+        }
+        if (o instanceof PSet) {
+            return ClassType.byName("system:Set");
+        }
+        if (o instanceof Iterable) {
+            return ClassType.byName("system:Sequence");
+        }
+        if (o instanceof Boolean) {
+            return ClassType.byName("system:Boolean");
+        }
+        if (o instanceof Long) {
+            return ClassType.byName("system:Integer");
+        }
+        if (o instanceof Double) {
+            return ClassType.byName("system:Real");
+        }
+        if (o instanceof Callable) {
+            return ClassType.byName("system:Function");
+        }
+        if (o instanceof ClassType) {
+            return ClassType.byName("system:Class");
+        }
+        return ClassType.byName("system:Any");
+    }
+
     public static String str(Object x) {
         return String.valueOf(x);
     }
