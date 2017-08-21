@@ -49,23 +49,27 @@ public class NodeUtils {
         }
     }
 
-    public static String signature(Node<?> node) {
-        if (node instanceof OverrideNode) {
-            return signature(declaration((OverrideNode) node));
-        }
-        StringBuilder builder = new StringBuilder(node.toString());
-        for (Node<?> child: node.children()) {
-            if (child instanceof PlaceholderNode) {
-                builder.append(' ');
-                builder.append(((PlaceholderNode) child).getParameter());
-            } else if (child instanceof VariableNode) {
-                builder.append(' ');
-                builder.append(child.toString());
-            } else {
-                break;
+    public static String signature(Object obj) {
+        if (obj instanceof Node) {
+            Node<?> node = (Node) obj;
+            if (node instanceof OverrideNode) {
+                return signature(declaration((OverrideNode) node));
             }
+            StringBuilder builder = new StringBuilder(node.toString());
+            for (Node<?> child : node.children()) {
+                if (child instanceof PlaceholderNode) {
+                    builder.append(' ');
+                    builder.append(((PlaceholderNode) child).getParameter());
+                } else if (child instanceof VariableNode) {
+                    builder.append(' ');
+                    builder.append(child.toString());
+                } else {
+                    break;
+                }
+            }
+            return builder.toString();
         }
-        return builder.toString();
+        return obj.toString();
     }
 
     public static List<String> arguments(Node<?> node) {

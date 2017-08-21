@@ -5,4 +5,9 @@ public class OverrideNode extends Node<OverrideNode>  {
     public <T> T accept(NodeVisitor<T> visitor) {
         return visitor.visitOverride(this);
     }
+
+    @Override
+    public String toString() {
+        return "super";
+    }
 }

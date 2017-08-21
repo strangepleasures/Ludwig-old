@@ -197,3 +197,14 @@ def prepend l x :
 
 def abstract :
 	throw 'Abstract function'
+
+def in o :
+	abstract
+
+method Sequence in o :
+	o
+
+class MutableList Any list
+
+def mutable-list :
+	MutableList list

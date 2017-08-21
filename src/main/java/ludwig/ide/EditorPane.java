@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static ludwig.utils.NodeUtils.arguments;
+import static ludwig.utils.NodeUtils.declaration;
 
 public class EditorPane extends SplitPane {
     private final Environment environment;
@@ -52,13 +53,11 @@ public class EditorPane extends SplitPane {
         this.settings = settings;
 
         packageTree = new PackageTreeView(environment.getWorkspace());
-        packageTree.setMinWidth(120);
+        packageTree.setPrefWidth(120);
 
         membersList.setMinWidth(120);
 
-        packageTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            fillMembers();
-        });
+        packageTree.getSelectionModel().selectedItemProperty().addListener(observable -> fillMembers());
 
         membersList.setPrefHeight(1E6);
 
@@ -379,24 +378,23 @@ public class EditorPane extends SplitPane {
     }
 
     private void displayMember() {
-        Node selectedItem = selectedMember();
+        Node sel = selectedMember();
         signatureView.getChildren().clear();
         codeView.setText("");
 
-        if (selectedItem == null) {
+        if (sel == null) {
             return;
         }
 
-        NamedNode head = (selectedItem instanceof OverrideNode) ? (NamedNode) ((ReferenceNode) ((OverrideNode) selectedItem).children().get(0)).ref() : (NamedNode) selectedItem;
+        NamedNode decl = (sel instanceof OverrideNode) ? declaration((OverrideNode) sel) : (NamedNode) sel;
 
         signatureView.add(new Label("Name"), 1, 1);
         signatureView.add(new Label("Description"), 2, 1);
-        signatureView.add(nameTextField(head), 1, 2);
-        signatureView.add(commentTextField(selectedItem), 2, 2);
+        signatureView.add(nameTextField(decl), 1, 2);
+        signatureView.add(commentTextField(decl), 2, 2);
 
-        if (head instanceof FunctionNode) {
-            FunctionNode fn = (FunctionNode) head;
-
+        if (decl instanceof FunctionNode) {
+            FunctionNode fn = (FunctionNode) decl;
             int row = 3;
             for (Node n : fn.children()) {
                 if (!(n instanceof VariableNode)) {
@@ -407,9 +405,8 @@ public class EditorPane extends SplitPane {
                 row++;
             }
             lazyCheckbox.setSelected(fn.isLazy());
-
-            codeView.setText(PrettyPrinter.print(fn));
         }
+        codeView.setText(PrettyPrinter.print(sel));
     }
 
     private Node selectedMember() {
@@ -788,6 +785,6 @@ public class EditorPane extends SplitPane {
     }
 
     private boolean isReadonly() {
-        return NodeUtils.isReadonly(membersList.getSelectionModel().getSelectedItem());
+        return NodeUtils.isReadonly(packageTree.getSelectionModel().getSelectedItem().getValue());
     }
 }
