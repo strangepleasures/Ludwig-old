@@ -4,7 +4,8 @@ import com.sun.javafx.collections.ObservableListWrapper;
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
 import impl.org.controlsfx.autocompletion.AutoCompletionTextFieldBinding;
 import javafx.application.Platform;
-import javafx.event.Event;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -31,8 +32,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
-import static ludwig.utils.NodeUtils.arguments;
-import static ludwig.utils.NodeUtils.declaration;
+import static ludwig.utils.NodeUtils.*;
 
 public class EditorPane extends SplitPane {
     private final Environment environment;
@@ -43,6 +43,7 @@ public class EditorPane extends SplitPane {
     private final ToolBar signatureToolbar;
     private final CheckBox lazyCheckbox = new CheckBox("Lazy");
     private final TextArea codeView = new TextArea();
+
 
     @Getter
     @Setter
@@ -101,7 +102,7 @@ public class EditorPane extends SplitPane {
         });
         codeView.setContextMenu(new ContextMenu(gotoDefinitionMenuItem));
 
-        codeView.setOnKeyPressed(e -> {
+        codeView.setOnKeyReleased(e -> {
             switch (e.getCode()) {
                 case LEFT:
                     selectPrevNode();
@@ -120,16 +121,37 @@ public class EditorPane extends SplitPane {
                 case DELETE:
                     deleteNode();
                     break;
-                default:
-                    if (!isReadonly() && e.getText() != null && !e.getText().isEmpty()) {
-                        showEditor(e.getText(), false);
-                    }
+                case ESCAPE:
+                    suggestionsPopup.hide();
+                    break;
+//                default:
+//                    if (/*!isReadonly() && */e.getText() != null && !e.getText().isEmpty()) {
+//                        //showEditor(e.getText(), false);
+//                        showSuggestions();
+//                    }
             }
-            e.consume();
+            //e.consume();
         });
 
-        codeView.setOnKeyReleased(Event::consume);
-        codeView.setOnKeyTyped(Event::consume);
+//        codeView.setOnKeyReleased(Event::consume);
+        codeView.setOnKeyTyped(e -> {
+            switch (e.getCode()) {
+                case SPACE:
+                    stopEditing();
+                    e.consume();
+                    break;
+                default:
+                    if (e.getCharacter().equals(" ")) {
+                        stopEditing();
+                    } else {
+                        startEditing();
+                        codeView.insertText(codeView.getSelection().getStart(), e.getCharacter());
+                        showSuggestions();
+                        e.consume();
+                    }
+
+            }
+        });
 
         codeView.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
@@ -189,6 +211,31 @@ public class EditorPane extends SplitPane {
         ));
 
         environment.getWorkspace().changeListeners().add(this::processChanges);
+    }
+
+    private Node<?> parent;
+    private int insertAt;
+    private boolean editing;
+
+    private void startEditing() {
+        if (!editing) {
+            editing = true;
+            insertAt = 0;
+            Node sel = selectedNode();
+            if (sel == null) {
+                parent = selectedMember();
+                insertAt = parent.children().size();
+            } else {
+                while (true) {
+                    if (hasParameters(sel) && insertAt < arguments(sel).size()) {
+                        parent = sel;
+                        return;
+                    }
+                    insertAt = sel.parent().children().indexOf(sel) + 1;
+                    sel = sel.parent();
+                }
+            }
+        }
     }
 
     private void deleteMember() {
@@ -416,6 +463,82 @@ public class EditorPane extends SplitPane {
         return membersList.getSelectionModel().getSelectedItem();
     }
 
+    private final Popup suggestionsPopup = new Popup();
+    private final ListView<Node> suggestionsCombo = new ListView<>();
+    private String lastWord;
+
+    {
+        suggestionsPopup.getContent().add(suggestionsCombo);
+    }
+
+    private void showSuggestions() {
+        if (isReadonly()) {
+            //   return;
+        }
+
+
+        TextAreaSkin skin = (TextAreaSkin) codeView.getSkin();
+        Bounds caretBounds = codeView.localToScreen(skin.getCaretBounds());
+
+
+        String text = codeView.getText();
+        int pos = Math.min(codeView.getSelection().getEnd(), text.length());
+        String word = text.substring(0, pos);
+
+        for (int i = pos - 1; i >= 0; i--) {
+            if (Character.isWhitespace(text.charAt(i))) {
+                word = text.substring(i + 1, pos);
+                break;
+            }
+        }
+
+        if (word.isEmpty()) {
+            stopEditing();
+            return;
+        }
+
+        lastWord = word;
+
+        ObservableList<Node> suggestions = FXCollections.observableArrayList(NodeUtils.collectLocals(selectedMember(), selectedNode(), word));
+        suggestions.addAll(environment.getSymbolRegistry().symbols(word));
+
+        if (suggestions.size() > 0 && suggestions.size() < 21) {
+            suggestionsCombo.setItems(suggestions);
+            suggestionsCombo.getSelectionModel().select(0);
+            suggestionsPopup.show(codeView, caretBounds.getMinX(), caretBounds.getMaxY());
+        } else {
+            suggestionsPopup.hide();
+        }
+    }
+
+    private void stopEditing() {
+        if (!editing) {
+            return;
+        }
+        editing = false;
+        suggestionsPopup.hide();
+
+        Node<?> node = suggestionsCombo.getSelectionModel().getSelectedItem();
+        if (node != null) {
+            if (parent != null) {
+                environment.getWorkspace().apply(singletonList(new InsertReference()
+                    .id(Change.newId())
+                    .ref(node.id())
+                    .parent(parent.id())
+                    .prev(insertAt == 0 ? null : parent.children().get(insertAt - 1).id())
+                    .next(insertAt == parent.children().size() ? null : parent.children().get(insertAt).id())
+                ));
+            }
+        } else if (Lexer.isLiteral(lastWord)) {
+            environment.getWorkspace().apply(singletonList(new InsertNode()
+                .node(new LiteralNode(lastWord).id(Change.newId()))
+                .parent(parent.id())
+                .prev(insertAt == 0 ? null : parent.children().get(insertAt - 1).id())
+                .next(insertAt == parent.children().size() ? null : parent.children().get(insertAt).id())
+            ));
+        }
+    }
+
     private void showEditor(String text, boolean selectAll) {
         Popup popup = new Popup();
         TextField autoCompleteTextField = new TextField();
@@ -624,7 +747,8 @@ public class EditorPane extends SplitPane {
             return null;
         }
 
-        return nodes.get(index + arguments(node).size());
+        int biasedIndex = index + arguments(node).size();
+        return biasedIndex < nodes.size() ? nodes.get(biasedIndex) : null;
     }
 
     private Node selectedNode() {

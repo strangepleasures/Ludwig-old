@@ -5,10 +5,10 @@ import javafx.scene.control.TreeView;
 import ludwig.model.*;
 import ludwig.workspace.Workspace;
 
-public class PackageTreeView extends TreeView<NamedNode> {
+class PackageTreeView extends TreeView<NamedNode> {
     private final Workspace workspace;
 
-    public PackageTreeView(Workspace workspace) {
+    PackageTreeView(Workspace workspace) {
         super(createRoot(workspace));
         this.workspace = workspace;
         setShowRoot(false);
@@ -42,11 +42,14 @@ public class PackageTreeView extends TreeView<NamedNode> {
     }
 
 
-    public void select(PackageNode packageNode) {
+    void select(PackageNode packageNode) {
         getSelectionModel().select(find(packageNode));
     }
 
-    public TreeItem<NamedNode> find(NamedNode node) {
+    private TreeItem<NamedNode> find(NamedNode node) {
+        if (node == null) {
+            return null;
+        }
         TreeItem<NamedNode> parentItem = node.parent() == null ? getRoot() : find((NamedNode) node.parent());
         return parentItem.getChildren()
             .stream()
@@ -55,7 +58,7 @@ public class PackageTreeView extends TreeView<NamedNode> {
             .orElse(null);
     }
 
-    public void refresh() {
+    void refresh() {
         setRoot(createRoot(workspace));
     }
 }
