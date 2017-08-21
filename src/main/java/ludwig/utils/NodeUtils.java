@@ -114,4 +114,8 @@ public class NodeUtils {
     public static boolean isField(Node node) {
         return (node instanceof VariableNode) && (node.parent() instanceof ClassNode);
     }
+
+    public static boolean hasParameters(Node<?> node) {
+        return node.accept(new HasParameters());
+    }
 }
