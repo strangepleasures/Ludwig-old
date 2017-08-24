@@ -382,7 +382,7 @@ public class EditorPane extends SplitPane {
         signatureView.getChildren().clear();
         codeView.setText("");
 
-        if (sel == null) {
+        if (sel == null || sel.deleted()) {
             return;
         }
 
@@ -703,6 +703,8 @@ public class EditorPane extends SplitPane {
         packageTree.refresh();
         packageTree.getSelectionModel().clearSelection();
         membersList.getSelectionModel().clearSelection();
+
+        displayMember();
 
         if (memberSelection != null) {
             navigateTo(memberSelection);
