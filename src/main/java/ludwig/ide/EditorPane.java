@@ -138,7 +138,7 @@ public class EditorPane extends SplitPane {
             switch (e.getCode()) {
                 case SPACE:
                     stopEditing();
-                    e.consume();
+                  //  e.consume();
                     break;
                 default:
                     if (e.getCharacter().equals(" ")) {
@@ -227,7 +227,7 @@ public class EditorPane extends SplitPane {
                 insertAt = parent.children().size();
             } else {
                 while (true) {
-                    if (hasParameters(sel) && insertAt < arguments(sel).size()) {
+                    if (insertAt < argumentsCount(sel)) {
                         parent = sel;
                         return;
                     }

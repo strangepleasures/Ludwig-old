@@ -115,7 +115,7 @@ public class NodeUtils {
         return (node instanceof VariableNode) && (node.parent() instanceof ClassNode);
     }
 
-    public static boolean hasParameters(Node<?> node) {
-        return node.accept(new HasParameters());
+    public static int argumentsCount(Node<?> node) {
+        return node.accept(new ArgumentsCount());
     }
 }
