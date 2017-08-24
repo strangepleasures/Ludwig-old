@@ -77,7 +77,7 @@ public class PrettyPrinter implements NodeVisitor<Void> {
     @Override
     public Void visitReference(ReferenceNode referenceNode) {
         print(referenceNode.ref().toString());
-        boolean inline = level(referenceNode) < 4;
+        boolean inline = level(referenceNode) < 3;
         referenceNode.children().forEach(node -> child(node, inline));
         return null;
     }
