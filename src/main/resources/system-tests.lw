@@ -68,3 +68,6 @@ method Point2D dim o :
 
 method Point3D dim o :
 	+ super o 1
+
+def test-str-object :
+	assert-equals 'Point3D{x: 1, y: 2, z: 3}' str Point3D 1 2 3

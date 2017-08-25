@@ -24,4 +24,19 @@ public class Instance {
     public <R> void set(VariableNode field, R value) {
         data.put(field, value);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(type).append("{");
+        boolean first = true;
+        for(VariableNode field: type.fields()) {
+            if (!first) {
+                builder.append(", ");
+            }
+            builder.append(field).append(": ").append(data.get(field));
+            first = false;
+        }
+        return builder.append("}").toString();
+    }
 }
