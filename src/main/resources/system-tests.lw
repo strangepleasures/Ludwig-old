@@ -57,6 +57,11 @@ def test-oop :
 	= p3 Point3D 1 2 3
 	assert-equals 3 dim p3
 
+def test-class-refs :
+	= factory ref Point3D
+	= p call factory 1 2 3
+	assert-equals 3 dim p
+
 def dim o :
 	abstract
 

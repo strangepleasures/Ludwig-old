@@ -62,12 +62,7 @@ class Evaluator implements NodeVisitor<Object> {
     public Object visitFunctionReference(FunctionReferenceNode functionReference) {
         Node node = ((ReferenceNode) functionReference.children().get(0)).ref();
         if (!(node instanceof Callable)) {
-            if (node instanceof FunctionNode) {
-                return new CallableFunction((FunctionNode) node);
-            }
-            if (node instanceof VariableNode) {
-                return new CallableField((VariableNode) node);
-            }
+            return new CallableRef(node);
         }
         return node;
     }

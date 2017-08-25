@@ -1,9 +1,11 @@
 package ludwig.utils;
 
+import ludwig.interpreter.ClassType;
 import ludwig.model.*;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NodeUtils {
 
@@ -73,6 +75,12 @@ public class NodeUtils {
     }
 
     public static List<String> arguments(Node<?> node) {
+        if (node instanceof ClassNode) {
+            return ClassType.of((ClassNode) node).fields().stream().map(Object::toString).collect(Collectors.toList());
+        }
+        if (node instanceof VariableNode) {
+            return Collections.singletonList("it");
+        }
         if (node instanceof OverrideNode) {
             return arguments(declaration((OverrideNode) node));
         }

@@ -1,22 +1,17 @@
 package ludwig.interpreter;
 
-import ludwig.model.FunctionNode;
-import ludwig.model.VariableNode;
+import ludwig.model.*;
 import org.pcollections.HashTreePMap;
 
-public class CallableFunction implements Callable {
-    private final FunctionNode function;
+import static ludwig.utils.NodeUtils.arguments;
+
+public class CallableRef implements Callable {
+    private final Node<?> function;
     private int argCount;
 
-    public CallableFunction(FunctionNode function) {
+    public CallableRef(Node<?> function) {
         this.function = function;
-
-        for (int i = 0; i < function.children().size(); i++) {
-            if (!(function.children().get(i) instanceof VariableNode)) {
-                argCount = i;
-                break;
-            }
-        }
+        argCount = arguments(function).size(); // TODO: Optimize
     }
 
     @Override
@@ -26,7 +21,7 @@ public class CallableFunction implements Callable {
 
     @Override
     public boolean isLazy() {
-        return function.isLazy();
+        return (function instanceof FunctionNode) && ((FunctionNode)function).isLazy();
     }
 
     @Override

@@ -300,19 +300,19 @@ public class EditorPane extends SplitPane {
     }
 
     private void runFunction() {
-        Node selectedItem = selectedMember();
-        if (!(selectedItem instanceof FunctionNode)) {
+        Node fn = selectedMember();
+        if (!(fn instanceof NamedNode)) {
             return;
         }
-        FunctionNode fn = (FunctionNode) selectedItem;
         try {
-            Callable callable = (fn instanceof Callable) ? (Callable) fn : new CallableFunction(fn);
+            Callable callable = (fn instanceof Callable) ? (Callable) fn : new CallableRef(fn);
             Object result;
             if (callable.argCount() > 0) {
                 TextInputDialog dialog = new TextInputDialog();
                 dialog.setTitle("Execute function");
                 dialog.setHeaderText("Enter function arguments");
-                dialog.setContentText(fn.name());
+                dialog.setContentText(((NamedNode) fn).name());
+
                 Optional<String> params = dialog.showAndWait();
                 if (params.isPresent()) {
                     Object[] args = Lexer.read(new StringReader(params.get()))
