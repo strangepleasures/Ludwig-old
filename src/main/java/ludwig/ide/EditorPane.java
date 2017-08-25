@@ -166,7 +166,9 @@ public class EditorPane extends SplitPane {
 
         MenuItem addPackageMenuItem = new MenuItem("Add...", Icons.icon("add"));
         addPackageMenuItem.setOnAction(e -> addPackage());
-        packageTree.setContextMenu(new ContextMenu(addPackageMenuItem));
+        MenuItem deletePackageMenuItem = new MenuItem("Delete", null);
+        deletePackageMenuItem.setOnAction(e -> deletePackage());
+        packageTree.setContextMenu(new ContextMenu(addPackageMenuItem, deletePackageMenuItem));
 
 
         MenuItem addFunctionMenuItem = new MenuItem("Add Function...", Icons.icon("add"));
@@ -259,10 +261,6 @@ public class EditorPane extends SplitPane {
         TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             Node parent = selectedItem.getValue();
-            if (NodeUtils.isReadonly(parent)) {
-                return;
-            }
-
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Add a package");
             dialog.setHeaderText("");
@@ -275,6 +273,17 @@ public class EditorPane extends SplitPane {
                 environment.getWorkspace().apply(singletonList(insert));
                 navigateTo(environment.getWorkspace().node(insert.node().id()));
             });
+        }
+    }
+
+    private void deletePackage() {
+        if (isReadonly()) {
+            return;
+        }
+        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+        if (selectedItem != null) {
+            Node packageNode = selectedItem.getValue();
+            environment.getWorkspace().apply(singletonList(new Delete().id(packageNode.id())));
         }
     }
 
@@ -481,9 +490,7 @@ public class EditorPane extends SplitPane {
 
         autoCompletionTextFieldBinding.setVisibleRowCount(20);
         Node[] ref = {null};
-        autoCompletionTextFieldBinding.setOnAutoCompleted(e -> {
-            ref[0] = e.getCompletion();
-        });
+        autoCompletionTextFieldBinding.setOnAutoCompleted(e -> ref[0] = e.getCompletion());
 
         popup.getContent().add(autoCompleteTextField);
         TextAreaSkin skin = (TextAreaSkin) codeView.getSkin();
@@ -787,6 +794,6 @@ public class EditorPane extends SplitPane {
     }
 
     private boolean isReadonly() {
-        return NodeUtils.isReadonly(packageTree.getSelectionModel().getSelectedItem().getValue());
+        return packageTree.getSelectionModel().getSelectedItem() == null || NodeUtils.isReadonly(packageTree.getSelectionModel().getSelectedItem().getValue());
     }
 }

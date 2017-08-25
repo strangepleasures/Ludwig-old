@@ -4,6 +4,9 @@ import javafx.scene.control.TextArea;
 
 public class EditorUtils {
     public static int tokenIndex(String text, int pos) {
+        if (pos >= text.length()) {
+            return -1;
+        }
         int index = -1;
         boolean isToken = false;
         for (int i = 0; i < Math.min(pos + 1, text.length()); i++) {
