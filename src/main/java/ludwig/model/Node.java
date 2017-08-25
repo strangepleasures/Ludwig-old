@@ -69,6 +69,7 @@ public abstract class Node<T extends Node> {
 
     public void delete() {
         this.deleted = true;
+        children.forEach(Node::delete);
     }
 
     @JsonIgnore
