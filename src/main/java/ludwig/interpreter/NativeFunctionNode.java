@@ -1,7 +1,6 @@
 package ludwig.interpreter;
 
-import ludwig.model.FunctionNode;
-import ludwig.model.VariableNode;
+import ludwig.model.*;
 
 import java.lang.reflect.*;
 
@@ -41,6 +40,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
             }
             add(param);
         }
+        add(LiteralNode.ofValue("*** Built-in function ***").id(id() + ":body"));
 
         lazy = method.isAnnotationPresent(Lazy.class);
     }
