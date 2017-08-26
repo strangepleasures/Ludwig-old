@@ -52,16 +52,7 @@ public class EditorPane extends SplitPane {
         membersList.setPrefHeight(1E6);
         codeEditor.setPrefHeight(1E6);
 
-
-        MenuItem gotoDefinitionMenuItem = new MenuItem("Go to definition");
-
-        gotoDefinitionMenuItem.setOnAction(e -> {
-            Node sel = codeEditor.selectedNode();
-            if (sel instanceof ReferenceNode) {
-                gotoDefinition((ReferenceNode) sel);
-            }
-        });
-        codeEditor.setContextMenu(new ContextMenu(gotoDefinitionMenuItem));
+        codeEditor.setContextMenu(ContextMenuFactory.menu(new CodeEditorActions()));
 
         membersList.getSelectionModel().selectedItemProperty().addListener(observable -> displayMember());
 
@@ -345,5 +336,14 @@ public class EditorPane extends SplitPane {
 
     private boolean isReadonly() {
         return packageTree.getSelectionModel().getSelectedItem() == null || NodeUtils.isReadonly(packageTree.getSelectionModel().getSelectedItem().getValue());
+    }
+
+    public class CodeEditorActions {
+        public void goToDefinition() {
+            Node sel = codeEditor.selectedNode();
+            if (sel instanceof ReferenceNode) {
+                navigateTo(((ReferenceNode) sel).ref());
+            }
+        }
     }
 }
