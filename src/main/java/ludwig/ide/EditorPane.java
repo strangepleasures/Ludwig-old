@@ -39,8 +39,8 @@ public class EditorPane extends SplitPane {
     private final Settings settings;
     private final ListView<Node> membersList = new ListView<>();
     private final PackageTreeView packageTree;
-    private final GridPane signatureView = new GridPane();
-    private final CheckBox lazyCheckbox = new CheckBox("Lazy");
+
+    private final SignatureEditor signatureEditor;
     private final CodeEditor codeEditor;
 
     @Getter
@@ -50,6 +50,8 @@ public class EditorPane extends SplitPane {
     public EditorPane(Environment environment, Settings settings) {
         this.environment = environment;
         this.settings = settings;
+
+        signatureEditor = new SignatureEditor(environment);
         codeEditor = new CodeEditor(environment);
 
         packageTree = new PackageTreeView(environment.getWorkspace());
@@ -87,7 +89,7 @@ public class EditorPane extends SplitPane {
 
         membersList.setCellFactory(listView -> new SignatureListCell());
 
-        getItems().addAll(packageTree, membersList, new VBox(signatureView, /*signatureToolbar,*/ lazyCheckbox, codeEditor));
+        getItems().addAll(packageTree, membersList, new VBox(signatureEditor, codeEditor));
 
         membersList.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getClickCount() == 2
@@ -310,33 +312,16 @@ public class EditorPane extends SplitPane {
 
     private void displayMember() {
         Node sel = selectedMember();
-        signatureView.getChildren().clear();
+        signatureEditor.setNode(sel);
         codeEditor.setContent(null);
 
         if (sel == null) {
             return;
         }
 
-        NamedNode decl = (sel instanceof OverrideNode) ? declaration((OverrideNode) sel) : (NamedNode) sel;
 
-        signatureView.add(new Label("Name"), 1, 1);
-        signatureView.add(new Label("Description"), 2, 1);
-        signatureView.add(nameTextField(decl), 1, 2);
-        signatureView.add(commentTextField(decl), 2, 2);
 
-        if (decl instanceof FunctionNode) {
-            FunctionNode fn = (FunctionNode) decl;
-            int row = 3;
-            for (Node n : fn.children()) {
-                if (!(n instanceof VariableNode)) {
-                    break;
-                }
-                signatureView.add(nameTextField((VariableNode) n), 1, row);
-                signatureView.add(commentTextField(n), 2, row);
-                row++;
-            }
-            lazyCheckbox.setSelected(fn.isLazy());
-        }
+
         codeEditor.setContent(sel);
     }
 
@@ -398,59 +383,6 @@ public class EditorPane extends SplitPane {
         }
     }
 
-    private TextField commentTextField(Node<?> node) {
-        return new TextField(node.comment()) {
-            private String saved;
-
-            {
-                setOnAction(e -> applyChanges());
-
-                this.focusedProperty().addListener(e -> {
-                    if (focusedProperty().get()) {
-                        saved = getText();
-                    } else {
-                        if (!Objects.equals(getText(), saved)) {
-                            applyChanges();
-                        }
-                    }
-                });
-
-                setEditable(!isReadonly());
-                setPrefWidth(1000);
-            }
-
-            private void applyChanges() {
-                environment.getWorkspace().apply(singletonList(new Comment().nodeId(node.id()).comment(getText())));
-            }
-        };
-    }
-
-    private TextField nameTextField(NamedNode node) {
-        return new TextField(node.name()) {
-            private String saved;
-
-            {
-                setOnAction(e -> applyChanges());
-
-                this.focusedProperty().addListener(e -> {
-                    if (focusedProperty().get()) {
-                        saved = getText();
-                    } else {
-                        if (!getText().equals(saved)) {
-                            applyChanges();
-                        }
-                    }
-                });
-
-                setEditable(!isReadonly());
-                setMinWidth(100);
-            }
-
-            private void applyChanges() {
-                environment.getWorkspace().apply(singletonList(new Rename().setNodeId(node.id()).name(getText())));
-            }
-        };
-    }
 
     private void refresh() {
         Node packageSelection = null;
