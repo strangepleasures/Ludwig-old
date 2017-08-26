@@ -69,7 +69,7 @@ public abstract class Node<T extends Node> {
 
     public void delete() {
         this.deleted = true;
-        if (parent != null) {
+        if (parent != null && !parent.deleted) {
             parent.children.remove(this);
         }
         children.forEach(Node::delete);
