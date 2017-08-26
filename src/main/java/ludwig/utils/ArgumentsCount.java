@@ -17,7 +17,7 @@ class ArgumentsCount implements NodeVisitor<Integer> {
 
     @Override
     public Integer visitFunction(FunctionNode functionNode) {
-        return arguments(functionNode).size();
+        return Integer.MAX_VALUE;
     }
 
     @Override
