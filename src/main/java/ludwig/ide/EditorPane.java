@@ -62,14 +62,6 @@ public class EditorPane extends SplitPane {
         packageTree.getSelectionModel().selectedItemProperty().addListener(observable -> fillMembers());
 
         membersList.setPrefHeight(1E6);
-
-
-        TableColumn<NamedNode, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        TableColumn<NamedNode, String> descriptionColumn = new TableColumn<>("Description");
-        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
-        descriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-
         codeEditor.setPrefHeight(1E6);
 
 
@@ -82,8 +74,6 @@ public class EditorPane extends SplitPane {
             }
         });
         codeEditor.setContextMenu(new ContextMenu(gotoDefinitionMenuItem));
-
-
 
         membersList.getSelectionModel().selectedItemProperty().addListener(observable -> displayMember());
 
@@ -305,7 +295,6 @@ public class EditorPane extends SplitPane {
                     FunctionNode fn = environment.getWorkspace().node(insertFn.node().id());
                     navigateTo(fn);
                 }
-
             });
         }
     }
@@ -313,15 +302,6 @@ public class EditorPane extends SplitPane {
     private void displayMember() {
         Node sel = selectedMember();
         signatureEditor.setNode(sel);
-        codeEditor.setContent(null);
-
-        if (sel == null) {
-            return;
-        }
-
-
-
-
         codeEditor.setContent(sel);
     }
 
@@ -415,8 +395,6 @@ public class EditorPane extends SplitPane {
             codeEditor.locate(codeSelection);
         }
     }
-
-
 
     private boolean isReadonly() {
         return packageTree.getSelectionModel().getSelectedItem() == null || NodeUtils.isReadonly(packageTree.getSelectionModel().getSelectedItem().getValue());
