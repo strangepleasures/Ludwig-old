@@ -1,19 +1,10 @@
 package ludwig.ide;
 
 import com.sun.javafx.collections.ObservableListWrapper;
-import com.sun.javafx.scene.control.skin.TextAreaSkin;
 import impl.org.controlsfx.autocompletion.AutoCompletionTextFieldBinding;
-import javafx.application.Platform;
-import javafx.event.Event;
-import javafx.geometry.Bounds;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Popup;
 import lombok.Getter;
 import lombok.Setter;
 import ludwig.changes.*;
@@ -22,7 +13,6 @@ import ludwig.model.*;
 import ludwig.script.Lexer;
 import ludwig.script.LexerException;
 import ludwig.utils.NodeUtils;
-import ludwig.utils.PrettyPrinter;
 import ludwig.workspace.Environment;
 
 import java.io.IOException;
@@ -31,8 +21,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
-import static ludwig.utils.NodeUtils.arguments;
-import static ludwig.utils.NodeUtils.declaration;
 
 public class EditorPane extends SplitPane {
     private final Environment environment;
@@ -88,13 +76,6 @@ public class EditorPane extends SplitPane {
                 anotherPane.codeEditor.insertNode((Node<?>) membersList.getSelectionModel().selectedItemProperty().getValue());
             }
         });
-
-        MenuItem addPackageMenuItem = new MenuItem("Add...", Icons.icon("add"));
-        addPackageMenuItem.setOnAction(e -> addPackage());
-        MenuItem deletePackageMenuItem = new MenuItem("Delete", null);
-        deletePackageMenuItem.setOnAction(e -> deletePackage());
-        packageTree.setContextMenu(new ContextMenu(addPackageMenuItem, deletePackageMenuItem));
-
 
         MenuItem addFunctionMenuItem = new MenuItem("Add Function...", Icons.icon("add"));
         addFunctionMenuItem.setOnAction(e -> addFunction());
@@ -178,40 +159,6 @@ public class EditorPane extends SplitPane {
             });
         }
     }
-
-    private void addPackage() {
-        if (isReadonly()) {
-            return;
-        }
-        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
-            Node parent = selectedItem.getValue();
-            TextInputDialog dialog = new TextInputDialog();
-            dialog.setTitle("Add a package");
-            dialog.setHeaderText("");
-            dialog.setContentText("Package name");
-
-            dialog.showAndWait().ifPresent(name -> {
-                InsertNode insert = new InsertNode()
-                    .node(new PackageNode().name(name).id(Change.newId()))
-                    .parent(parent.id());
-                environment.getWorkspace().apply(singletonList(insert));
-                navigateTo(environment.getWorkspace().node(insert.node().id()));
-            });
-        }
-    }
-
-    private void deletePackage() {
-        if (isReadonly()) {
-            return;
-        }
-        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
-        if (selectedItem != null) {
-            Node packageNode = selectedItem.getValue();
-            environment.getWorkspace().apply(singletonList(new Delete().id(packageNode.id())));
-        }
-    }
-
 
     private void runFunction() {
         Node fn = selectedMember();

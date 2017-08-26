@@ -1,9 +1,12 @@
 package ludwig.ide;
 
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
+import ludwig.changes.*;
 import ludwig.model.*;
 import ludwig.workspace.Workspace;
+
+import static java.util.Collections.singletonList;
+import static ludwig.utils.NodeUtils.isReadonly;
 
 class PackageTreeView extends TreeView<NamedNode> {
     private final Workspace workspace;
@@ -12,6 +15,8 @@ class PackageTreeView extends TreeView<NamedNode> {
         super(createRoot(workspace));
         this.workspace = workspace;
         setShowRoot(false);
+
+        setContextMenu(ContextMenuFactory.menu(new Actions()));
     }
 
     private static TreeItem<NamedNode> createRoot(Workspace workspace) {
@@ -42,7 +47,7 @@ class PackageTreeView extends TreeView<NamedNode> {
     }
 
 
-    void select(PackageNode packageNode) {
+    void select(NamedNode packageNode) {
         getSelectionModel().select(find(packageNode));
     }
 
@@ -60,5 +65,45 @@ class PackageTreeView extends TreeView<NamedNode> {
 
     void refresh() {
         setRoot(createRoot(workspace));
+    }
+
+    public class Actions {
+        public void newPackage() {
+            TreeItem<NamedNode> selectedItem = getSelectionModel().getSelectedItem();
+            if (selectedItem != null) {
+                Node parent = selectedItem.getValue();
+
+                if (isReadonly(parent)) {
+                    return;
+                }
+
+                TextInputDialog dialog = new TextInputDialog();
+                dialog.setTitle("Add a package");
+                dialog.setHeaderText("");
+                dialog.setContentText("Package name");
+
+                dialog.showAndWait().ifPresent(name -> {
+                    PackageNode packageNode = new PackageNode().name(name).id(Change.newId());
+                    InsertNode insert = new InsertNode()
+                        .node(packageNode)
+                        .parent(parent.id());
+                    workspace.apply(singletonList(insert));
+                    select(packageNode);
+                });
+            }
+        }
+
+        public void deletePackage() {
+            TreeItem<NamedNode> selectedItem = getSelectionModel().getSelectedItem();
+            if (selectedItem != null) {
+                Node packageNode = selectedItem.getValue();
+                if (isReadonly(packageNode)) {
+                    return;
+                }
+                NamedNode parent = (NamedNode) packageNode.parent();
+                workspace.apply(singletonList(new Delete().id(packageNode.id())));
+                select(parent);
+            }
+        }
     }
 }

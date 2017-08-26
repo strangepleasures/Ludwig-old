@@ -1,6 +1,7 @@
 package ludwig.interpreter;
 
-import ludwig.model.*;
+import ludwig.model.FunctionNode;
+import ludwig.model.Node;
 import org.pcollections.HashTreePMap;
 
 import static ludwig.utils.NodeUtils.arguments;
