@@ -17,6 +17,8 @@ class PackageTreeView extends TreeView<NamedNode> {
         setShowRoot(false);
 
         setContextMenu(ContextMenuFactory.menu(new Actions()));
+
+        setPrefWidth(120);
     }
 
     private static TreeItem<NamedNode> createRoot(Workspace workspace) {
