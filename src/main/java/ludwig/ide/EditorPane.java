@@ -40,9 +40,8 @@ public class EditorPane extends SplitPane {
     private final ListView<Node> membersList = new ListView<>();
     private final PackageTreeView packageTree;
     private final GridPane signatureView = new GridPane();
-    private final ToolBar signatureToolbar;
     private final CheckBox lazyCheckbox = new CheckBox("Lazy");
-    private final TextArea codeView = new TextArea();
+    private final CodeEditor codeEditor;
 
     @Getter
     @Setter
@@ -51,6 +50,7 @@ public class EditorPane extends SplitPane {
     public EditorPane(Environment environment, Settings settings) {
         this.environment = environment;
         this.settings = settings;
+        codeEditor = new CodeEditor(environment);
 
         packageTree = new PackageTreeView(environment.getWorkspace());
         packageTree.setPrefWidth(120);
@@ -68,99 +68,32 @@ public class EditorPane extends SplitPane {
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
         descriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 
-        Button addParameterButton = new Button("", Icons.icon("add"));
-        addParameterButton.setOnAction(e -> {
-
-
-        });
-
-        Button removeParameterButton = new Button("", Icons.icon("delete"));
-        removeParameterButton.setOnAction(e -> {
-
-        });
-        Button moveParameterUpButton = new Button("", Icons.icon("up"));
-        moveParameterUpButton.setOnAction(e -> {
-
-        });
-        Button moveParameterDownButton = new Button("", Icons.icon("down"));
-        moveParameterDownButton.setOnAction(e -> {
-
-        });
-        signatureToolbar = new ToolBar(addParameterButton, removeParameterButton, moveParameterUpButton, moveParameterDownButton);
-
-        codeView.setPrefHeight(1E6);
+        codeEditor.setPrefHeight(1E6);
 
 
         MenuItem gotoDefinitionMenuItem = new MenuItem("Go to definition");
 
         gotoDefinitionMenuItem.setOnAction(e -> {
-            Node sel = selectedNode();
+            Node sel = codeEditor.selectedNode();
             if (sel instanceof ReferenceNode) {
                 gotoDefinition((ReferenceNode) sel);
             }
         });
-        codeView.setContextMenu(new ContextMenu(gotoDefinitionMenuItem));
+        codeEditor.setContextMenu(new ContextMenu(gotoDefinitionMenuItem));
 
-        codeView.setOnKeyPressed(e -> {
-            switch (e.getCode()) {
-                case LEFT:
-                    selectPrevNode();
-                    break;
-                case RIGHT:
-                    selectNextNode();
-                    break;
-                case UP:
-                    selectPrevLine();
-                    break;
-                case DOWN:
-                    selectNextLine();
-                    break;
-                case BACK_SPACE:
-                    selectPrevNode();
-                case DELETE:
-                    deleteNode();
-                    break;
-                default:
-                    if (!isReadonly() && e.getText() != null && !e.getText().isEmpty()) {
-                        showEditor(e.getText(), false);
-                    }
-            }
-            e.consume();
-        });
 
-        codeView.setOnKeyReleased(Event::consume);
-        codeView.setOnKeyTyped(Event::consume);
-
-        codeView.setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) {
-                if (isReadonly()) {
-                    return;
-                }
-
-                Node n = selectedNode();
-
-                if (n == null) {
-                    return;
-                }
-                if (n instanceof PlaceholderNode) {
-                    showEditor("", true);
-                } else {
-                    showEditor(n.toString(), true);
-                }
-            }
-        });
 
         membersList.getSelectionModel().selectedItemProperty().addListener(observable -> displayMember());
 
         membersList.setCellFactory(listView -> new SignatureListCell());
 
-        getItems().addAll(packageTree, membersList, new VBox(signatureView, /*signatureToolbar,*/ lazyCheckbox, codeView));
+        getItems().addAll(packageTree, membersList, new VBox(signatureView, /*signatureToolbar,*/ lazyCheckbox, codeEditor));
 
         membersList.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getClickCount() == 2
                 && membersList.getSelectionModel().selectedItemProperty().getValue() != null
                 && anotherPane != null) {
-                anotherPane.insertNode((Node<?>) membersList.getSelectionModel().selectedItemProperty().getValue());
+                anotherPane.codeEditor.insertNode((Node<?>) membersList.getSelectionModel().selectedItemProperty().getValue());
             }
         });
 
@@ -287,17 +220,6 @@ public class EditorPane extends SplitPane {
         }
     }
 
-    private void deleteNode() {
-        if (isReadonly()) {
-            return;
-        }
-        Node<?> node = selectedNode();
-        if (node == null) {
-            return;
-        }
-        Node<?> parent = node.parent();
-        // TODO: implement
-    }
 
     private void runFunction() {
         Node fn = selectedMember();
@@ -389,9 +311,9 @@ public class EditorPane extends SplitPane {
     private void displayMember() {
         Node sel = selectedMember();
         signatureView.getChildren().clear();
-        codeView.setText("");
+        codeEditor.setContent(null);
 
-        if (sel == null || sel.deleted()) {
+        if (sel == null) {
             return;
         }
 
@@ -415,7 +337,7 @@ public class EditorPane extends SplitPane {
             }
             lazyCheckbox.setSelected(fn.isLazy());
         }
-        codeView.setText(PrettyPrinter.print(sel));
+        codeEditor.setContent(sel);
     }
 
     private Node selectedMember() {
@@ -425,100 +347,6 @@ public class EditorPane extends SplitPane {
         return membersList.getSelectionModel().getSelectedItem();
     }
 
-    private void showEditor(String text, boolean selectAll) {
-        Popup popup = new Popup();
-        TextField autoCompleteTextField = new TextField();
-        autoCompleteTextField.setText(text);
-
-        AutoCompletionTextFieldBinding<Node> autoCompletionTextFieldBinding =
-            new AutoCompletionTextFieldBinding<>(
-                autoCompleteTextField,
-                param -> {
-                    List<Node> suggestions = new ArrayList<>();
-                    if (param.getUserText().isEmpty() || "= variable value".startsWith(param.getUserText())) {
-                        suggestions.add(new AssignmentNode()
-                            .add(new PlaceholderNode().setParameter("variable").id(Change.newId()))
-                            .add(new PlaceholderNode().setParameter("value").id(Change.newId())));
-                    }
-                    if (param.getUserText().isEmpty() || param.getUserText().startsWith("λ") || param.getUserText().startsWith("\\")) {
-                        suggestions.add(new LambdaNode()
-                            .add(new PlaceholderNode().setParameter("args...").id(Change.newId())));
-                    }
-                    if (param.getUserText().isEmpty() || "ref fn".startsWith(param.getUserText())) {
-                        suggestions.add(new FunctionReferenceNode()
-                            .add(new PlaceholderNode().setParameter("fn").id(Change.newId())));
-                    }
-                    if (param.getUserText().isEmpty() || "call fn args...".startsWith(param.getUserText())) {
-                        suggestions.add(new CallNode()
-                            .add(new PlaceholderNode().setParameter("fn").id(Change.newId()))
-                            .add(new PlaceholderNode().setParameter("args...").id(Change.newId())));
-                    }
-                    if (param.getUserText().isEmpty() || "if condition statements...>".startsWith(param.getUserText())) {
-                        suggestions.add(new IfNode()
-                            .add(new PlaceholderNode().setParameter("condition").id(Change.newId()))
-                            .add(new PlaceholderNode().setParameter("statements...").id(Change.newId())));
-                    }
-                    if (param.getUserText().isEmpty() || "else statements...".startsWith(param.getUserText())) {
-                        suggestions.add(new ElseNode()
-                            .add(new PlaceholderNode().setParameter("statements...").id(Change.newId())));
-                    }
-                    if (param.getUserText().isEmpty() || "for var seq statements...".startsWith(param.getUserText())) {
-                        suggestions.add(new ForNode()
-                            .add(new PlaceholderNode().setParameter("var").id(Change.newId()))
-                            .add(new PlaceholderNode().setParameter("seq").id(Change.newId()))
-                            .add(new PlaceholderNode().setParameter("statements...").id(Change.newId())));
-                    }
-                    if (param.getUserText().isEmpty() || "break loop-var".startsWith(param.getUserText())) {
-                        suggestions.add(new BreakNode()
-                            .add(new PlaceholderNode().setParameter("loop-var").id(Change.newId())));
-                    }
-                    if (param.getUserText().isEmpty() || "continue loop-var".startsWith(param.getUserText())) {
-                        suggestions.add(new ContinueNode()
-                            .add(new PlaceholderNode().setParameter("loop-var").id(Change.newId())));
-                    }
-                    if (param.getUserText().isEmpty() || "return result".startsWith(param.getUserText())) {
-                        suggestions.add(new ReturnNode()
-                            .add(new PlaceholderNode().setParameter("result").id(Change.newId())));
-                    }
-
-                    suggestions.addAll(NodeUtils.collectLocals(selectedMember(), selectedNode(), param.getUserText()));
-                    suggestions.addAll(environment.getSymbolRegistry().symbols(param.getUserText()));
-
-                    return suggestions;
-                },
-                new NodeStringConverter());
-
-        autoCompletionTextFieldBinding.setVisibleRowCount(20);
-        Node[] ref = {null};
-        autoCompletionTextFieldBinding.setOnAutoCompleted(e -> ref[0] = e.getCompletion());
-
-        popup.getContent().add(autoCompleteTextField);
-        TextAreaSkin skin = (TextAreaSkin) codeView.getSkin();
-        Bounds caretBounds = codeView.localToScreen(skin.getCaretBounds());
-        autoCompleteTextField.setOnAction(ev -> {
-            if (Lexer.isLiteral(autoCompleteTextField.getText())) {
-                insertNode(new LiteralNode(autoCompleteTextField.getText()).id(Change.newId()));
-            } else if (ref[0] != null) {
-                insertNode(ref[0]);
-            } else if (!autoCompleteTextField.getText().isEmpty()) {
-                insertNode(new VariableNode().name(autoCompleteTextField.getText()).id(Change.newId()));
-            }
-            popup.hide();
-            autoCompletionTextFieldBinding.dispose();
-        });
-        autoCompleteTextField.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ESCAPE) {
-                popup.hide();
-                autoCompletionTextFieldBinding.dispose();
-            }
-        });
-
-        popup.show(codeView, caretBounds.getMinX(), caretBounds.getMinY());
-
-        if (!selectAll) {
-            Platform.runLater(() -> autoCompleteTextField.selectRange(text.length(), text.length()));
-        }
-    }
 
     private void processChanges(Change change) {
         if (!environment.getWorkspace().isBatchUpdate()) {
@@ -543,59 +371,10 @@ public class EditorPane extends SplitPane {
                 decl = node.parentOfType(LambdaNode.class);
             }
             if (decl != null) {
-                locate(decl);
+                codeEditor.locate(decl);
             }
         }
     }
-
-    private void locate(Node node) {
-        for (int i = 0; i < codeView.getText().length(); i++) {
-            if (selectedNode(i) == node) {
-                codeView.selectRange(i, i);
-                break;
-            }
-        }
-    }
-
-    private void insertNode(Node<?> node) {
-        Node<?> sel = selectedNode();
-        Insert head = (node instanceof NamedNode) ? new InsertReference().id(Change.newId()).ref(node.id()) : new InsertNode().node(node);
-        List<Change> changes = new ArrayList<>();
-        Node selectedItem = selectedMember();
-        if (!(selectedItem instanceof FunctionNode) || isReadonly()) {
-            return;
-        }
-        FunctionNode target = (FunctionNode) selectedItem;
-        if (sel != null) {
-            head.parent(sel.parent().id());
-            int index = sel.parent().children().indexOf(sel);
-            head.prev(index == 0 ? null : sel.parent().children().get(index - 1).id());
-            head.next(index == sel.parent().children().size() - 1 ? null : sel.parent().children().get(index + 1).id());
-            changes.add(new Delete().id(sel.id()));
-        } else {
-            head.parent(target.id());
-            head.prev(target.children().isEmpty() ? null : target.children().get(target.children().size() - 1).id());
-        }
-
-        changes.add(head);
-
-        String prev = null;
-
-        for (String arg : arguments(node)) {
-            InsertNode insertPlaceholder = new InsertNode()
-                .node(new PlaceholderNode().setParameter(arg).id(Change.newId()))
-                .parent(((InsertReference) head).id())
-                .prev(prev);
-            changes.add(insertPlaceholder);
-            prev = insertPlaceholder.node().id();
-        }
-
-
-        environment.getWorkspace().apply(changes);
-
-        selectNextNode();
-    }
-
 
     private void fillMembers() {
         membersList.getItems().clear();
@@ -617,25 +396,6 @@ public class EditorPane extends SplitPane {
                 membersList.getSelectionModel().select(0);
             }
         }
-    }
-
-    private Node selectedNode(int pos) {
-        Node selectedItem = selectedMember();
-        if (!(selectedItem instanceof FunctionNode)) {
-            return null;
-        }
-        FunctionNode node = (FunctionNode) selectedItem;
-        List<Node> nodes = NodeUtils.expandNode(node);
-        int index = EditorUtils.tokenIndex(codeView.getText(), pos);
-        if (index < 0) {
-            return null;
-        }
-
-        return nodes.get(index + arguments(node).size());
-    }
-
-    private Node selectedNode() {
-        return selectedNode(codeView.getSelection().getStart());
     }
 
     private TextField commentTextField(Node<?> node) {
@@ -705,7 +465,7 @@ public class EditorPane extends SplitPane {
 
         memberSelection = selectedMember();
 
-        codeSelection = selectedNode();
+        codeSelection = codeEditor.selectedNode();
 
         packageTree.refresh();
         packageTree.getSelectionModel().clearSelection();
@@ -720,78 +480,11 @@ public class EditorPane extends SplitPane {
         }
 
         if (codeSelection != null) {
-            locate(codeSelection);
+            codeEditor.locate(codeSelection);
         }
     }
 
-    private void selectNextNode() {
-        int start = codeView.getSelection().getStart();
-        Node current = selectedNode(start);
-        int length = codeView.getText().length();
-        for (int i = start + 1; i < length; i++) {
-            if (selectedNode(i) != current) {
-                codeView.selectRange(i, i);
-                break;
-            }
-        }
-    }
 
-    private void selectPrevNode() {
-        int start = codeView.getSelection().getStart();
-        Node current = selectedNode(start);
-
-        for (int i = start - 1; i >= 0; i--) {
-            Node sel = selectedNode(i);
-            if (sel != current) {
-                codeView.selectRange(i, i);
-                for (int j = i - 1; j >= 0; j--) {
-                    if (selectedNode(j) != sel) {
-                        codeView.selectRange(j + 1, j + 1);
-                        return;
-                    }
-                }
-            }
-        }
-
-        codeView.selectRange(0, 0);
-    }
-
-    private void selectNextLine() {
-        String text = codeView.getText();
-        int start = codeView.getSelection().getStart();
-        int length = text.length();
-        for (int i = start + 1; i < length; i++) {
-            if (text.charAt(i) == '\n') {
-                for (int j = i + 1; j < length; j++) {
-                    if (text.charAt(j) != ' ') {
-                        codeView.selectRange(j, j);
-                        return;
-                    }
-                }
-
-                break;
-            }
-        }
-        codeView.selectRange(length + 1, length + 1);
-    }
-
-    private void selectPrevLine() {
-        String text = codeView.getText();
-        int start = codeView.getSelection().getStart();
-        boolean first = true;
-        for (int i = start - 1; i >= 0; i--) {
-            if (text.charAt(i) == '\n') {
-                if (first) {
-                    first = false;
-                } else {
-                    codeView.selectRange(i, i);
-                    selectNextNode();
-                    return;
-                }
-            }
-        }
-        codeView.selectRange(0, 0);
-    }
 
     private boolean isReadonly() {
         return packageTree.getSelectionModel().getSelectedItem() == null || NodeUtils.isReadonly(packageTree.getSelectionModel().getSelectedItem().getValue());
