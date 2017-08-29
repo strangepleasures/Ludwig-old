@@ -190,10 +190,10 @@ def < a b :
 	>= b a
 
 def append l x :
-	plus l size l x
+	insert l size l x
 
 def prepend l x :
-	plus l 0 x
+	insert l 0 x
 
 def abstract :
 	throw 'Abstract function'
@@ -289,3 +289,12 @@ method Complex / x y :
 
 method Complex neg x :
 	Complex neg re x neg im x
+
+def to-list seq :
+	= result list
+	for i seq
+		= result append result i
+	result
+
+method List to-list seq :
+	seq

@@ -153,24 +153,12 @@ public class StdLib {
         }
     }
 
-    public static PVector plus(PVector list, int index, Object x) {
-        return list.plus(index, x);
+    public static PVector insert(PVector list, long index, Object x) {
+        return list.plus((int)index, x);
     }
 
     public static void print(Object o) {
         System.out.print(o);
-    }
-
-    @Name("to-list")
-    public static <E> PVector<E> tolist(Iterable<E> source) {
-        if (source instanceof PVector) {
-            return (PVector<E>) source;
-        }
-        PVector<E> v = TreePVector.empty();
-        for (E x : source) {
-            v = v.plus(x);
-        }
-        return v;
     }
 
     @Name("to-set")
@@ -248,7 +236,6 @@ public class StdLib {
             this.head = head;
             this.tail = tail;
         }
-
 
         @Override
         public boolean hasNext() {
