@@ -141,7 +141,7 @@ public class StdLib {
             return list.subList(1, list.size());
         }
         if (seq instanceof Cons) {
-            return ((Cons<E>) seq).tail.get();
+            return ((Cons<E>) seq).getTail().get();
         } else {
             return () -> {
                 Iterator<E> i = seq.iterator();
@@ -211,68 +211,4 @@ public class StdLib {
         return callable.argCount();
     }
 
-    private static class Cons<T> implements Iterable<T> {
-        private final Delayed<T> head;
-        private final Delayed<Iterable<T>> tail;
-
-        private Cons(Delayed<T> head, Delayed<Iterable<T>> tail) {
-            this.head = head;
-            this.tail = tail;
-        }
-
-        @Override
-        public Iterator<T> iterator() {
-            return new ConsIterator<>(head, tail);
-        }
-    }
-
-    private static class ConsIterator<T> implements Iterator<T> {
-        private Delayed<T> head;
-        private Delayed<Iterable<T>> tail;
-        private boolean first = true;
-        private Iterator<T> it;
-
-        private ConsIterator(Delayed<T> head, Delayed<Iterable<T>> tail) {
-            this.head = head;
-            this.tail = tail;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (first) {
-                return true;
-            }
-            if (it == null) {
-                Iterator<T> i = tail.get().iterator();
-                if (i instanceof ConsIterator) {
-                    ConsIterator<T> ci = (ConsIterator<T>) i;
-                    first = true;
-                    head = ci.head;
-                    tail = ci.tail;
-                    return true;
-                }
-                it = i;
-            }
-            return it.hasNext();
-        }
-
-        @Override
-        public T next() {
-            if (first) {
-                first = false;
-                return head.get();
-            }
-            if (it == null) {
-                Iterator<T> i = tail.get().iterator();
-                if (i instanceof ConsIterator) {
-                    ConsIterator<T> ci = (ConsIterator<T>) i;
-                    head = ci.head;
-                    tail = ci.tail;
-                    return head.get();
-                }
-                it = i;
-            }
-            return it.next();
-        }
-    }
 }
