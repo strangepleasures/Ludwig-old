@@ -208,3 +208,84 @@ class MutableList Any list
 
 def mutable-list :
 	MutableList list
+
+def bind callable x1 :
+	= n arg-count callable
+	if == n 0
+    	throw 'Function has no arguments'
+	if == n 1
+    	return λ :
+    		call callable x1
+	if == n 2
+    	return λ x2 :
+    		call callable x1 x2
+	if == n 3
+    	return λ x2 x3 :
+    		call callable x1 x2 x3
+	if == n 4
+    	return λ x2 x3 x4 :
+    		call callable x1 x2 x3 x4
+	if == n 5
+    	return λ x2 x3 x4 x5 :
+    		call callable x1 x2 x3 x4 x5
+	if == n 6
+    	return λ x2 x3 x4 x5 x6 :
+    		call callable x1 x2 x3 x4 x5 x6
+	if == n 7
+    	return λ x2 x3 x4 x5 x6 x7 :
+    		call callable x1 x2 x3 x4 x5 x6 x7
+	if == n 8
+    	return λ x2 x3 x4 x5 x6 x7 x8 :
+    		call callable x1 x2 x3 x4 x5 x6 x7 x8
+	if == n 9
+    	return λ x2 x3 x4 x5 x6 x7 x8 x9 :
+    		call callable x1 x2 x3 x4 x5 x6 x7 x8 x9
+	if == n 10
+		return λ x2 x3 x4 x5 x6 x7 x8 x9 x10 :
+			call callable x1 x2 x3 x4 x5 x6 x7 x8 x9 x10
+	throw 'Too many arguments'
+
+def size seq :
+	= n 0
+	for i seq
+		= n + n 1
+	n
+
+def contains seq item :
+	for i seq
+		if == i item
+			return true
+	return false
+
+def index seq item :
+	= i 0
+	for x seq
+		if == x item
+			return i
+		= i + i 1
+	-1
+
+def sqr x :
+	* x x
+
+class Complex Any re im
+
+method Complex + x y :
+	Complex + re x re y + im x im y
+
+method Complex - x y :
+	Complex - re x re y - im x im y
+
+method Complex * x y :
+	Complex
+		- * re x re y * im x im y
+		+ * re x im y * re y im x
+
+method Complex / x y :
+	= d + sqr re y sqr im y
+	Complex
+		/ + * re x re y * im x im y d
+		/ - * re y im x * re x im y d
+
+method Complex neg x :
+	Complex neg re x neg im x

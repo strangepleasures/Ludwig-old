@@ -218,37 +218,9 @@ public class StdLib {
         return StreamSupport.stream(it.spliterator(), false).map(String::valueOf).collect(Collectors.joining(delimiter, prefix, suffix));
     }
 
-    public static long size(Iterable<?> it) {
-        if (it instanceof Collection) {
-            return ((Collection) it).size();
-        }
-        int result = 0;
-        for (Object x : it) {
-            result++;
-        }
-        return result;
-    }
-
-    public static Callable bind(Callable callable, Object o) {
-        return new Callable() {
-            @Override
-            public Object tail(Object... args) {
-                Object[] a = new Object[args.length + 1];
-                a[0] = isLazy() ? (Delayed) () -> o : o;
-                System.arraycopy(args, 0, a, 1, args.length);
-                return callable.tail(a);
-            }
-
-            @Override
-            public int argCount() {
-                return callable.argCount() - 1;
-            }
-
-            @Override
-            public boolean isLazy() {
-                return callable.isLazy() && argCount() > 0;
-            }
-        };
+    @Name("arg-count")
+    public long argCount(Callable callable) {
+        return callable.argCount();
     }
 
     private static class Cons<T> implements Iterable<T> {

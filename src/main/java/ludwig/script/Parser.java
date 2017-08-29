@@ -183,6 +183,14 @@ public class Parser {
                     locals = locals.plus(variableNode.name(), variableNode);
                 }
 
+                for (Node child : classNode.children()) {
+                    if (!(child instanceof VariableNode)) {
+                        continue;
+                    }
+                    VariableNode variableNode = (VariableNode) child;
+                    locals = locals.plus(variableNode.name(), variableNode);
+                }
+
                 while (!nextToken().equals(")")) ;
                 consume("(");
                 while (pos < tokens.size() && !currentToken().equals(")")) {
@@ -313,24 +321,27 @@ public class Parser {
                 }
 
                 default: {
-                    Node headNode = "super".equals(head) ? superFunction : find(head);
-
-                    if (isField(headNode)) {
-                        int savedPos = pos;
-                        VariableNode fn = (VariableNode) headNode;
-                        ReferenceNode r = append(parent, new ReferenceNode(fn));
-                        if (currentToken().equals(")")) {
-                            pos = savedPos;
-                            parent.children().remove(parent.children().size() - 1);
+                    if (locals.containsKey(head)) {
+                        NamedNode<?> local = locals.get(head);
+                        if (isField(local)) {
+                            int savedPos = pos;
+                            VariableNode fn = (VariableNode) local;
+                            ReferenceNode r = append(parent, new ReferenceNode(fn));
+                            if (currentToken().equals(")")) {
+                                pos = savedPos;
+                                parent.children().remove(parent.children().size() - 1);
+                            } else {
+                                parseChild(r);
+                                return;
+                            }
                         } else {
-                            parseChild(r);
-                            return;
+                            append(parent, new ReferenceNode(local));
                         }
+                        return;
                     }
 
-                    if (locals.containsKey(head)) {
-                        append(parent, new ReferenceNode(locals.get(head)));
-                    } else if (headNode instanceof FunctionNode) {
+                    Node headNode = "super".equals(head) ? superFunction : find(head);
+                    if (headNode instanceof FunctionNode) {
                         FunctionNode fn = (FunctionNode) headNode;
                         ReferenceNode r = append(parent, new ReferenceNode(fn));
                         for (Node param : fn.children()) {
