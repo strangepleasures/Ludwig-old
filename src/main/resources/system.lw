@@ -124,7 +124,20 @@ def any seq predicate :
 			return true
 	false
 
+def str obj :
+	build-string out obj StringBuilder
 
+def join seq prefix delimiter suffix :
+	= builder StringBuilder
+	out prefix builder
+	= first true
+	for i seq
+		if not first
+			out delimiter builder
+		= first false
+		out i builder
+	out suffix builder
+	str builder
 
 def concat seq :
 	join seq '' '' ''
@@ -295,6 +308,14 @@ def to-list seq :
 	for i seq
 		= result append result i
 	result
+
+method Complex out obj dest :
+	out re obj dest
+	if != im obj 0
+		if > im obj 0
+			out '+' dest
+		out im obj dest
+		out 'i' dest
 
 method List to-list seq :
 	seq

@@ -4,6 +4,7 @@ import ludwig.interpreter.*;
 import org.pcollections.*;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -48,9 +49,7 @@ public class StdLib {
         return ClassType.byName("system:Any");
     }
 
-    public static String str(Object x) {
-        return String.valueOf(x);
-    }
+
 
     @Description("Exponent")
     public static double exp(double x) {
@@ -202,13 +201,29 @@ public class StdLib {
         };
     }
 
-    public static String join(Iterable<?> it, String prefix, String delimiter, String suffix) {
-        return StreamSupport.stream(it.spliterator(), false).map(String::valueOf).collect(Collectors.joining(delimiter, prefix, suffix));
-    }
-
     @Name("arg-count")
     public long argCount(Callable callable) {
         return callable.argCount();
     }
 
+    public static Concatenator StringBuilder() {
+        return new Concatenator();
+    }
+
+    @Name("build-string")
+    public static String buildString(Concatenator concatenator) {
+        return concatenator.toString();
+    }
+
+    public static <E, C extends Consumer<? super E>> C out(E obj, C dest) {
+        dest.accept(obj);
+        return dest;
+    }
+//
+//    public static String str(Object x) {
+//        if (x instanceof Concatenator) {
+//            return x.toString();
+//        }
+//        return out(x, new Concatenator()).toString();
+//    }
 }

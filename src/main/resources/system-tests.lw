@@ -76,3 +76,15 @@ method Point3D dim o :
 
 def test-str-object :
 	assert-equals 'Point3D{x: 1, y: 2, z: 3}' str Point3D 1 2 3
+
+def test-join :
+	assert-equals
+		'[a b c]'
+		join
+			list 'a' 'b' 'c'
+			'['
+			' '
+			']'
+
+def test-str :
+	assert-equals '3+4i' str Complex 3 4
