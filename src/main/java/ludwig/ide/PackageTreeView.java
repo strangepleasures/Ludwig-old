@@ -65,7 +65,7 @@ class PackageTreeView extends TreeView<NamedNode> {
             .orElse(null);
     }
 
-    void refresh() {
+    void recreateTree() {
         setRoot(createRoot(workspace));
     }
 

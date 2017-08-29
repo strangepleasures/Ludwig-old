@@ -118,7 +118,7 @@ public class EditorPane extends SplitPane {
 
         codeSelection = codeEditor.selectedNode();
 
-        packageTree.refresh();
+        packageTree.recreateTree();
         packageTree.getSelectionModel().clearSelection();
         membersList.getSelectionModel().clearSelection();
 
