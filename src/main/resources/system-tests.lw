@@ -115,3 +115,11 @@ def test-zip :
 	assert-equals
 		list 1 4 9 16 25
 		to-list zip a a ref *
+
+def foo n :
+	if == n 0
+		return 0
+	return foo - n 1
+
+def test-tail-recursion :
+	assert-equals 0 foo 100000
