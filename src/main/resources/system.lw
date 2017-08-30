@@ -179,6 +179,18 @@ def keep seq count :
 		list
 		cons head seq keep tail seq - count 1
 
+def drop seq count :
+	if > count 0
+		return drop tail seq - count 1
+	seq
+
+def zip seq1 seq2 f :
+	cond or is-empty seq1 is-empty seq2
+		list
+		cons
+			call f head seq1 head seq2
+			zip tail seq1 tail seq2 f
+
 def range start end :
 	keep
 		ints start

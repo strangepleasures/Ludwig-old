@@ -88,3 +88,30 @@ def test-join :
 
 def test-str :
 	assert-equals '3+4i' str Complex 3 4
+
+def fibs :
+	_fibs 1 1
+
+def _fibs a b :
+	cons a cons b _fibs + a b + a * 2 b
+
+def test-fibs :
+	= f to-list keep fibs 7
+	assert-equals
+		list 1 1 2 3 5 8 13
+		f
+
+def fibo :
+	cons 1 cons 1 zip fibo drop fibo 1 ref +
+
+def test-fibo :
+	= f to-list keep fibo 7
+	assert-equals
+		list 1 1 2 3 5 8 13
+		f
+
+def test-zip :
+	= a range 1 6
+	assert-equals
+		list 1 4 9 16 25
+		to-list zip a a ref *
