@@ -8,9 +8,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class SystemPackageTest {
+public class BuiltinsTest {
 
-    private PackageNode systemPackage = SystemPackage.of(StdLib.class);
+    private PackageNode systemPackage = Builtins.of(StdLib.class);
 
     @Test
     public void testPlus() {

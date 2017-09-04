@@ -1,56 +1,22 @@
 package ludwig.interpreter;
 
-import ludwig.model.*;
-
 import java.lang.reflect.*;
 
-public class NativeFunctionNode extends FunctionNode implements Callable {
+public class NativeFunction implements Callable {
     private final Method method;
     private final Class[] paramTypes;
     private final boolean lazy;
     private static final Object[] EMPTY = {};
 
-    public NativeFunctionNode(Method method) {
+    public NativeFunction(Method method) {
         this.method = method;
         this.paramTypes = method.getParameterTypes();
-
-        String methodName = method.isAnnotationPresent(Name.class) ? method.getAnnotation(Name.class).value() : method.getName();
-        name(methodName);
-
-        String packageName;
-        if (method.getDeclaringClass().isAnnotationPresent(Name.class)) {
-            packageName = method.getDeclaringClass().getAnnotation(Name.class).value();
-        } else {
-            packageName = method.getDeclaringClass().getSimpleName().toLowerCase();
-        }
-
-        id(packageName + ":" + methodName);
-
-        if (method.isAnnotationPresent(Description.class)) {
-            comment(method.getAnnotation(Description.class).value());
-        }
-
-        for (Parameter parameter : method.getParameters()) {
-            VariableNode param = new VariableNode();
-            String paramName = parameter.isAnnotationPresent(Name.class) ? parameter.getAnnotation(Name.class).value() : parameter.getName();
-            param.name(paramName)
-                .id(id() + ":" + paramName);
-            if (parameter.isAnnotationPresent(Description.class)) {
-                param.comment(parameter.getAnnotation(Description.class).value());
-            }
-            add(param);
-        }
-        add(new PlaceholderNode().parameter("Built-in function").id(id() + ":body"));
 
         lazy = method.isAnnotationPresent(Lazy.class);
     }
 
     @Override
     public Object tail(Object[] args) {
-        return new Evaluator(null).tail(this, args);
-    }
-
-    public Object eval(Object[] args) {
         try {
             for (int i = 0; i < args.length; i++) {
                 args[i] = cast(args[i], paramTypes[i]);

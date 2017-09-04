@@ -1,7 +1,7 @@
 package ludwig.workspace;
 
 import ludwig.changes.*;
-import ludwig.interpreter.SystemPackage;
+import ludwig.interpreter.Builtins;
 import ludwig.model.*;
 import ludwig.runtime.StdLib;
 import ludwig.script.Parser;
@@ -25,7 +25,7 @@ public class Workspace {
     public Workspace() {
         builtins = new ProjectNode().name("Runtime").id("Runtime").readonly(true);
         Arrays.asList(StdLib.class)
-                .forEach(c -> builtins.add(SystemPackage.of(c)));
+                .forEach(c -> builtins.add(Builtins.of(c)));
 
         addNode(builtins);
     }

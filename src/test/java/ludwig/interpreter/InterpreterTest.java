@@ -7,12 +7,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.pcollections.HashTreePMap;
 
-import java.util.HashMap;
-
 import static org.junit.Assert.assertEquals;
 
 public class InterpreterTest {
-    private PackageNode systemPackage = SystemPackage.of(StdLib.class);
+    private PackageNode systemPackage = Builtins.of(StdLib.class);
 
     @Test
     public void testSimpleFunction() {

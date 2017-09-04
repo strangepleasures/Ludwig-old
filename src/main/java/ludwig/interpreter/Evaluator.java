@@ -268,9 +268,14 @@ class Evaluator implements NodeVisitor<Object> {
         if (isField(impl)) {
             return ((Instance) args[0]).get((VariableNode) impl);
         }
-        if (impl instanceof NativeFunctionNode) {
-            return ((NativeFunctionNode) impl).eval(args);
+
+        if (impl instanceof FunctionNode) {
+            Callable callable = Builtins.callable((FunctionNode) impl);
+            if (callable != null) {
+                return callable.tail(args);
+            }
         }
+
         if (head instanceof FunctionNode) {
             FunctionNode fn = (FunctionNode) head;
             HashPMap<NamedNode, Object> savedLocals = locals;
