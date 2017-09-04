@@ -8,11 +8,11 @@ public class ProjectNode extends NamedNode<ProjectNode> {
         return visitor.visitProject(this);
     }
 
-    public boolean isReadonly() {
+    public boolean readonly() {
         return readonly;
     }
 
-    public ProjectNode setReadonly(boolean readonly) {
+    public ProjectNode readonly(boolean readonly) {
         this.readonly = readonly;
         return this;
     }

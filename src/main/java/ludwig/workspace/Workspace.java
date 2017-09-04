@@ -1,8 +1,9 @@
 package ludwig.workspace;
 
 import ludwig.changes.*;
-import ludwig.interpreter.Builtins;
+import ludwig.interpreter.SystemPackage;
 import ludwig.model.*;
+import ludwig.runtime.StdLib;
 import ludwig.script.Parser;
 
 import java.io.InputStreamReader;
@@ -17,11 +18,15 @@ public class Workspace {
     private final List<Change> appliedChanges = new ArrayList<>();
     private final List<ProjectNode> projects = new ArrayList<>();
     private final List<Consumer<Change>> changeListeners = new ArrayList<>();
-    private final Builtins builtins = new Builtins();
+    private final ProjectNode builtins;
     private boolean batchUpdate;
     private boolean loading;
 
     public Workspace() {
+        builtins = new ProjectNode().name("Runtime").id("Runtime").readonly(true);
+        Arrays.asList(StdLib.class)
+                .forEach(c -> builtins.add(SystemPackage.of(c)));
+
         addNode(builtins);
     }
 

@@ -12,7 +12,7 @@ import java.util.HashMap;
 import static org.junit.Assert.assertEquals;
 
 public class InterpreterTest {
-    private SystemPackage systemPackage = new SystemPackage(StdLib.class);
+    private PackageNode systemPackage = SystemPackage.of(StdLib.class);
 
     @Test
     public void testSimpleFunction() {
@@ -54,7 +54,7 @@ public class InterpreterTest {
         ucn.add(lambda);
         ucn.add(LiteralNode.ofValue(2.0));
 
-        Object result = Interpreter.eval(ucn, HashTreePMap.empty(), new HashMap<>());
+        Object result = Interpreter.eval(ucn, HashTreePMap.empty());
         assertEquals(5.0, result);
     }
 

@@ -1,6 +1,8 @@
 package ludwig.script;
 
-import ludwig.changes.*;
+import ludwig.changes.Change;
+import ludwig.changes.InsertNode;
+import ludwig.changes.InsertReference;
 import ludwig.interpreter.ClassType;
 import ludwig.model.*;
 import ludwig.workspace.Workspace;
@@ -74,7 +76,7 @@ public class Parser {
                 ClassNode classNode = append(packageNode, new ClassNode().name(nextToken()));
                 if (!currentToken().equals(")")) {
                     ClassNode superClass = (ClassNode) find(nextToken());
-                    append(classNode, new ReferenceNode(superClass));
+                    appendRef(classNode, superClass);
                 }
                 while (!currentToken().equals(")")) {
                     append(classNode, new VariableNode().name(nextToken()));
@@ -168,7 +170,7 @@ public class Parser {
                 ClassNode classNode = (ClassNode) find(nextToken());
                 FunctionNode fn = (FunctionNode) find(nextToken());
                 OverrideNode node = append(packageNode, new OverrideNode());
-                append(node, new ReferenceNode(fn));
+                appendRef(node, fn);
 
                 superFunction = findSuper(classNode, fn);
 
@@ -208,7 +210,6 @@ public class Parser {
                 nextToken();
                 consume(")");
                 break;
-
         }
     }
 
@@ -255,7 +256,7 @@ public class Parser {
                 }
                 case "ref":
                     FunctionReferenceNode ref = append(parent, new FunctionReferenceNode());
-                    append(ref, new ReferenceNode(find(nextToken())));
+                    appendRef(ref, find(nextToken()));
                     break;
                 case "for": {
                     ForNode node = append(parent, new ForNode());
@@ -281,7 +282,7 @@ public class Parser {
 
                     NamedNode f = find(name);
                     if (isField(f)) {
-                        ReferenceNode r = append(node, new ReferenceNode(f));
+                        ReferenceNode r = appendRef(node, f);
                         parseChild(r);
                         if (!currentToken().equals(")")) {
                             parseChild(node);
@@ -293,7 +294,7 @@ public class Parser {
                         pos = savedPos;
                         node.children().clear();
                         if (locals.containsKey(name)) {
-                            append(node, new ReferenceNode(locals.get(name)));
+                            appendRef(node, locals.get(name));
                             parseChild(node);
                         } else {
                             VariableNode lhs = append(node, new VariableNode().name(name));
@@ -326,7 +327,7 @@ public class Parser {
                         if (isField(local)) {
                             int savedPos = pos;
                             VariableNode fn = (VariableNode) local;
-                            ReferenceNode r = append(parent, new ReferenceNode(fn));
+                            ReferenceNode r = appendRef(parent, fn);
                             if (currentToken().equals(")")) {
                                 pos = savedPos;
                                 parent.children().remove(parent.children().size() - 1);
@@ -335,7 +336,7 @@ public class Parser {
                                 return;
                             }
                         } else {
-                            append(parent, new ReferenceNode(local));
+                            appendRef(parent, local);
                         }
                         return;
                     }
@@ -343,7 +344,7 @@ public class Parser {
                     Node headNode = "super".equals(head) ? superFunction : find(head);
                     if (headNode instanceof FunctionNode) {
                         FunctionNode fn = (FunctionNode) headNode;
-                        ReferenceNode r = append(parent, new ReferenceNode(fn));
+                        Node r = appendRef(parent, fn);
                         for (Node param : fn.children()) {
                             if (!(param instanceof VariableNode)) {
                                 break;
@@ -352,7 +353,7 @@ public class Parser {
                         }
                     } else if (headNode instanceof OverrideNode) {
                         FunctionNode fn = (FunctionNode) ((ReferenceNode) headNode.children().get(0)).ref();
-                        ReferenceNode r = append(parent, new ReferenceNode(headNode));
+                        Node r = appendRef(parent, headNode);
                         for (Node param : fn.children()) {
                             if (!(param instanceof VariableNode)) {
                                 break;
@@ -361,7 +362,7 @@ public class Parser {
                         }
                     } else if (headNode instanceof ClassNode) {
                         ClassNode cn = (ClassNode) headNode;
-                        ReferenceNode r = append(parent, new ReferenceNode(cn));
+                        Node r = appendRef(parent, cn);
                         while (!currentToken().equals(")")) {
                             parseChild(r);
                         }
@@ -433,28 +434,27 @@ public class Parser {
     }
 
     private <T extends Node> T append(Node<?> parent, T node) {
-        if (node instanceof ReferenceNode) {
-            InsertReference change = new InsertReference()
-                    .id(Change.newId())
-                    .parent(parent.id())
-                    .prev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id())
-                    .next(null)
-                    .ref(((ReferenceNode) node).ref().id());
-            workspace.apply(Collections.singletonList(change));
-            return workspace.node(change.id());
+        if (node instanceof NamedNode) {
+            node.id(parent.id() + ":" + ((NamedNode) node).name());
         } else {
-            if (node instanceof NamedNode) {
-                node.id(parent.id() + ":" + ((NamedNode) node).name());
-            } else {
-                node.id(Change.newId());
-            }
-            InsertNode change = new InsertNode()
-                    .node(node)
-                    .parent(parent.id())
-                    .prev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id());
-            workspace.apply(Collections.singletonList(change));
-            return workspace.node(node.id());
+            node.id(Change.newId());
         }
+        InsertNode change = new InsertNode()
+                .node(node)
+                .parent(parent.id())
+                .prev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id());
+        workspace.apply(Collections.singletonList(change));
+        return workspace.node(node.id());
+    }
 
+    private ReferenceNode appendRef(Node<?> parent, Node<?> node) {
+        InsertReference change = new InsertReference()
+                .id(Change.newId())
+                .parent(parent.id())
+                .prev(parent.children().isEmpty() ? null : parent.children().get(parent.children().size() - 1).id())
+                .next(null)
+                .ref(node.id());
+        workspace.apply(Collections.singletonList(change));
+        return (ReferenceNode) workspace.node(change.id());
     }
 }

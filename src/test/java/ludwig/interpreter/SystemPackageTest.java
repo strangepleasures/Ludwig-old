@@ -1,6 +1,7 @@
 package ludwig.interpreter;
 
 import ludwig.model.FunctionNode;
+import ludwig.model.PackageNode;
 import ludwig.runtime.StdLib;
 import ludwig.script.Parser;
 import org.junit.Test;
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 public class SystemPackageTest {
 
-    private SystemPackage systemPackage = new SystemPackage(StdLib.class);
+    private PackageNode systemPackage = SystemPackage.of(StdLib.class);
 
     @Test
     public void testPlus() {

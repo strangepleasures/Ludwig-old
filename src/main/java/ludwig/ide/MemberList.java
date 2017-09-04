@@ -39,8 +39,7 @@ public class MemberList extends ListView<Node<?>> {
             setItems(new ObservableListWrapper<>(packageNode.children()
                 .stream()
                 .filter(item -> !(item instanceof PackageNode))
-                .map(item -> (Node<?>) item)
-                .sorted(Comparator.comparing(NodeUtils::signature))
+                .sorted(Comparator.comparing(n -> NodeUtils.signature(n).toLowerCase()))
                 .collect(Collectors.toList())));
 
             if (!getItems().isEmpty()) {

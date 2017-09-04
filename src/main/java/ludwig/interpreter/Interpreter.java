@@ -4,11 +4,8 @@ import ludwig.model.*;
 import org.pcollections.HashPMap;
 import org.pcollections.HashTreePMap;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Interpreter {
-    public static Object eval(Node node, HashPMap<NamedNode, Object> locals, Map<NamedNode, Object> globals) {
+    public static Object eval(Node node, HashPMap<NamedNode, Object> locals) {
         return node.accept(new Evaluator(locals));
     }
 
@@ -19,7 +16,7 @@ public class Interpreter {
             head.add(LiteralNode.ofValue(arg));
         }
 
-        return eval(head, HashTreePMap.empty(), new HashMap<>());
+        return eval(head, HashTreePMap.empty());
     }
 
 }

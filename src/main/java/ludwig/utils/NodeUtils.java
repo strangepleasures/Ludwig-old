@@ -96,7 +96,7 @@ public class NodeUtils {
     }
 
     public static boolean isReadonly(Node<?> node) {
-        return node == null || node.parentOfType(ProjectNode.class).isReadonly();
+        return node == null || node.parentOfType(ProjectNode.class).readonly();
     }
 
     private static void collectLocals(Node<?> root, Node<?> stop, String filter, List<Node> locals) {
