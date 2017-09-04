@@ -10,6 +10,7 @@ import static ludwig.utils.NodeUtils.isField;
 class Evaluator implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
     private boolean doElse;
+    private Error error;
 
     Evaluator(HashPMap<NamedNode, Object> locals) {
         this.locals = locals;
@@ -69,7 +70,30 @@ class Evaluator implements NodeVisitor<Object> {
 
     @Override
     public Object visitThrow(ThrowNode throwNode) {
-        return new Error(throwNode.children().get(0).accept(this).toString());
+        return Error.error(throwNode.children().get(0).accept(this).toString());
+    }
+
+    @Override
+    public Object visitTry(TryNode tryNode) {
+        error = null;
+        Object result = null;
+        for (Node node : tryNode.children()) {
+            try {
+                result = node.accept(this);
+                if (result instanceof Signal) {
+                    break;
+                }
+            } catch (Exception e) {
+                error = new Error(e.getMessage());
+                return null;
+            }
+        }
+        if (result instanceof Error) {
+            error = (Error) result;
+            return null;
+        } else {
+            return result;
+        }
     }
 
     @Override

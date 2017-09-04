@@ -33,6 +33,8 @@ public interface NodeVisitor<T> {
 
     T visitThrow(ThrowNode throwNode);
 
+    T visitTry(TryNode tryNode);
+
     T visitPlaceholder(PlaceholderNode placeholderNode);
 
     T visitBreak(BreakNode breakNode);
@@ -42,4 +44,5 @@ public interface NodeVisitor<T> {
     T visitOverride(OverrideNode overrideNode);
 
     T visitClass(ClassNode classNode);
+
 }

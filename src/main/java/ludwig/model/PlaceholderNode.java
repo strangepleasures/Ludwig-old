@@ -1,11 +1,11 @@
 package ludwig.model;
 
 public class PlaceholderNode extends Node<PlaceholderNode> {
-    public String getParameter() {
+    public String parameter() {
         return parameter;
     }
 
-    public PlaceholderNode setParameter(String parameter) {
+    public PlaceholderNode parameter(String parameter) {
         this.parameter = parameter;
         return this;
     }

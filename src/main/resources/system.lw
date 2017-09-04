@@ -22,6 +22,8 @@ class Set Sequence
 
 class Class Any
 
+class Error Any
+
 def null :
 	if false
 

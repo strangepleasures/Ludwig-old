@@ -216,7 +216,7 @@ public class CodeEditor extends TextArea {
 
         for (String arg : arguments(node)) {
             InsertNode insertPlaceholder = new InsertNode()
-                .node(new PlaceholderNode().setParameter(arg).id(Change.newId()))
+                .node(new PlaceholderNode().parameter(arg).id(Change.newId()))
                 .parent(((InsertReference) head).id())
                 .prev(prev);
             changes.add(insertPlaceholder);
@@ -242,48 +242,48 @@ public class CodeEditor extends TextArea {
                     List<Node> suggestions = new ArrayList<>();
                     if (param.getUserText().isEmpty() || "= variable value".startsWith(param.getUserText())) {
                         suggestions.add(new AssignmentNode()
-                            .add(new PlaceholderNode().setParameter("variable").id(Change.newId()))
-                            .add(new PlaceholderNode().setParameter("value").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("variable").id(Change.newId()))
+                            .add(new PlaceholderNode().parameter("value").id(Change.newId())));
                     }
                     if (param.getUserText().isEmpty() || param.getUserText().startsWith("λ") || param.getUserText().startsWith("\\")) {
                         suggestions.add(new LambdaNode()
-                            .add(new PlaceholderNode().setParameter("args...").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("args...").id(Change.newId())));
                     }
                     if (param.getUserText().isEmpty() || "ref fn".startsWith(param.getUserText())) {
                         suggestions.add(new FunctionReferenceNode()
-                            .add(new PlaceholderNode().setParameter("fn").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("fn").id(Change.newId())));
                     }
                     if (param.getUserText().isEmpty() || "call fn args...".startsWith(param.getUserText())) {
                         suggestions.add(new CallNode()
-                            .add(new PlaceholderNode().setParameter("fn").id(Change.newId()))
-                            .add(new PlaceholderNode().setParameter("args...").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("fn").id(Change.newId()))
+                            .add(new PlaceholderNode().parameter("args...").id(Change.newId())));
                     }
                     if (param.getUserText().isEmpty() || "if condition statements...>".startsWith(param.getUserText())) {
                         suggestions.add(new IfNode()
-                            .add(new PlaceholderNode().setParameter("condition").id(Change.newId()))
-                            .add(new PlaceholderNode().setParameter("statements...").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("condition").id(Change.newId()))
+                            .add(new PlaceholderNode().parameter("statements...").id(Change.newId())));
                     }
                     if (param.getUserText().isEmpty() || "else statements...".startsWith(param.getUserText())) {
                         suggestions.add(new ElseNode()
-                            .add(new PlaceholderNode().setParameter("statements...").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("statements...").id(Change.newId())));
                     }
                     if (param.getUserText().isEmpty() || "for var seq statements...".startsWith(param.getUserText())) {
                         suggestions.add(new ForNode()
-                            .add(new PlaceholderNode().setParameter("var").id(Change.newId()))
-                            .add(new PlaceholderNode().setParameter("seq").id(Change.newId()))
-                            .add(new PlaceholderNode().setParameter("statements...").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("var").id(Change.newId()))
+                            .add(new PlaceholderNode().parameter("seq").id(Change.newId()))
+                            .add(new PlaceholderNode().parameter("statements...").id(Change.newId())));
                     }
                     if (param.getUserText().isEmpty() || "break loop-var".startsWith(param.getUserText())) {
                         suggestions.add(new BreakNode()
-                            .add(new PlaceholderNode().setParameter("loop-var").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("loop-var").id(Change.newId())));
                     }
                     if (param.getUserText().isEmpty() || "continue loop-var".startsWith(param.getUserText())) {
                         suggestions.add(new ContinueNode()
-                            .add(new PlaceholderNode().setParameter("loop-var").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("loop-var").id(Change.newId())));
                     }
                     if (param.getUserText().isEmpty() || "return result".startsWith(param.getUserText())) {
                         suggestions.add(new ReturnNode()
-                            .add(new PlaceholderNode().setParameter("result").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("result").id(Change.newId())));
                     }
 
                     suggestions.addAll(NodeUtils.collectLocals(this.node, selectedNode(), param.getUserText()));

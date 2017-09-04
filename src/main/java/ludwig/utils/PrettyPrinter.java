@@ -113,6 +113,13 @@ public class PrettyPrinter implements NodeVisitor<Void> {
     }
 
     @Override
+    public Void visitTry(TryNode tryNode) {
+        print("try");
+        tryNode.children().forEach(node -> child(node, false));
+        return null;
+    }
+
+    @Override
     public Void visitPlaceholder(PlaceholderNode placeholderNode) {
         print(placeholderNode.toString());
         return null;
@@ -208,8 +215,7 @@ public class PrettyPrinter implements NodeVisitor<Void> {
     @Override
     public Void visitElse(ElseNode elseNode) {
         print("else");
-        boolean inline = level(elseNode) < 4;
-        elseNode.children().forEach(node -> child(node, inline));
+        elseNode.children().forEach(node -> child(node, false));
         return null;
     }
 

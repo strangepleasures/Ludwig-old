@@ -86,6 +86,11 @@ class ArgumentsCount implements NodeVisitor<Integer> {
     }
 
     @Override
+    public Integer visitTry(TryNode tryNode) {
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
     public Integer visitPlaceholder(PlaceholderNode placeholderNode) {
         return 0;
     }

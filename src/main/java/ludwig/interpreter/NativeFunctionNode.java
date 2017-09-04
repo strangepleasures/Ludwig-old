@@ -40,7 +40,7 @@ public class NativeFunctionNode extends FunctionNode implements Callable {
             }
             add(param);
         }
-        add(LiteralNode.ofValue("*** Built-in function ***").id(id() + ":body"));
+        add(new PlaceholderNode().parameter("Built-in function").id(id() + ":body"));
 
         lazy = method.isAnnotationPresent(Lazy.class);
     }

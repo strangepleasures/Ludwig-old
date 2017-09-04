@@ -59,10 +59,7 @@ public class NodeUtils {
             }
             StringBuilder builder = new StringBuilder(node.toString());
             for (Node<?> child : node.children()) {
-                if (child instanceof PlaceholderNode) {
-                    builder.append(' ');
-                    builder.append(((PlaceholderNode) child).getParameter());
-                } else if (child instanceof VariableNode) {
+                if (child instanceof VariableNode) {
                     builder.append(' ');
                     builder.append(child.toString());
                 } else {
