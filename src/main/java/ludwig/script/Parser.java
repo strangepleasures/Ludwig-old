@@ -245,6 +245,8 @@ public class Parser {
                 case "else":
                 case "return":
                 case "throw":
+                case "try":
+                case "catch":
                 case "list":
                 case "break":
                 case "continue": {
@@ -425,6 +427,10 @@ public class Parser {
                 return new ListNode();
             case "throw":
                 return new ThrowNode();
+            case "try":
+                return new TryNode();
+            case "catch":
+                return new ClassNode();
             case "break":
                 return new BreakNode();
             case "continue":

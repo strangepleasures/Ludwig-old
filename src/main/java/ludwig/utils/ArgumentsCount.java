@@ -114,4 +114,9 @@ class ArgumentsCount implements NodeVisitor<Integer> {
     public Integer visitClass(ClassNode classNode) {
         return arguments(classNode).size();
     }
+
+    @Override
+    public Integer visitCatch(CatchNode catchNode) {
+        return Integer.MAX_VALUE;
+    }
 }

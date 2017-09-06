@@ -56,6 +56,13 @@ public class PrettyPrinter implements NodeVisitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitCatch(CatchNode catchNode) {
+        print("catch");
+        catchNode.children().forEach(node -> child(node, false));
+        return null;
+    }
+
 
     @Override
     public Void visitLiteral(LiteralNode literalNode) {

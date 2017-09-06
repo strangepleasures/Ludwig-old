@@ -10,7 +10,6 @@ import static ludwig.utils.NodeUtils.isField;
 class Evaluator implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
     private boolean doElse;
-    private Error error;
 
     Evaluator(HashPMap<NamedNode, Object> locals) {
         this.locals = locals;
@@ -70,12 +69,11 @@ class Evaluator implements NodeVisitor<Object> {
 
     @Override
     public Object visitThrow(ThrowNode throwNode) {
-        return Error.error(throwNode.children().get(0).accept(this).toString());
+        return new Error(throwNode.children().get(0).accept(this).toString());
     }
 
     @Override
     public Object visitTry(TryNode tryNode) {
-        error = null;
         Object result = null;
         for (Node node : tryNode.children()) {
             try {
@@ -84,12 +82,10 @@ class Evaluator implements NodeVisitor<Object> {
                     break;
                 }
             } catch (Exception e) {
-                error = new Error(e.getMessage());
-                return null;
+                new Error(e.getMessage());
             }
         }
         if (result instanceof Error) {
-            error = (Error) result;
             return null;
         } else {
             return result;
@@ -119,6 +115,30 @@ class Evaluator implements NodeVisitor<Object> {
     @Override
     public Object visitClass(ClassNode classNode) {
         return null;
+    }
+
+    @Override
+    public Object visitCatch(CatchNode catchNode) {
+        if (Error.error() == null) {
+            return null;
+        }
+        Error saved = Error.error();
+
+        Object result = null;
+        for (Node node : catchNode.children()) {
+            try {
+                result = node.accept(this);
+                if (result instanceof Signal) {
+                    break;
+                }
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        if (Error.error() == saved) {
+            Error.reset();
+        }
+        return result;
     }
 
     @Override

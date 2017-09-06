@@ -45,4 +45,5 @@ public interface NodeVisitor<T> {
 
     T visitClass(ClassNode classNode);
 
+    T visitCatch(CatchNode catchNode);
 }

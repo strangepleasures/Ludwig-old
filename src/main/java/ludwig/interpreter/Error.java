@@ -7,6 +7,7 @@ public class Error implements Signal {
 
     public Error(String message) {
         this.message = message;
+        error.set(this);
     }
 
     public String getMessage() {
@@ -18,15 +19,11 @@ public class Error implements Signal {
         return "Error: " + message;
     }
 
-    public static Error error(String message) {
-        Error e = new Error(message);
-        error.set(e);
-        return e;
+    public static Error error() {
+        return error.get();
     }
 
-    public static Error error() {
-        Error e = error.get();
+    public static void reset() {
         error.remove();
-        return e;
     }
 }

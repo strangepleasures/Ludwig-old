@@ -1,6 +1,7 @@
 package ludwig.runtime;
 
 import ludwig.interpreter.*;
+import ludwig.interpreter.Error;
 import org.pcollections.*;
 
 import java.util.*;
@@ -45,6 +46,9 @@ public class StdLib {
         }
         if (o instanceof ClassType) {
             return ClassType.byName("system:Class");
+        }
+        if (o instanceof ErrorInfo) {
+            return ClassType.byName("system:Error");
         }
         return ClassType.byName("system:Any");
     }
@@ -218,6 +222,10 @@ public class StdLib {
     public static <E, C extends Consumer<? super E>> C out(E obj, C dest) {
         dest.accept(obj);
         return dest;
+    }
+
+    public static ErrorInfo error() {
+        return new ErrorInfo(Error.error());
     }
 //
 //    public static String str(Object x) {
