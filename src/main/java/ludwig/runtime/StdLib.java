@@ -160,6 +160,7 @@ public class StdLib {
         return list.plus((int)index, x);
     }
 
+    @SideEffects
     public static void print(Object o) {
         System.out.print(o);
     }
