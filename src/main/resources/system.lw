@@ -272,6 +272,16 @@ def bind callable x1 :
 			call callable x1 x2 x3 x4 x5 x6 x7 x8 x9 x10
 	throw 'Too many arguments'
 
+def get seq index :
+	for x seq
+		if == index 0
+			return x
+		= index - index 1
+	throw 'Invalid index'
+
+method List get seq index :
+	list-get seq index
+
 def size seq :
 	= n 0
 	for i seq

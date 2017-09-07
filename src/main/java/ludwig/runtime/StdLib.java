@@ -2,6 +2,7 @@ package ludwig.runtime;
 
 import ludwig.interpreter.*;
 import ludwig.interpreter.Error;
+import ludwig.model.Visibilities;
 import org.pcollections.*;
 
 import java.util.*;
@@ -52,7 +53,6 @@ public class StdLib {
         }
         return ClassType.byName("system:Any");
     }
-
 
 
     @Description("Exponent")
@@ -157,7 +157,7 @@ public class StdLib {
     }
 
     public static PVector insert(PVector list, long index, Object x) {
-        return list.plus((int)index, x);
+        return list.plus((int) index, x);
     }
 
     @SideEffects
@@ -176,14 +176,6 @@ public class StdLib {
         }
         return result;
     }
-
-    public static Object get(Iterable seq, long n) {
-        if (seq instanceof List) {
-            return ((List) seq).get((int) n);
-        }
-        return StreamSupport.stream(seq.spliterator(), false).skip(n - 1).findFirst().get();
-    }
-
 
     @Lazy
     public static <T> Iterable<T> cons(Delayed<T> head, Delayed<Iterable<T>> tail) {
@@ -228,11 +220,10 @@ public class StdLib {
     public static ErrorInfo error() {
         return new ErrorInfo(Error.error());
     }
-//
-//    public static String str(Object x) {
-//        if (x instanceof Concatenator) {
-//            return x.toString();
-//        }
-//        return out(x, new Concatenator()).toString();
-//    }
+
+    @Name("list-get")
+    @Visibility(Visibilities.PRIVATE)
+    public static <T> T listGet(List<T> list, long index) {
+        return list.get((int)index);
+    }
 }

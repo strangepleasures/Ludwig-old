@@ -91,7 +91,7 @@ public class Parser {
                     lazy = true;
                     consume("lazy");
                 }
-                FunctionNode fn = append(packageNode, new FunctionNode().name(nextToken()).setLazy(lazy));
+                FunctionNode fn = append(packageNode, new FunctionNode().name(nextToken()).lazy(lazy));
                 while (!currentToken().equals(")")) {
                     append(fn, new VariableNode().name(nextToken()));
                 }

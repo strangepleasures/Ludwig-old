@@ -18,19 +18,16 @@ public class Workspace {
     private final List<Change> appliedChanges = new ArrayList<>();
     private final List<ProjectNode> projects = new ArrayList<>();
     private final List<Consumer<Change>> changeListeners = new ArrayList<>();
-    private final ProjectNode builtins;
+    private ProjectNode builtins;
     private boolean batchUpdate;
     private boolean loading;
 
-    public Workspace() {
+    public void init() {
         builtins = new ProjectNode().name("Runtime").id("Runtime").readonly(true);
-        Arrays.asList(StdLib.class)
-                .forEach(c -> builtins.add(Builtins.of(c)));
+        builtins.add(Builtins.of(StdLib.class));
 
         addNode(builtins);
-    }
 
-    public void init() {
         try {
             try (Reader reader = new InputStreamReader(Workspace.class.getResourceAsStream("/system.lw"))) {
                 Parser.parse(reader, this, builtins);

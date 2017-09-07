@@ -49,7 +49,7 @@ class Evaluator implements NodeVisitor<Object> {
     public Object visitReference(ReferenceNode referenceNode) {
         Node<?> head = referenceNode.ref();
 
-        boolean isLazy = (head instanceof FunctionNode) && ((FunctionNode) head).isLazy();
+        boolean isLazy = (head instanceof FunctionNode) && ((FunctionNode) head).lazy();
         Object[] args = new Object[referenceNode.children().size()];
         for (int i = 0; i < args.length; i++) {
             args[i] = isLazy ? new Return(referenceNode.children().get(i), locals) : referenceNode.children().get(i).accept(this);

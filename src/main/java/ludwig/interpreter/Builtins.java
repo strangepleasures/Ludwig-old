@@ -36,7 +36,7 @@ public class Builtins {
     private static FunctionNode function(Method method) {
         FunctionNode f = new FunctionNode();
 
-        f.setLazy(method.isAnnotationPresent(Lazy.class));
+        f.lazy(method.isAnnotationPresent(Lazy.class));
 
         String methodName = method.isAnnotationPresent(Name.class) ? method.getAnnotation(Name.class).value() : method.getName();
         f.name(methodName);
@@ -52,6 +52,10 @@ public class Builtins {
 
         if (method.isAnnotationPresent(Description.class)) {
             f.comment(method.getAnnotation(Description.class).value());
+        }
+
+        if (method.isAnnotationPresent(Visibility.class)) {
+            f.visibility(method.getAnnotation(Visibility.class).value());
         }
 
         for (Parameter parameter : method.getParameters()) {

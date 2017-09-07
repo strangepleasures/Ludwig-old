@@ -3,13 +3,23 @@ package ludwig.model;
 
 public class FunctionNode extends NamedNode<FunctionNode>  {
     private boolean lazy;
+    private Visibilities visibility = Visibilities.PUBLIC;
 
-    public boolean isLazy() {
+    public boolean lazy() {
         return lazy;
     }
 
-    public FunctionNode setLazy(boolean lazy) {
+    public FunctionNode lazy(boolean lazy) {
         this.lazy = lazy;
+        return this;
+    }
+
+    public Visibilities visibility() {
+        return visibility;
+    }
+
+    public FunctionNode visibility(Visibilities visibility) {
+        this.visibility = visibility;
         return this;
     }
 

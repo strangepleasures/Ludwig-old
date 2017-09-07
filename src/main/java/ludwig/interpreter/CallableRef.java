@@ -22,7 +22,7 @@ public class CallableRef implements Callable {
 
     @Override
     public boolean isLazy() {
-        return (function instanceof FunctionNode) && ((FunctionNode)function).isLazy();
+        return (function instanceof FunctionNode) && ((FunctionNode)function).lazy();
     }
 
     @Override
