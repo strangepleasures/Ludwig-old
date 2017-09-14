@@ -5,4 +5,9 @@ public class TryNode extends Node<TryNode> {
     public <T> T accept(NodeVisitor<T> visitor) {
         return visitor.visitTry(this);
     }
+
+    @Override
+    public String toString() {
+        return "try";
+    }
 }

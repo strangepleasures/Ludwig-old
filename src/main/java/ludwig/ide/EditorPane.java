@@ -17,7 +17,7 @@ public class EditorPane extends SplitPane {
     private final PackageTreeView packageTree;
 
     private final SignatureEditor signatureEditor;
-    private final CodeEditor codeEditor;
+    private final CodeTreeView codeEditor;
 
     @Getter
     @Setter
@@ -30,7 +30,7 @@ public class EditorPane extends SplitPane {
         membersList = new MemberList(environment);
         packageTree = new PackageTreeView(environment.getWorkspace());
         signatureEditor = new SignatureEditor(environment);
-        codeEditor = new CodeEditor(environment);
+        codeEditor = new CodeTreeView(environment);
 
         membersList.setMinWidth(120);
 
@@ -49,7 +49,7 @@ public class EditorPane extends SplitPane {
             if (event.getClickCount() == 2
                 && membersList.getSelectionModel().selectedItemProperty().getValue() != null
                 && anotherPane != null) {
-                anotherPane.codeEditor.insertNode(membersList.getSelectionModel().selectedItemProperty().getValue());
+              //  anotherPane.codeEditor.insertNode(membersList.getSelectionModel().selectedItemProperty().getValue());
             }
         });
 
@@ -59,7 +59,7 @@ public class EditorPane extends SplitPane {
     private void displayMember() {
         Node sel = selectedMember();
         signatureEditor.setNode(sel);
-        codeEditor.setContent(sel);
+        codeEditor.setNode(sel);
     }
 
     private Node selectedMember() {
