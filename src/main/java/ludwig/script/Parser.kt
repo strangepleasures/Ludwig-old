@@ -333,7 +333,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                 }
             }
         } finally {
-            for (i in 0..level - 1) {
+            for (i in 0 until level) {
                 consume(")")
             }
         }
@@ -360,15 +360,11 @@ class Parser private constructor(private val tokens: List<String>, private val w
 
     // TODO: Optimize
     private fun find(name: String): NamedNode<*>? {
-        for (project in workspace.projects) {
-            for (node in project.children()) {
-                val packageNode = node as PackageNode
-                if (item(packageNode, name) != null) {
-                    return item(packageNode, name)
-                }
-            }
-        }
-        return null
+        return workspace.projects
+                .flatMap { it.children() }
+                .map { it as PackageNode }
+                .firstOrNull { item(it, name) != null }
+                ?.let { item(it, name) }
     }
 
     private fun createSpecial(token: String): Node<*>? {
@@ -398,7 +394,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                 .parent(parent!!.id())
                 .prev(if (parent.children().isEmpty()) null else parent.children()[parent.children().size - 1].id())
         workspace.apply(listOf(change))
-        return workspace.node(node.id())
+        return workspace.node<Node<*>>(node.id()) as T?
     }
 
     private fun appendRef(parent: Node<*>?, node: Node<*>?): ReferenceNode {
@@ -409,7 +405,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                 .next(null)
                 .ref(node!!.id()!!)
         workspace.apply(listOf(change))
-        return workspace.node(change.id())
+        return workspace.node<Node<*>>(change.id()) as ReferenceNode
     }
 
     companion object {

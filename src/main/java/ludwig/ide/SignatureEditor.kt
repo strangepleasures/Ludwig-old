@@ -22,7 +22,7 @@ class SignatureEditor(private val environment: Environment) : VBox() {
             return
         }
 
-        children.add(SignatureItemEditor(environment, decl))
+        children.add(SignatureItemEditor(environment, decl!!))
 
         for (n in decl!!.children()) {
             if (n !is VariableNode) {

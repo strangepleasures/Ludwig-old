@@ -1,0 +1,73 @@
+package ludwig.ide
+
+import javafx.scene.control.TextField
+import javafx.scene.layout.VBox
+import ludwig.changes.Comment
+import ludwig.changes.Rename
+import ludwig.model.NamedNode
+import ludwig.utils.NodeUtils
+import ludwig.workspace.Environment
+
+import java.util.Objects
+
+import java.util.Collections.singletonList
+
+class SignatureItemEditor(private val environment: Environment, private val node: NamedNode<*>) : VBox() {
+    private val nameTextField: TextField
+    private val commentTextField: TextField
+
+    init {
+
+        nameTextField = object : TextField(node.name()) {
+            private var saved: String? = null
+
+            init {
+                setOnAction { e -> applyChanges() }
+
+                this.focusedProperty().addListener { e ->
+                    if (focusedProperty().get()) {
+                        saved = text
+                    } else {
+                        if (text != saved) {
+                            applyChanges()
+                        }
+                    }
+                }
+
+                isEditable = !NodeUtils.isReadonly(node)
+            }
+
+            private fun applyChanges() {
+                this@SignatureItemEditor.environment.workspace().apply(listOf(Rename().setNodeId(node.id()!!).name(text)))
+            }
+        }
+
+        children.add(nameTextField)
+
+        commentTextField = object : TextField(node.comment()) {
+            private var saved: String? = null
+
+            init {
+                setOnAction { e -> applyChanges() }
+
+                this.focusedProperty().addListener { e ->
+                    if (focusedProperty().get()) {
+                        saved = text
+                    } else {
+                        if (text != saved) {
+                            applyChanges()
+                        }
+                    }
+                }
+
+                isEditable = !NodeUtils.isReadonly(node)
+            }
+
+            private fun applyChanges() {
+                environment.workspace().apply(listOf(Comment().nodeId(node.id()!!).comment(text)))
+            }
+        }
+
+        children.add(commentTextField)
+    }
+}
