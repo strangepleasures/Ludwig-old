@@ -53,6 +53,6 @@ public class Closure implements Callable {
 
     @Override
     public String toString() {
-        return PrettyPrinter.print(lambda);
+        return PrettyPrinter.Companion.print(lambda);
     }
 }

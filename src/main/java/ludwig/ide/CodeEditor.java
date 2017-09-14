@@ -88,7 +88,7 @@ public class CodeEditor extends TextArea {
             setText("");
             setEditable(false);
         } else {
-            setText(PrettyPrinter.print(node));
+            setText(PrettyPrinter.Companion.print(node));
             setEditable(!NodeUtils.INSTANCE.isReadonly(node));
         }
     }
