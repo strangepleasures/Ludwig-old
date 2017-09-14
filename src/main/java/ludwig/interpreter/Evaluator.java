@@ -7,10 +7,10 @@ import org.pcollections.HashPMap;
 import org.pcollections.TreePVector;
 
 class Evaluator implements NodeVisitor<Object> {
-    private HashPMap<NamedNode, Object> locals;
+    private HashPMap<NamedNode<?>, Object> locals;
     private boolean doElse;
 
-    Evaluator(HashPMap<NamedNode, Object> locals) {
+    Evaluator(HashPMap<NamedNode<?>, Object> locals) {
         this.locals = locals;
     }
 
@@ -252,7 +252,7 @@ class Evaluator implements NodeVisitor<Object> {
     private Object untail(Object result) {
         while (result instanceof Return) {
             Return tail = (Return) result;
-            HashPMap<NamedNode, Object> state = locals;
+            HashPMap<NamedNode<?>, Object> state = locals;
             try {
                 locals = tail.getLocals();
                 result = tail.getNode().accept(this);
@@ -292,7 +292,7 @@ class Evaluator implements NodeVisitor<Object> {
 
         if (head instanceof FunctionNode) {
             FunctionNode fn = (FunctionNode) head;
-            HashPMap<NamedNode, Object> savedLocals = locals;
+            HashPMap<NamedNode<?>, Object> savedLocals = locals;
 
             try {
                 for (int i = 0; i < args.length; i++) {
@@ -325,7 +325,7 @@ class Evaluator implements NodeVisitor<Object> {
         }
         if (head instanceof OverrideNode) {
             FunctionNode fn = (FunctionNode) ((ReferenceNode) head.children().get(0)).ref();
-            HashPMap<NamedNode, Object> savedLocals = locals;
+            HashPMap<NamedNode<?>, Object> savedLocals = locals;
 
             try {
                 for (int i = 0; i < args.length; i++) {

@@ -168,7 +168,7 @@ public class MemberList extends ListView<Node<?>> {
                     }
 
                 } else {
-                    result = callable.call();
+                    result = callable.call(new Object[] {});
                 }
                 new Alert(Alert.AlertType.INFORMATION, "Result: " + NodeUtils.INSTANCE.formatLiteral(result)).show();
             } catch (Exception err) {
