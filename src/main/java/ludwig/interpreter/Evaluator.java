@@ -284,7 +284,7 @@ class Evaluator implements NodeVisitor<Object> {
         }
 
         if (impl instanceof FunctionNode) {
-            Callable callable = Builtins.callable((FunctionNode) impl);
+            Callable callable = Builtins.INSTANCE.callable((FunctionNode) impl);
             if (callable != null) {
                 return callable.tail(args);
             }

@@ -24,7 +24,7 @@ public class Workspace {
 
     public void init() {
         builtins = new ProjectNode().name("Runtime").id("Runtime").readonly(true);
-        builtins.add(Builtins.of(StdLib.class));
+        builtins.add(Builtins.INSTANCE.of(StdLib.class));
 
         addNode(builtins);
 
