@@ -15,9 +15,9 @@ public class Workspace {
     public static final int MAX_PROBLEMS = 10;
 
     private final Map<String, Node> nodes = new HashMap<>();
-    private final List<Change> appliedChanges = new ArrayList<>();
+    private final List<Change<?>> appliedChanges = new ArrayList<>();
     private final List<ProjectNode> projects = new ArrayList<>();
-    private final List<Consumer<Change>> changeListeners = new ArrayList<>();
+    private final List<Consumer<Change<?>>> changeListeners = new ArrayList<>();
     private ProjectNode builtins;
     private boolean batchUpdate;
     private boolean loading;
@@ -30,17 +30,17 @@ public class Workspace {
 
         try {
             try (Reader reader = new InputStreamReader(Workspace.class.getResourceAsStream("/system.lw"))) {
-                Parser.parse(reader, this, builtins);
+                Parser.Companion.parse(reader, this, builtins);
             }
             try (Reader reader = new InputStreamReader(Workspace.class.getResourceAsStream("/system-tests.lw"))) {
-                Parser.parse(reader, this, builtins);
+                Parser.Companion.parse(reader, this, builtins);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public final List<Consumer<Change>> changeListeners() {
+    public final List<Consumer<Change<?>>> changeListeners() {
         return changeListeners;
     }
 
@@ -119,7 +119,7 @@ public class Workspace {
         return projects;
     }
 
-    public List<Problem> apply(List<Change> changes) {
+    public List<Problem> apply(List<Change<?>> changes) {
         List<Problem> problems = new ArrayList<>();
         for (int i = 0; i < changes.size(); i++) {
             Change<?> change = changes.get(i);
@@ -145,7 +145,7 @@ public class Workspace {
         return problems;
     }
 
-    public List<Problem> load(List<Change> changes) {
+    public List<Problem> load(List<Change<?>> changes) {
         loading = true;
         try {
             return apply(changes);
@@ -162,7 +162,7 @@ public class Workspace {
         nodes.clear();
         projects.clear();
 
-        List<Change> changes = new ArrayList<>(appliedChanges);
+        List<Change<?>> changes = new ArrayList<>(appliedChanges);
         appliedChanges.clear();
         apply(changes);
     }

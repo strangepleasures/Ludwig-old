@@ -35,7 +35,7 @@ public class EditorPane extends SplitPane {
         membersList.setPrefHeight(1E6);
         codeEditor.setPrefHeight(1E6);
 
-        codeEditor.setContextMenu(ContextMenuFactory.menu(new CodeEditorActions()));
+        codeEditor.setContextMenu(ContextMenuFactory.INSTANCE.menu(new CodeEditorActions()));
 
         membersList.getSelectionModel().selectedItemProperty().addListener(observable -> displayMember());
 

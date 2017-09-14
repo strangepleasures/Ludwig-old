@@ -8,7 +8,7 @@ import ludwig.utils.NodeUtils;
 class NodeStringConverter extends StringConverter<Node> {
     @Override
     public String toString(Node object) {
-        return NodeUtils.signature(object);
+        return NodeUtils.INSTANCE.signature(object);
     }
 
     @Override

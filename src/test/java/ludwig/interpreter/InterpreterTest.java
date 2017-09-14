@@ -23,7 +23,7 @@ public class InterpreterTest {
         variableNode2.name("y");
         functionNode.add(variableNode2);
 
-        FunctionNode minus = (FunctionNode) Parser.item(systemPackage, "-");
+        FunctionNode minus = (FunctionNode) Parser.Companion.item(systemPackage, "-");
         ReferenceNode head = new ReferenceNode(minus);
         ReferenceNode referenceNode1 = new ReferenceNode(variableNode1);
         ReferenceNode referenceNode2 = new ReferenceNode(variableNode2);
@@ -41,16 +41,16 @@ public class InterpreterTest {
         LambdaNode lambda = new LambdaNode();
 
         lambda.add(new VariableNode());
-        FunctionNode plus = (FunctionNode) Parser.item(systemPackage, "+");
+        FunctionNode plus = (FunctionNode) Parser.Companion.item(systemPackage, "+");
         ReferenceNode head = new ReferenceNode(plus);
         ReferenceNode referenceNode = new ReferenceNode(lambda.children().get(0));
         head.add(referenceNode);
-        head.add(LiteralNode.ofValue(3.0));
+        head.add(LiteralNode.Companion.ofValue(3.0));
         lambda.add(head);
 
         CallNode ucn = new CallNode();
         ucn.add(lambda);
-        ucn.add(LiteralNode.ofValue(2.0));
+        ucn.add(LiteralNode.Companion.ofValue(2.0));
 
         Object result = Interpreter.eval(ucn, HashTreePMap.empty());
         assertEquals(5.0, result);
@@ -60,7 +60,7 @@ public class InterpreterTest {
     @Test
     @Ignore
     public void testDelayed() {
-        FunctionNode or = (FunctionNode) Parser.item(systemPackage, "or");
+        FunctionNode or = (FunctionNode) Parser.Companion.item(systemPackage, "or");
         assertEquals(true, Interpreter.call(or, true, true));
         assertEquals(true, Interpreter.call(or, true, false));
         assertEquals(true, Interpreter.call(or, false, true));

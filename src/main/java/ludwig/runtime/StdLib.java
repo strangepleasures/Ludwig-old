@@ -16,42 +16,42 @@ public class StdLib {
 
     public static ClassType type(Object o) {
         if (o == null) {
-            return ClassType.byName("system:Null");
+            return ClassType.Companion.byName("system:Null");
         }
         if (o instanceof Instance) {
             return ((Instance) o).type();
         }
         if (o instanceof String) {
-            return ClassType.byName("system:String");
+            return ClassType.Companion.byName("system:String");
         }
         if (o instanceof PVector) {
-            return ClassType.byName("system:List");
+            return ClassType.Companion.byName("system:List");
         }
         if (o instanceof PSet) {
-            return ClassType.byName("system:Set");
+            return ClassType.Companion.byName("system:Set");
         }
         if (o instanceof Iterable) {
-            return ClassType.byName("system:Sequence");
+            return ClassType.Companion.byName("system:Sequence");
         }
         if (o instanceof Boolean) {
-            return ClassType.byName("system:Boolean");
+            return ClassType.Companion.byName("system:Boolean");
         }
         if (o instanceof Long) {
-            return ClassType.byName("system:Integer");
+            return ClassType.Companion.byName("system:Integer");
         }
         if (o instanceof Double) {
-            return ClassType.byName("system:Real");
+            return ClassType.Companion.byName("system:Real");
         }
         if (o instanceof Callable) {
-            return ClassType.byName("system:Function");
+            return ClassType.Companion.byName("system:Function");
         }
         if (o instanceof ClassType) {
-            return ClassType.byName("system:Class");
+            return ClassType.Companion.byName("system:Class");
         }
         if (o instanceof ErrorInfo) {
-            return ClassType.byName("system:Error");
+            return ClassType.Companion.byName("system:Error");
         }
-        return ClassType.byName("system:Any");
+        return ClassType.Companion.byName("system:Any");
     }
 
 
@@ -218,7 +218,7 @@ public class StdLib {
     }
 
     public static ErrorInfo error() {
-        return new ErrorInfo(Error.error());
+        return new ErrorInfo(Error.Companion.error());
     }
 
     @Name("list-get")

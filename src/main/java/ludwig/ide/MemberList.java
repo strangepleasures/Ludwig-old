@@ -17,7 +17,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
-import static ludwig.utils.NodeUtils.isReadonly;
 
 
 public class MemberList extends ListView<Node<?>> {
@@ -28,7 +27,7 @@ public class MemberList extends ListView<Node<?>> {
         this.environment = environment;
 
         setCellFactory(listView -> new SignatureListCell());
-        setContextMenu(ContextMenuFactory.menu(new Actions()));
+        setContextMenu(ContextMenuFactory.INSTANCE.menu(new Actions()));
     }
 
     public void setPackage(PackageNode packageNode) {
@@ -39,7 +38,7 @@ public class MemberList extends ListView<Node<?>> {
             setItems(new ObservableListWrapper<>(packageNode.children()
                 .stream()
                 .filter(item -> !(item instanceof PackageNode))
-                .sorted(Comparator.comparing(n -> NodeUtils.signature(n).toLowerCase()))
+                .sorted(Comparator.comparing(n -> NodeUtils.INSTANCE.signature(n).toLowerCase()))
                 .collect(Collectors.toList())));
 
             if (!getItems().isEmpty()) {
@@ -50,7 +49,7 @@ public class MemberList extends ListView<Node<?>> {
 
     public class Actions {
         public void addFunction() {
-            if (isReadonly(packageNode)) {
+            if (NodeUtils.INSTANCE.isReadonly(packageNode)) {
                 return;
             }
 
@@ -61,24 +60,24 @@ public class MemberList extends ListView<Node<?>> {
             dialog.showAndWait().ifPresent(signature -> {
                 List<String> parts = Collections.emptyList();
                 try {
-                    parts = Lexer.read(new StringReader(signature))
+                    parts = Lexer.Companion.read(new StringReader(signature))
                         .stream()
                         .filter(s -> !s.equals("(") && !s.equals(")"))
                         .collect(Collectors.toList());
                 } catch (IOException | LexerException t) {
                 }
                 if (!parts.isEmpty()) {
-                    List<Change> changes = new ArrayList<>();
+                    List<Change<?>> changes = new ArrayList<>();
 
                     InsertNode insertFn = new InsertNode()
-                        .node(new FunctionNode().name(parts.get(0)).id(Change.newId()))
+                        .node(new FunctionNode().name(parts.get(0)).id(Change.Companion.newId()))
                         .parent(packageNode.id());
 
                     changes.add(insertFn);
 
                     String prev = null;
                     for (int i = 1; i < parts.size(); i++) {
-                        String id = Change.newId();
+                        String id = Change.Companion.newId();
                         changes.add(new InsertNode()
                             .node(new VariableNode().name(parts.get(i)).id(id))
                             .parent(insertFn.node().id())
@@ -120,17 +119,17 @@ public class MemberList extends ListView<Node<?>> {
 
             dialog.showAndWait().ifPresent(signature -> {
                 if (ref[0] != null) {
-                    List<Change> changes = new ArrayList<>();
+                    List<Change<?>> changes = new ArrayList<>();
 
                     InsertNode insertOverride = new InsertNode()
-                        .node(new OverrideNode().id(Change.newId()))
+                        .node(new OverrideNode().id(Change.Companion.newId()))
                         .parent(packageNode.id());
 
                     changes.add(insertOverride);
 
                     changes.add(new InsertReference()
                         .ref(ref[0].id())
-                        .id(Change.newId())
+                        .id(Change.Companion.newId())
                         .parent(insertOverride.node().id()));
 
                     environment.workspace().apply(changes);
@@ -157,10 +156,10 @@ public class MemberList extends ListView<Node<?>> {
 
                     Optional<String> params = dialog.showAndWait();
                     if (params.isPresent()) {
-                        Object[] args = Lexer.read(new StringReader(params.get()))
+                        Object[] args = Lexer.Companion.read(new StringReader(params.get()))
                             .stream()
                             .filter(s -> !s.equals("(") && !s.equals(")"))
-                            .map(NodeUtils::parseLiteral)
+                            .map(NodeUtils.INSTANCE::parseLiteral)
                             .map(x -> callable.isLazy() ? (Delayed<?>) () -> x : x)
                             .toArray();
                         result = callable.call(args);
@@ -171,7 +170,7 @@ public class MemberList extends ListView<Node<?>> {
                 } else {
                     result = callable.call();
                 }
-                new Alert(Alert.AlertType.INFORMATION, "Result: " + NodeUtils.formatLiteral(result)).show();
+                new Alert(Alert.AlertType.INFORMATION, "Result: " + NodeUtils.INSTANCE.formatLiteral(result)).show();
             } catch (Exception err) {
                 err.printStackTrace();
                 new Alert(Alert.AlertType.ERROR, "Error: " + err.toString()).show();
@@ -179,7 +178,7 @@ public class MemberList extends ListView<Node<?>> {
         }
 
         public void delete() {
-            if (isReadonly(packageNode)) {
+            if (NodeUtils.INSTANCE.isReadonly(packageNode)) {
                 return;
             }
             Node selectedItem = getSelectionModel().getSelectedItem();

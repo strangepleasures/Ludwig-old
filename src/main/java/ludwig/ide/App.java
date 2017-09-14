@@ -54,7 +54,7 @@ public class App extends Application {
                 File file = dialog.showOpenDialog(new Stage());
                 if(file != null){
                     try {
-                        settings.project = file.toURI().toURL();
+                        settings.setProject(file.toURI().toURL());
                         start(new Stage());
                         primaryStage.close();
                     } catch (Exception e) {
@@ -109,12 +109,12 @@ public class App extends Application {
     }
 
     private void loadWorkspace() {
-        if (settings.project != null) {
+        if (settings.getProject() != null) {
             try {
-                if ("file".equals(settings.project.getProtocol())) {
-                    repository = new LocalChangeRepository(new File(settings.project.getFile()));
+                if ("file".equals(settings.getProject().getProtocol())) {
+                    repository = new LocalChangeRepository(new File(settings.getProject().getFile()));
                 }
-                List<Change> changes = repository.pull(null);
+                List<Change<?>> changes = repository.pull(null);
                 environment.workspace().load(changes);
 
                 environment.workspace().changeListeners().add(change -> {

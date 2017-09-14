@@ -5,13 +5,12 @@ import javafx.scene.layout.VBox;
 import ludwig.changes.Comment;
 import ludwig.changes.Rename;
 import ludwig.model.NamedNode;
+import ludwig.utils.NodeUtils;
 import ludwig.workspace.Environment;
 
 import java.util.Objects;
 
 import static java.util.Collections.singletonList;
-import static ludwig.utils.NodeUtils.isReadonly;
-
 public class SignatureItemEditor extends VBox {
     private final Environment environment;
     private final NamedNode<?> node;
@@ -38,7 +37,7 @@ public class SignatureItemEditor extends VBox {
                     }
                 });
 
-                setEditable(!isReadonly(node));
+                setEditable(!NodeUtils.INSTANCE.isReadonly(node));
             }
 
             private void applyChanges() {
@@ -64,7 +63,7 @@ public class SignatureItemEditor extends VBox {
                     }
                 });
 
-                setEditable(!isReadonly(node));
+                setEditable(!NodeUtils.INSTANCE.isReadonly(node));
             }
 
             private void applyChanges() {

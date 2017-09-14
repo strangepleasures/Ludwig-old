@@ -2,9 +2,9 @@ package ludwig.interpreter;
 
 import ludwig.model.FunctionNode;
 import ludwig.model.Node;
+import ludwig.utils.NodeUtils;
 import org.pcollections.HashTreePMap;
 
-import static ludwig.utils.NodeUtils.arguments;
 
 public class CallableRef implements Callable {
     private final Node<?> function;
@@ -12,7 +12,7 @@ public class CallableRef implements Callable {
 
     public CallableRef(Node<?> function) {
         this.function = function;
-        argCount = arguments(function).size(); // TODO: Optimize
+        argCount = NodeUtils.INSTANCE.arguments(function).size(); // TODO: Optimize
     }
 
     @Override

@@ -13,7 +13,7 @@ public class Interpreter {
         ReferenceNode head = new ReferenceNode(functionNode);
 
         for (Object arg : args) {
-            head.add(LiteralNode.ofValue(arg));
+            head.add(LiteralNode.Companion.ofValue(arg));
         }
 
         return eval(head, HashTreePMap.empty());

@@ -19,8 +19,6 @@ import ludwig.workspace.Environment;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ludwig.utils.NodeUtils.arguments;
-import static ludwig.utils.NodeUtils.isReadonly;
 
 public class CodeEditor extends TextArea {
     private final Environment environment;
@@ -91,7 +89,7 @@ public class CodeEditor extends TextArea {
             setEditable(false);
         } else {
             setText(PrettyPrinter.print(node));
-            setEditable(!isReadonly(node));
+            setEditable(!NodeUtils.INSTANCE.isReadonly(node));
         }
     }
 
@@ -99,13 +97,13 @@ public class CodeEditor extends TextArea {
         if (node == null) {
             return null;
         }
-        List<Node> nodes = NodeUtils.expandNode(node);
-        int index = EditorUtils.tokenIndex(getText(), pos);
+        List<Node<?>> nodes = NodeUtils.INSTANCE.expandNode(node);
+        int index = EditorUtils.INSTANCE.tokenIndex(getText(), pos);
         if (index < 0) {
             return null;
         }
 
-        return nodes.get(index + arguments(node).size());
+        return nodes.get(index + NodeUtils.INSTANCE.arguments(node).size());
     }
 
     public Node selectedNode() {
@@ -192,8 +190,8 @@ public class CodeEditor extends TextArea {
 
     public void insertNode(Node<?> node) {
         Node<?> sel = selectedNode();
-        Insert head = (node instanceof NamedNode) ? new InsertReference().id(Change.newId()).ref(node.id()) : new InsertNode().node(node);
-        List<Change> changes = new ArrayList<>();
+        Insert head = (node instanceof NamedNode) ? new InsertReference().id(Change.Companion.newId()).ref(node.id()) : new InsertNode().node(node);
+        List<Change<?>> changes = new ArrayList<>();
         Node selectedItem = this.node;
         if (!(selectedItem instanceof FunctionNode) || !isEditable()) {
             return;
@@ -214,9 +212,9 @@ public class CodeEditor extends TextArea {
 
         String prev = null;
 
-        for (String arg : arguments(node)) {
+        for (String arg : NodeUtils.INSTANCE.arguments(node)) {
             InsertNode insertPlaceholder = new InsertNode()
-                .node(new PlaceholderNode().parameter(arg).id(Change.newId()))
+                .node(new PlaceholderNode().parameter(arg).id(Change.Companion.newId()))
                 .parent(((InsertReference) head).id())
                 .prev(prev);
             changes.add(insertPlaceholder);
@@ -242,51 +240,51 @@ public class CodeEditor extends TextArea {
                     List<Node> suggestions = new ArrayList<>();
                     if (param.getUserText().isEmpty() || "= variable value".startsWith(param.getUserText())) {
                         suggestions.add(new AssignmentNode()
-                            .add(new PlaceholderNode().parameter("variable").id(Change.newId()))
-                            .add(new PlaceholderNode().parameter("value").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("variable").id(Change.Companion.newId()))
+                            .add(new PlaceholderNode().parameter("value").id(Change.Companion.newId())));
                     }
                     if (param.getUserText().isEmpty() || param.getUserText().startsWith("λ") || param.getUserText().startsWith("\\")) {
                         suggestions.add(new LambdaNode()
-                            .add(new PlaceholderNode().parameter("args...").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("args...").id(Change.Companion.newId())));
                     }
                     if (param.getUserText().isEmpty() || "ref fn".startsWith(param.getUserText())) {
                         suggestions.add(new FunctionReferenceNode()
-                            .add(new PlaceholderNode().parameter("fn").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("fn").id(Change.Companion.newId())));
                     }
                     if (param.getUserText().isEmpty() || "call fn args...".startsWith(param.getUserText())) {
                         suggestions.add(new CallNode()
-                            .add(new PlaceholderNode().parameter("fn").id(Change.newId()))
-                            .add(new PlaceholderNode().parameter("args...").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("fn").id(Change.Companion.newId()))
+                            .add(new PlaceholderNode().parameter("args...").id(Change.Companion.newId())));
                     }
                     if (param.getUserText().isEmpty() || "if condition statements...>".startsWith(param.getUserText())) {
                         suggestions.add(new IfNode()
-                            .add(new PlaceholderNode().parameter("condition").id(Change.newId()))
-                            .add(new PlaceholderNode().parameter("statements...").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("condition").id(Change.Companion.newId()))
+                            .add(new PlaceholderNode().parameter("statements...").id(Change.Companion.newId())));
                     }
                     if (param.getUserText().isEmpty() || "else statements...".startsWith(param.getUserText())) {
                         suggestions.add(new ElseNode()
-                            .add(new PlaceholderNode().parameter("statements...").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("statements...").id(Change.Companion.newId())));
                     }
                     if (param.getUserText().isEmpty() || "for var seq statements...".startsWith(param.getUserText())) {
                         suggestions.add(new ForNode()
-                            .add(new PlaceholderNode().parameter("var").id(Change.newId()))
-                            .add(new PlaceholderNode().parameter("seq").id(Change.newId()))
-                            .add(new PlaceholderNode().parameter("statements...").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("var").id(Change.Companion.newId()))
+                            .add(new PlaceholderNode().parameter("seq").id(Change.Companion.newId()))
+                            .add(new PlaceholderNode().parameter("statements...").id(Change.Companion.newId())));
                     }
                     if (param.getUserText().isEmpty() || "break loop-var".startsWith(param.getUserText())) {
                         suggestions.add(new BreakNode()
-                            .add(new PlaceholderNode().parameter("loop-var").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("loop-var").id(Change.Companion.newId())));
                     }
                     if (param.getUserText().isEmpty() || "continue loop-var".startsWith(param.getUserText())) {
                         suggestions.add(new ContinueNode()
-                            .add(new PlaceholderNode().parameter("loop-var").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("loop-var").id(Change.Companion.newId())));
                     }
                     if (param.getUserText().isEmpty() || "return result".startsWith(param.getUserText())) {
                         suggestions.add(new ReturnNode()
-                            .add(new PlaceholderNode().parameter("result").id(Change.newId())));
+                            .add(new PlaceholderNode().parameter("result").id(Change.Companion.newId())));
                     }
 
-                    suggestions.addAll(NodeUtils.collectLocals(this.node, selectedNode(), param.getUserText()));
+                    suggestions.addAll(NodeUtils.INSTANCE.collectLocals(this.node, selectedNode(), param.getUserText()));
                     suggestions.addAll(environment.symbolRegistry().symbols(param.getUserText()));
 
                     return suggestions;
@@ -301,12 +299,12 @@ public class CodeEditor extends TextArea {
         TextAreaSkin skin = (TextAreaSkin) getSkin();
         Bounds caretBounds = localToScreen(skin.getCaretBounds());
         autoCompleteTextField.setOnAction(ev -> {
-            if (Lexer.isLiteral(autoCompleteTextField.getText())) {
-                insertNode(new LiteralNode(autoCompleteTextField.getText()).id(Change.newId()));
+            if (Lexer.Companion.isLiteral(autoCompleteTextField.getText())) {
+                insertNode(new LiteralNode(autoCompleteTextField.getText()).id(Change.Companion.newId()));
             } else if (ref[0] != null) {
                 insertNode(ref[0]);
             } else if (!autoCompleteTextField.getText().isEmpty()) {
-                insertNode(new VariableNode().name(autoCompleteTextField.getText()).id(Change.newId()));
+                insertNode(new VariableNode().name(autoCompleteTextField.getText()).id(Change.Companion.newId()));
             }
             popup.hide();
             autoCompletionTextFieldBinding.dispose();

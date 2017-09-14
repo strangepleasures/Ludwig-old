@@ -95,7 +95,7 @@ public class PrettyPrinter implements NodeVisitor<Void> {
         }
 
         for (int i = 0; i < node.children().size() - 1; i++) {
-            if (NodeUtils.argumentsCount(node.children().get(i)) > 3) {
+            if (NodeUtils.INSTANCE.argumentsCount(node.children().get(i)) > 3) {
                 return false;
             }
         }

@@ -9,6 +9,6 @@ class SignatureListCell extends ListCell<Node<?>> {
     protected void updateItem(Node<?> item, boolean empty) {
         super.updateItem(item, empty);
 
-        setText((!empty && item != null) ? NodeUtils.signature(item) : "");
+        setText((!empty && item != null) ? NodeUtils.INSTANCE.signature(item) : "");
     }
 }

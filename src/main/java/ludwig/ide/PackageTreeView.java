@@ -3,10 +3,10 @@ package ludwig.ide;
 import javafx.scene.control.*;
 import ludwig.changes.*;
 import ludwig.model.*;
+import ludwig.utils.NodeUtils;
 import ludwig.workspace.Workspace;
 
 import static java.util.Collections.singletonList;
-import static ludwig.utils.NodeUtils.isReadonly;
 
 class PackageTreeView extends TreeView<NamedNode> {
     private final Workspace workspace;
@@ -16,7 +16,7 @@ class PackageTreeView extends TreeView<NamedNode> {
         this.workspace = workspace;
         setShowRoot(false);
 
-        setContextMenu(ContextMenuFactory.menu(new Actions()));
+        setContextMenu(ContextMenuFactory.INSTANCE.menu(new Actions()));
 
         setPrefWidth(120);
     }
@@ -75,7 +75,7 @@ class PackageTreeView extends TreeView<NamedNode> {
             if (selectedItem != null) {
                 Node parent = selectedItem.getValue();
 
-                if (isReadonly(parent)) {
+                if (NodeUtils.INSTANCE.isReadonly(parent)) {
                     return;
                 }
 
@@ -85,7 +85,7 @@ class PackageTreeView extends TreeView<NamedNode> {
                 dialog.setContentText("Package name");
 
                 dialog.showAndWait().ifPresent(name -> {
-                    PackageNode packageNode = new PackageNode().name(name).id(Change.newId());
+                    PackageNode packageNode = new PackageNode().name(name).id(Change.Companion.newId());
                     InsertNode insert = new InsertNode()
                         .node(packageNode)
                         .parent(parent.id());
@@ -99,7 +99,7 @@ class PackageTreeView extends TreeView<NamedNode> {
             TreeItem<NamedNode> selectedItem = getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
                 Node packageNode = selectedItem.getValue();
-                if (isReadonly(packageNode)) {
+                if (NodeUtils.INSTANCE.isReadonly(packageNode)) {
                     return;
                 }
                 NamedNode parent = (NamedNode) packageNode.parent();

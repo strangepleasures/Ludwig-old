@@ -2,10 +2,9 @@ package ludwig.interpreter;
 
 import ludwig.model.*;
 import ludwig.runtime.StdLib;
+import ludwig.utils.NodeUtils;
 import org.pcollections.HashPMap;
 import org.pcollections.TreePVector;
-
-import static ludwig.utils.NodeUtils.isField;
 
 class Evaluator implements NodeVisitor<Object> {
     private HashPMap<NamedNode, Object> locals;
@@ -119,10 +118,10 @@ class Evaluator implements NodeVisitor<Object> {
 
     @Override
     public Object visitCatch(CatchNode catchNode) {
-        if (Error.error() == null) {
+        if (Error.Companion.error() == null) {
             return null;
         }
-        Error saved = Error.error();
+        Error saved = Error.Companion.error();
 
         Object result = null;
         for (Node node : catchNode.children()) {
@@ -135,8 +134,8 @@ class Evaluator implements NodeVisitor<Object> {
                 return null;
             }
         }
-        if (Error.error() == saved) {
-            Error.reset();
+        if (Error.Companion.error() == saved) {
+            Error.Companion.reset();
         }
         return result;
     }
@@ -201,7 +200,7 @@ class Evaluator implements NodeVisitor<Object> {
         Node lhs = assignmentNode.children().get(0);
         if (lhs instanceof ReferenceNode) {
             lhs = ((ReferenceNode) lhs).ref();
-            if (isField(lhs)) {
+            if (NodeUtils.INSTANCE.isField(lhs)) {
                 Instance instance = (Instance) assignmentNode.children().get(0).children().get(0).accept(this);
                 instance.set((VariableNode) lhs, value);
                 return value;
@@ -255,8 +254,8 @@ class Evaluator implements NodeVisitor<Object> {
             Return tail = (Return) result;
             HashPMap<NamedNode, Object> state = locals;
             try {
-                locals = tail.locals;
-                result = tail.node.accept(this);
+                locals = tail.getLocals();
+                result = tail.getNode().accept(this);
             } finally {
                 locals = state;
             }
@@ -268,7 +267,7 @@ class Evaluator implements NodeVisitor<Object> {
         Node<?> impl = head;
 
         if (head instanceof ClassNode) {
-            ClassType type = ClassType.of((ClassNode) head);
+            ClassType type = ClassType.Companion.of((ClassNode) head);
             Instance instance = new Instance(type);
             for (int i = 0; i < args.length; i++) {
                 instance.set(type.fields().get(i), args[i]);
@@ -277,10 +276,10 @@ class Evaluator implements NodeVisitor<Object> {
         }
 
         if (args.length > 0 && args[0] instanceof Instance) {
-            impl = (Node<?>) StdLib.type(args[0]).implementation(head);
+            impl = StdLib.type(args[0]).implementation(head);
         }
 
-        if (isField(impl)) {
+        if (NodeUtils.INSTANCE.isField(impl)) {
             return ((Instance) args[0]).get((VariableNode) impl);
         }
 

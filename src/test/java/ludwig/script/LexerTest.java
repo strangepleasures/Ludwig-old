@@ -29,7 +29,7 @@ public class LexerTest {
     }
 
     private void test(String src, String tokens) throws IOException, LexerException {
-        assertEquals(tokens, Lexer.read(new StringReader(src)).stream().collect(Collectors.joining(" ")));
-        assertEquals(tokens, Lexer.read(new StringReader(src + "\n")).stream().collect(Collectors.joining(" ")));
+        assertEquals(tokens, Lexer.Companion.read(new StringReader(src)).stream().collect(Collectors.joining(" ")));
+        assertEquals(tokens, Lexer.Companion.read(new StringReader(src + "\n")).stream().collect(Collectors.joining(" ")));
     }
 }

@@ -5,9 +5,9 @@ import ludwig.model.NamedNode;
 import ludwig.model.Node;
 import ludwig.model.OverrideNode;
 import ludwig.model.VariableNode;
+import ludwig.utils.NodeUtils;
 import ludwig.workspace.Environment;
 
-import static ludwig.utils.NodeUtils.declaration;
 
 public class SignatureEditor extends VBox {
     private final Environment environment;
@@ -22,7 +22,7 @@ public class SignatureEditor extends VBox {
 
         getChildren().clear();
 
-        NamedNode<?> decl = (node instanceof OverrideNode) ? declaration((OverrideNode) node) : (NamedNode) node;
+        NamedNode<?> decl = (node instanceof OverrideNode) ? NodeUtils.INSTANCE.declaration((OverrideNode) node) : (NamedNode) node;
         if (node == null) {
             return;
         }

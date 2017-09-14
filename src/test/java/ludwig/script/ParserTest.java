@@ -18,7 +18,7 @@ public class ParserTest {
             project.name("System");
             project.id("System");
             workspace.getProjects().add(project);
-            Parser.parse(reader, workspace, project);
+            Parser.Companion.parse(reader, workspace, project);
             System.out.println(project);
         }
 
