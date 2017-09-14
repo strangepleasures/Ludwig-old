@@ -91,7 +91,7 @@ public class EditorPane extends SplitPane {
 
     private void fillMembers() {
         membersList.getItems().clear();
-        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+        TreeItem<NamedNode<?>> selectedItem = packageTree.getSelectionModel().getSelectedItem();
 
         if (selectedItem != null) {
             NamedNode node = selectedItem.getValue();
@@ -105,7 +105,7 @@ public class EditorPane extends SplitPane {
         NamedNode signatureSelection = null;
         Node codeSelection = null;
 
-        TreeItem<NamedNode> selectedItem = packageTree.getSelectionModel().getSelectedItem();
+        TreeItem<NamedNode<?>> selectedItem = packageTree.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             packageSelection = selectedItem.getValue();
         }

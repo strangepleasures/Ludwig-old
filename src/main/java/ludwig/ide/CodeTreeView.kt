@@ -1,6 +1,5 @@
 package ludwig.ide
 
-import com.sun.javafx.scene.control.skin.TreeViewSkin
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeView
 import ludwig.model.*
