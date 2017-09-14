@@ -9,7 +9,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import lombok.Getter;
 import ludwig.changes.Change;
 import ludwig.repository.ChangeRepository;
 import ludwig.repository.LocalChangeRepository;
@@ -27,7 +26,6 @@ public class App extends Application {
 
     private Settings settings;
     private ChangeRepository repository;
-    @Getter
     private Environment environment = new Environment();
 
     public static void main(String[] args) {
@@ -56,7 +54,7 @@ public class App extends Application {
                 File file = dialog.showOpenDialog(new Stage());
                 if(file != null){
                     try {
-                        settings.setProject(file.toURI().toURL());
+                        settings.project = file.toURI().toURL();
                         start(new Stage());
                         primaryStage.close();
                     } catch (Exception e) {
@@ -74,8 +72,8 @@ public class App extends Application {
         SplitPane splitPane = new SplitPane();
         EditorPane leftEditorPane = new EditorPane(environment, settings);
         EditorPane rightEditorPane = new EditorPane(environment, settings);
-        leftEditorPane.setAnotherPane(rightEditorPane);
-        rightEditorPane.setAnotherPane(leftEditorPane);
+        leftEditorPane.anotherPane(rightEditorPane);
+        rightEditorPane.anotherPane(leftEditorPane);
         splitPane.getItems().addAll(leftEditorPane, rightEditorPane);
         borderPane.setCenter(splitPane);
 
@@ -111,17 +109,17 @@ public class App extends Application {
     }
 
     private void loadWorkspace() {
-        if (settings.getProject() != null) {
+        if (settings.project != null) {
             try {
-                if ("file".equals(settings.getProject().getProtocol())) {
-                    repository = new LocalChangeRepository(new File(settings.getProject().getFile()));
+                if ("file".equals(settings.project.getProtocol())) {
+                    repository = new LocalChangeRepository(new File(settings.project.getFile()));
                 }
                 List<Change> changes = repository.pull(null);
-                environment.getWorkspace().load(changes);
+                environment.workspace().load(changes);
 
-                environment.getWorkspace().changeListeners().add(change -> {
+                environment.workspace().changeListeners().add(change -> {
                     try {
-                        if (!environment.getWorkspace().isLoading()) {
+                        if (!environment.workspace().isLoading()) {
                             repository.push(Collections.singletonList(change));
                         }
                     } catch (IOException e) {

@@ -99,12 +99,12 @@ class Evaluator implements NodeVisitor<Object> {
 
     @Override
     public Object visitBreak(BreakNode breakNode) {
-        return new Break((NamedNode) ((ReferenceNode) breakNode.children().get(0)).ref());
+        return new Break();
     }
 
     @Override
     public Object visitContinue(ContinueNode continueNode) {
-        return new Continue((NamedNode) ((ReferenceNode) continueNode.children().get(0)).ref());
+        return new Continue();
     }
 
     @Override
@@ -231,6 +231,7 @@ class Evaluator implements NodeVisitor<Object> {
 
     @Override
     public Object visitFor(ForNode forNode) {
+        loop:
         for (Object var : (Iterable) forNode.children().get(1).accept(this)) {
             VariableNode v = (VariableNode) forNode.children().get(0);
             locals = locals.plus(v, var);
@@ -238,15 +239,9 @@ class Evaluator implements NodeVisitor<Object> {
                 Object value = forNode.children().get(i).accept(this);
                 if (value instanceof Signal) {
                     if (value instanceof Break) {
-                        Break br = (Break) value;
-                        if (br.getLoop() == v || br.getLoop() == null) {
-                            break;
-                        }
+                        break loop;
                     } else if (value instanceof Continue) {
-                        Continue c = (Continue) value;
-                        if (c.getLoop() == v || c.getLoop() == null) {
-                            break;
-                        }
+                        continue loop;
                     }
                     return value;
                 }
@@ -260,8 +255,8 @@ class Evaluator implements NodeVisitor<Object> {
             Return tail = (Return) result;
             HashPMap<NamedNode, Object> state = locals;
             try {
-                locals = tail.getLocals();
-                result = tail.getNode().accept(this);
+                locals = tail.locals;
+                result = tail.node.accept(this);
             } finally {
                 locals = state;
             }

@@ -1,14 +1,17 @@
 package ludwig.interpreter;
 
-import lombok.Value;
 import ludwig.model.NamedNode;
 import ludwig.model.Node;
 import org.pcollections.HashPMap;
 
-@Value
 public class Return<T> implements Signal, Delayed<T> {
     Node node;
     HashPMap<NamedNode, Object> locals;
+
+    public Return(Node node, HashPMap<NamedNode, Object> locals) {
+        this.node = node;
+        this.locals = locals;
+    }
 
     public T get() {
         Node n = node;

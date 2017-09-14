@@ -4,8 +4,6 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import lombok.Getter;
-import lombok.Setter;
 import ludwig.changes.Change;
 import ludwig.model.*;
 import ludwig.workspace.Environment;
@@ -19,8 +17,6 @@ public class EditorPane extends SplitPane {
     private final SignatureEditor signatureEditor;
     private final CodeTreeView codeEditor;
 
-    @Getter
-    @Setter
     private EditorPane anotherPane;
 
     public EditorPane(Environment environment, Settings settings) {
@@ -28,7 +24,7 @@ public class EditorPane extends SplitPane {
         this.settings = settings;
 
         membersList = new MemberList(environment);
-        packageTree = new PackageTreeView(environment.getWorkspace());
+        packageTree = new PackageTreeView(environment.workspace());
         signatureEditor = new SignatureEditor(environment);
         codeEditor = new CodeTreeView(environment);
 
@@ -53,7 +49,7 @@ public class EditorPane extends SplitPane {
             }
         });
 
-        environment.getWorkspace().changeListeners().add(this::processChanges);
+        environment.workspace().changeListeners().add(this::processChanges);
     }
 
     private void displayMember() {
@@ -70,7 +66,7 @@ public class EditorPane extends SplitPane {
     }
 
     private void processChanges(Change change) {
-        if (!environment.getWorkspace().isBatchUpdate()) {
+        if (!environment.workspace().isBatchUpdate()) {
             refresh();
         }
     }
@@ -142,5 +138,15 @@ public class EditorPane extends SplitPane {
                 navigateTo(((ReferenceNode) sel).ref());
             }
         }
+    }
+
+
+    public EditorPane anotherPane() {
+        return anotherPane;
+    }
+
+    public EditorPane anotherPane(EditorPane anotherPane) {
+        this.anotherPane = anotherPane;
+        return this;
     }
 }

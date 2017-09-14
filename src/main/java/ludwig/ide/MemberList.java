@@ -86,9 +86,9 @@ public class MemberList extends ListView<Node<?>> {
                         prev = id;
                     }
 
-                    environment.getWorkspace().apply(changes);
+                    environment.workspace().apply(changes);
 
-                    FunctionNode fn = environment.getWorkspace().node(insertFn.node().id());
+                    FunctionNode fn = environment.workspace().node(insertFn.node().id());
                     getSelectionModel().select(fn);
                 }
             });
@@ -105,7 +105,7 @@ public class MemberList extends ListView<Node<?>> {
                     dialog.getEditor(),
                     param -> {
                         List<Node> suggestions = new ArrayList<>();
-                        suggestions.addAll(environment.getSymbolRegistry().symbols(param.getUserText()));
+                        suggestions.addAll(environment.symbolRegistry().symbols(param.getUserText()));
 
                         return suggestions;
                     },
@@ -133,9 +133,9 @@ public class MemberList extends ListView<Node<?>> {
                         .id(Change.newId())
                         .parent(insertOverride.node().id()));
 
-                    environment.getWorkspace().apply(changes);
+                    environment.workspace().apply(changes);
 
-                    OverrideNode o = environment.getWorkspace().node(insertOverride.node().id());
+                    OverrideNode o = environment.workspace().node(insertOverride.node().id());
                     getSelectionModel().select(o);
                 }
             });
@@ -184,7 +184,7 @@ public class MemberList extends ListView<Node<?>> {
             }
             Node selectedItem = getSelectionModel().getSelectedItem();
             if (selectedItem != null) {
-                environment.getWorkspace().apply(singletonList(new Delete().id(selectedItem.id())));
+                environment.workspace().apply(singletonList(new Delete().id(selectedItem.id())));
             }
         }
     }

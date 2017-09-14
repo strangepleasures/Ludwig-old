@@ -42,7 +42,7 @@ public class SignatureItemEditor extends VBox {
             }
 
             private void applyChanges() {
-                SignatureItemEditor.this.environment.getWorkspace().apply(singletonList(new Rename().setNodeId(node.id()).name(getText())));
+                SignatureItemEditor.this.environment.workspace().apply(singletonList(new Rename().setNodeId(node.id()).name(getText())));
             }
         };
 
@@ -68,7 +68,7 @@ public class SignatureItemEditor extends VBox {
             }
 
             private void applyChanges() {
-                environment.getWorkspace().apply(singletonList(new Comment().nodeId(node.id()).comment(getText())));
+                environment.workspace().apply(singletonList(new Comment().nodeId(node.id()).comment(getText())));
             }
         };
 

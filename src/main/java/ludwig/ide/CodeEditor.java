@@ -224,7 +224,7 @@ public class CodeEditor extends TextArea {
         }
 
 
-        environment.getWorkspace().apply(changes);
+        environment.workspace().apply(changes);
 
         selectNextNode();
     }
@@ -287,7 +287,7 @@ public class CodeEditor extends TextArea {
                     }
 
                     suggestions.addAll(NodeUtils.collectLocals(this.node, selectedNode(), param.getUserText()));
-                    suggestions.addAll(environment.getSymbolRegistry().symbols(param.getUserText()));
+                    suggestions.addAll(environment.symbolRegistry().symbols(param.getUserText()));
 
                     return suggestions;
                 },
