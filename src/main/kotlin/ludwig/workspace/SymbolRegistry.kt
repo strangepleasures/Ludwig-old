@@ -17,12 +17,12 @@ class SymbolRegistry(workspace: Workspace) {
     private val nodesById = HashMap<String, Node>()
 
     init {
-        workspace.changeListeners().add(Consumer { change ->
+        workspace.changeListeners().add({ change ->
             if (change is InsertNode) {
                 val node = change.node
                 if (node is FunctionNode || NodeUtils.isField(node)) {
                     symbols.add(node)
-                    nodesById.put(node!!.id, node)
+                    nodesById.put(node.id, node)
                 }
             } else if (change is Delete) {
                 val node = nodesById.remove(change.id)

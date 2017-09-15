@@ -4,13 +4,12 @@ import com.google.common.collect.HashMultimap
 import ludwig.changes.InsertReference
 import ludwig.model.NamedNode
 import ludwig.model.ReferenceNode
-import java.util.function.Consumer
 
 class UsageTracker(workspace: Workspace) {
     private val refs = HashMultimap.create<NamedNode, ReferenceNode>()
 
     init {
-        workspace.changeListeners().add(Consumer { change ->
+        workspace.changeListeners().add({ change ->
             if (change is InsertReference) {
                 refs.put(workspace.node(change.ref), workspace.node(change.id))
             }

@@ -6,7 +6,6 @@ import javafx.scene.layout.VBox
 import ludwig.changes.Change
 import ludwig.model.*
 import ludwig.workspace.Environment
-import java.util.function.Consumer
 
 class EditorPane(private val environment: Environment, private val settings: Settings) : SplitPane() {
     private val membersList: MemberList
@@ -45,7 +44,7 @@ class EditorPane(private val environment: Environment, private val settings: Set
             }
         }
 
-        environment.workspace().changeListeners().add(Consumer<Change> { this.processChanges(it) })
+        environment.workspace().changeListeners().add({ processChanges(it) })
     }
 
     private fun displayMember() {
