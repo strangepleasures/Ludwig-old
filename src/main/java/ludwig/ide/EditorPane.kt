@@ -1,7 +1,6 @@
 package ludwig.ide
 
 import javafx.scene.control.SplitPane
-import javafx.scene.control.TreeItem
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.VBox
 import ludwig.changes.Change

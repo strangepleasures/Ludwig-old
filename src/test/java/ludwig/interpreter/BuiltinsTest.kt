@@ -1,12 +1,10 @@
 package ludwig.interpreter
 
 import ludwig.model.FunctionNode
-import ludwig.model.PackageNode
 import ludwig.runtime.StdLib
 import ludwig.script.Parser
-import org.junit.Test
-
 import org.junit.Assert.assertEquals
+import org.junit.Test
 
 class BuiltinsTest {
 

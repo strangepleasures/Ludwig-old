@@ -1,12 +1,15 @@
 package ludwig.ide
 
-import javafx.scene.control.*
-import ludwig.changes.*
-import ludwig.model.*
+import javafx.scene.control.TextInputDialog
+import javafx.scene.control.TreeItem
+import javafx.scene.control.TreeView
+import ludwig.changes.Change
+import ludwig.changes.Delete
+import ludwig.changes.InsertNode
+import ludwig.model.NamedNode
+import ludwig.model.PackageNode
 import ludwig.utils.NodeUtils
 import ludwig.workspace.Workspace
-
-import java.util.Collections.singletonList
 
 internal class PackageTreeView : TreeView<NamedNode<*>> {
     private val workspace: Workspace

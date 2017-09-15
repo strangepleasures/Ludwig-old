@@ -1,6 +1,8 @@
 package ludwig.interpreter
 
-import java.lang.reflect.*
+import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Method
+import java.lang.reflect.Proxy
 
 class NativeFunction(private val method: Method) : Callable {
 

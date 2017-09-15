@@ -2,8 +2,6 @@ package ludwig.ide
 
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
-
-import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
 object ContextMenuFactory {

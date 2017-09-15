@@ -1,8 +1,7 @@
 package ludwig.utils
 
 import ludwig.model.*
-
-import java.util.Comparator
+import java.util.*
 
 class PrettyPrinter private constructor() : NodeVisitor<Unit> {
     private val builder = StringBuilder()

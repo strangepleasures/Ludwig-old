@@ -1,9 +1,11 @@
 package ludwig.interpreter
 
-import ludwig.model.*
+import ludwig.model.ClassNode
+import ludwig.model.Node
+import ludwig.model.ReferenceNode
+import ludwig.model.VariableNode
 import org.pcollections.TreePVector
-
-import java.util.HashMap
+import java.util.*
 
 class ClassType private constructor(node: ClassNode) {
 

@@ -1,9 +1,12 @@
 package ludwig.interpreter
 
-import ludwig.model.*
-
-import java.lang.reflect.*
-import java.util.HashMap
+import ludwig.model.FunctionNode
+import ludwig.model.PackageNode
+import ludwig.model.PlaceholderNode
+import ludwig.model.VariableNode
+import java.lang.reflect.Method
+import java.lang.reflect.Modifier
+import java.util.*
 
 object Builtins {
     private val callables = HashMap<FunctionNode, Callable>()

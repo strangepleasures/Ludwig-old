@@ -8,10 +8,6 @@ import ludwig.model.NamedNode
 import ludwig.utils.NodeUtils
 import ludwig.workspace.Environment
 
-import java.util.Objects
-
-import java.util.Collections.singletonList
-
 class SignatureItemEditor(private val environment: Environment, private val node: NamedNode<*>) : VBox() {
     private val nameTextField: TextField
     private val commentTextField: TextField

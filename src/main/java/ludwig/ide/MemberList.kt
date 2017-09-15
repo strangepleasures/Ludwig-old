@@ -2,21 +2,24 @@ package ludwig.ide
 
 import com.sun.javafx.collections.ObservableListWrapper
 import impl.org.controlsfx.autocompletion.AutoCompletionTextFieldBinding
-import javafx.scene.control.*
-import ludwig.changes.*
-import ludwig.interpreter.*
+import javafx.scene.control.Alert
+import javafx.scene.control.ListView
+import javafx.scene.control.TextInputDialog
+import ludwig.changes.Change
+import ludwig.changes.Delete
+import ludwig.changes.InsertNode
+import ludwig.changes.InsertReference
+import ludwig.interpreter.Callable
+import ludwig.interpreter.CallableRef
 import ludwig.model.*
 import ludwig.script.Lexer
 import ludwig.script.LexerException
 import ludwig.utils.NodeUtils
 import ludwig.workspace.Environment
-
 import java.io.IOException
 import java.io.StringReader
 import java.util.*
 import java.util.stream.Collectors
-
-import java.util.Collections.singletonList
 
 
 class MemberList(private val environment: Environment) : ListView<Node<*>>() {

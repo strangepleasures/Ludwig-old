@@ -3,11 +3,10 @@ package ludwig.interpreter
 import ludwig.model.*
 import ludwig.runtime.StdLib
 import ludwig.script.Parser
+import org.junit.Assert.assertEquals
 import org.junit.Ignore
 import org.junit.Test
 import org.pcollections.HashTreePMap
-
-import org.junit.Assert.assertEquals
 
 class InterpreterTest {
     private val systemPackage = Builtins.of(StdLib::class.java)

@@ -5,15 +5,12 @@ import ludwig.changes.InsertNode
 import ludwig.changes.InsertReference
 import ludwig.interpreter.ClassType
 import ludwig.model.*
+import ludwig.utils.NodeUtils.isField
 import ludwig.workspace.Workspace
 import org.pcollections.HashPMap
 import org.pcollections.HashTreePMap
-
 import java.io.IOException
 import java.io.Reader
-import java.util.Collections
-
-import ludwig.utils.NodeUtils.isField
 
 class Parser private constructor(private val tokens: List<String>, private val workspace: Workspace) {
 

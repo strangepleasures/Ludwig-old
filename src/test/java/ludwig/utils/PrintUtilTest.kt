@@ -1,6 +1,9 @@
 package ludwig.utils
 
-import ludwig.model.*
+import ludwig.model.FunctionNode
+import ludwig.model.PackageNode
+import ludwig.model.ReferenceNode
+import ludwig.model.VariableNode
 import org.junit.Test
 
 class PrintUtilTest {

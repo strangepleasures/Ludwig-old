@@ -2,8 +2,7 @@ package ludwig.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-
-import java.util.ArrayList
+import java.util.*
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 abstract class Node<T : Node<T>> {

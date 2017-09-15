@@ -13,10 +13,8 @@ import ludwig.changes.Change
 import ludwig.repository.ChangeRepository
 import ludwig.repository.LocalChangeRepository
 import ludwig.workspace.Environment
-
 import java.io.File
 import java.io.IOException
-import java.util.Collections
 import java.util.function.Consumer
 
 class App : Application() {

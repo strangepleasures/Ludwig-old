@@ -1,12 +1,10 @@
 package ludwig.script
 
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
 import java.io.IOException
 import java.io.StringReader
 import java.util.stream.Collectors
-
-import org.junit.Assert.assertEquals
 
 class LexerTest {
     @Test

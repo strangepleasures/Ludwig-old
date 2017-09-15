@@ -1,8 +1,7 @@
 package ludwig.changes
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-
-import java.util.UUID
+import java.util.*
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 abstract class Change<T : Change<T>> {

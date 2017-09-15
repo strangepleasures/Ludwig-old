@@ -1,6 +1,8 @@
 package ludwig.interpreter
 
-import ludwig.model.*
+import ludwig.model.LambdaNode
+import ludwig.model.NamedNode
+import ludwig.model.VariableNode
 import ludwig.utils.PrettyPrinter
 import org.pcollections.HashPMap
 

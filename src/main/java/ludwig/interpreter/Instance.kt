@@ -1,8 +1,7 @@
 package ludwig.interpreter
 
 import ludwig.model.VariableNode
-
-import java.util.HashMap
+import java.util.*
 
 class Instance(private val type: ClassType) {
     private val data = HashMap<VariableNode, Any?>()
