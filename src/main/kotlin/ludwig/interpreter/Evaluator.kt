@@ -249,7 +249,7 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
         }
 
         if (args.size > 0 && args[0] is Instance) {
-            impl = StdLib.type(args[0]).implementation(head)
+            impl = StdLib.type(args[0])!!.implementation(head)
         }
 
         if (NodeUtils.isField(impl)) {

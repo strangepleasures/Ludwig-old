@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
-class NativeFunction(private val method: Method) : Callable {
+class NativeFunction(private val instance: Any, private val method: Method) : Callable {
 
     private val paramTypes: Array<Class<*>>
     override val isLazy: Boolean
@@ -20,7 +20,7 @@ class NativeFunction(private val method: Method) : Callable {
             for (i in args.indices) {
                 args[i] = cast(args[i], paramTypes[i])
             }
-            return method.invoke(null, *args)
+            return method.invoke(instance, *args)
         } catch (e: IllegalAccessException) {
             throw RuntimeException(e)
         } catch (e: InvocationTargetException) {

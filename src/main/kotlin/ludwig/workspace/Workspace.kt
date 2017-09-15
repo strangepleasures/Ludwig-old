@@ -28,7 +28,7 @@ class Workspace {
         builtins.name = "Runtime"
         builtins.readonly = true
         builtins.id = "Runtime"
-        builtins.children.add(Builtins.of(StdLib::class.java))
+        builtins.children.add(Builtins.of(StdLib))
 
         addNode(builtins)
 

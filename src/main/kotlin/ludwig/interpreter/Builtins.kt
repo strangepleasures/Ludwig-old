@@ -15,7 +15,8 @@ object Builtins {
         return callables[fn]
     }
 
-    fun of(clazz: Class<*>): PackageNode {
+    fun of(instance: Any): PackageNode {
+        val clazz = instance::class.java
         val p = PackageNode()
         val packageName: String
         if (clazz.isAnnotationPresent(Name::class.java)) {
@@ -29,7 +30,7 @@ object Builtins {
         for (method in clazz.declaredMethods) {
             if (Modifier.isPublic(method.modifiers)) {
                 val fn = function(method)
-                callables.put(fn, NativeFunction(method))
+                callables.put(fn, NativeFunction(instance, method))
                 p.children.add(fn)
             }
         }
