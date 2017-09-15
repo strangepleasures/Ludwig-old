@@ -15,9 +15,9 @@ import java.util.function.Consumer
 class Workspace {
 
     private val nodes = HashMap<String, Node>()
-    private val appliedChanges = ArrayList<Change>()
-    val projects = ArrayList<ProjectNode>()
-    private val changeListeners = ArrayList<(Change) -> Unit>()
+    private val appliedChanges = mutableListOf<Change>()
+    val projects = mutableListOf<ProjectNode>()
+    private val changeListeners = mutableListOf<(Change) -> Unit>()
     private val builtins = ProjectNode()
     var isBatchUpdate: Boolean = false
         private set
@@ -112,12 +112,8 @@ class Workspace {
         return null
     }
 
-    fun getProjects(): List<ProjectNode> {
-        return projects
-    }
-
     fun apply(changes: List<Change>): List<Problem> {
-        val problems = ArrayList<Problem>()
+        val problems = mutableListOf<Problem>()
         for (i in changes.indices) {
             val change = changes[i]
             isBatchUpdate = i < changes.size - 1

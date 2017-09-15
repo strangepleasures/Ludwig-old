@@ -1,11 +1,10 @@
 package ludwig.runtime
 
-import java.util.function.Consumer
 
-class Concatenator : Consumer<Any> {
+class Concatenator : (Any?) -> Unit {
     private val builder = StringBuilder()
 
-    override fun accept(o: Any) {
+    override fun invoke(o: Any?) {
         if (o is String) {
             builder.append(o)
         } else if (o is Double) {

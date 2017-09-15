@@ -15,7 +15,6 @@ import ludwig.script.Lexer
 import ludwig.utils.NodeUtils
 import ludwig.utils.PrettyPrinter
 import ludwig.workspace.Environment
-import java.util.*
 
 
 class CodeEditor(private val environment: Environment) : TextArea() {
@@ -173,7 +172,7 @@ class CodeEditor(private val environment: Environment) : TextArea() {
     fun insertNode(node: Node) {
         val sel = selectedNode()
         val head = if (node is NamedNode) InsertReference().apply { id = newId(); ref = node.id } else InsertNode().apply { this.node = node }
-        val changes = ArrayList<Change>()
+        val changes = mutableListOf<Change>()
         val selectedItem = this.node
         if (selectedItem !is FunctionNode || !isEditable) {
             return
@@ -216,7 +215,7 @@ class CodeEditor(private val environment: Environment) : TextArea() {
         val autoCompletionTextFieldBinding = AutoCompletionTextFieldBinding<Node>(
                 autoCompleteTextField,
                 { param ->
-                    val suggestions = ArrayList<Node>()
+                    val suggestions = mutableListOf<Node>()
 //                    if (param.userText.isEmpty() || "= variable value".startsWith(param.userText)) {
 //                        suggestions.add(AssignmentNode()
 //                                .add(PlaceholderNode().apply { parameter = "variable"; id = newId()})

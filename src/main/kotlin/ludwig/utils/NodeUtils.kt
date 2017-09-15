@@ -3,8 +3,6 @@ package ludwig.utils
 import ludwig.interpreter.ClassType
 import ludwig.model.*
 import org.apache.commons.lang.StringEscapeUtils
-
-import java.util.*
 import java.util.stream.Collectors
 
 object NodeUtils {
@@ -35,7 +33,7 @@ object NodeUtils {
     }
 
     fun expandNode(node: Node): List<Node> {
-        val nodes = ArrayList<Node>()
+        val nodes = mutableListOf<Node>()
         expandNode(node, true, nodes)
         return nodes
     }
@@ -78,7 +76,7 @@ object NodeUtils {
         if (node is OverrideNode) {
             return arguments(declaration(node))
         }
-        val args = ArrayList<String>()
+        val args = mutableListOf<String>()
         for (child in node.children) {
             if (child !is VariableNode) {
                 break
@@ -107,7 +105,7 @@ object NodeUtils {
     }
 
     fun collectLocals(root: Node, stop: Node, filter: String): List<Node> {
-        val locals = ArrayList<Node>()
+        val locals = mutableListOf<Node>()
         collectLocals(root, stop, filter, locals)
         locals.sortBy { it.toString() }
         return locals

@@ -2,7 +2,6 @@ package ludwig.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import java.util.*
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 abstract class Node {
@@ -10,7 +9,7 @@ abstract class Node {
     var comment: String? = null
     @JsonIgnore
     var parent: Node? = null
-    val children = ArrayList<Node>()
+    val children = mutableListOf<Node>()
     @JsonIgnore
     private var deleted = false
 

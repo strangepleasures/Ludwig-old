@@ -1,12 +1,11 @@
 package ludwig.runtime
 
 import ludwig.interpreter.*
-import ludwig.interpreter.Error
 import ludwig.model.Visibilities
-import org.pcollections.*
-
-import java.util.*
-import java.util.function.Consumer
+import org.pcollections.OrderedPSet
+import org.pcollections.POrderedSet
+import org.pcollections.PSet
+import org.pcollections.PVector
 
 @Name("system")
 object StdLib {
@@ -202,8 +201,8 @@ object StdLib {
         return concatenator.toString()
     }
 
-    fun <E, C : Consumer<in E>> out(obj: E, dest: C): C {
-        dest.accept(obj)
+    fun <E> out(obj: E, dest: (E) -> Unit): (E) -> Unit {
+        dest(obj)
         return dest
     }
 

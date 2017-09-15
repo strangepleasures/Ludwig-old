@@ -67,7 +67,7 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
                 }
 
                 if (!parts.isEmpty()) {
-                    val changes = ArrayList<Change>()
+                    val changes = mutableListOf<Change>()
 
                     val insertFn = InsertNode()
                             .apply { parent = packageNode!!.id; node = FunctionNode().apply { name = parts[0]; id = newId() } }
@@ -99,7 +99,7 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
             val autoCompletionTextFieldBinding = AutoCompletionTextFieldBinding<Node>(
                     dialog.editor,
                     { param ->
-                        val suggestions = ArrayList<Node>()
+                        val suggestions = mutableListOf<Node>()
                         suggestions.addAll(environment.symbolRegistry().symbols(param.userText))
 
                         suggestions
@@ -113,7 +113,7 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
 
             dialog.showAndWait().ifPresent { signature ->
                 if (ref != null) {
-                    val changes = ArrayList<Change>()
+                    val changes = mutableListOf<Change>()
 
                     val insertOverride = InsertNode()
                             .apply { parent = packageNode!!.id; node = OverrideNode().apply { id = newId() } }

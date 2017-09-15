@@ -6,7 +6,7 @@ import java.util.*
 
 class Lexer private constructor(private val reader: Reader) {
     private val builder = StringBuilder()
-    private val tokens = ArrayList<String>()
+    private val tokens = mutableListOf<String>()
     private val levelsStack = ArrayDeque<Int>()
     private var balance = 0
 
