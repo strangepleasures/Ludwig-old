@@ -10,7 +10,7 @@ import java.util.*
 class LocalChangeRepository(private val file: File) : ChangeRepository {
 
     @Throws(IOException::class)
-    override fun push(changes: List<Change<*>>) {
+    override fun push(changes: List<Change>) {
         FileOutputStream(file, true).use { fos ->
             YamlConfiguration.YAML_FACTORY.createGenerator(fos, JsonEncoding.UTF8).use { generator ->
                 for (change in changes) {
@@ -21,10 +21,10 @@ class LocalChangeRepository(private val file: File) : ChangeRepository {
     }
 
     @Throws(IOException::class)
-    override fun pull(sinceChangeId: String?): List<Change<*>> {
+    override fun pull(sinceChangeId: String?): List<Change> {
         YamlConfiguration.YAML_FACTORY.createParser(file).use { parser ->
             YamlConfiguration.OBJECT_MAPPER.readValues(parser, Change::class.java).use { it ->
-                val changes = ArrayList<Change<*>>()
+                val changes = ArrayList<Change>()
                 var accept = sinceChangeId == null
                 while (it.hasNext()) {
                     val change = it.nextValue()

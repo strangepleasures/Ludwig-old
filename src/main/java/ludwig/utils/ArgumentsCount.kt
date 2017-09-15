@@ -26,7 +26,7 @@ internal class ArgumentsCount : NodeVisitor<Int?> {
     }
 
     override fun visitReference(referenceNode: ReferenceNode): Int? {
-        return arguments(referenceNode.ref()).size
+        return arguments(referenceNode.ref).size
     }
 
     override fun visitList(listNode: ListNode): Int? {

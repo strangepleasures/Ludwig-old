@@ -12,7 +12,7 @@ class UsageTracker(workspace: Workspace) {
     init {
         workspace.changeListeners().add(Consumer{ change ->
             if (change is InsertReference) {
-                refs.put(workspace.node(change.ref()), workspace.node(change.id()))
+                refs.put(workspace.node(change.ref), workspace.node(change.id))
             }
         })
     }

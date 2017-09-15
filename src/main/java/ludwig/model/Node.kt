@@ -6,37 +6,15 @@ import java.util.*
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 abstract class Node<T : Node<T>> {
-    private var id: String? = null
-    private var comment: String? = null
+    lateinit var id: String
+    var comment: String? = null
     @JsonIgnore
-    private var parent: Node<*>? = null
-    private val children = ArrayList<Node<*>>()
+    var parent: Node<*>? = null
+    val children = ArrayList<Node<*>>()
     @JsonIgnore
     private var deleted = false
 
     abstract fun <T> accept(visitor: NodeVisitor<T>): T
-
-    fun id(): String? {
-        return id
-    }
-
-    fun id(id: String): T {
-        this.id = id
-        return this as T
-    }
-
-    fun comment(): String? {
-        return comment
-    }
-
-    fun comment(comment: String): T {
-        this.comment = comment
-        return this as T
-    }
-
-    fun children(): MutableList<Node<*>> {
-        return children
-    }
 
     fun add(child: Node<*>): T {
         children.add(child)
@@ -44,14 +22,6 @@ abstract class Node<T : Node<T>> {
         return this as T
     }
 
-    fun parent(): Node<*>? {
-        return parent
-    }
-
-    fun parent(parent: Node<*>?): T {
-        this.parent = parent
-        return this as T
-    }
 
     fun <T : Node<*>> parentOfType(type: Class<T>): T? {
         var n: Node<*>? = this

@@ -5,10 +5,7 @@ import impl.org.controlsfx.autocompletion.AutoCompletionTextFieldBinding
 import javafx.scene.control.Alert
 import javafx.scene.control.ListView
 import javafx.scene.control.TextInputDialog
-import ludwig.changes.Change
-import ludwig.changes.Delete
-import ludwig.changes.InsertNode
-import ludwig.changes.InsertReference
+import ludwig.changes.*
 import ludwig.interpreter.Callable
 import ludwig.interpreter.CallableRef
 import ludwig.model.*
@@ -36,7 +33,7 @@ class MemberList(private val environment: Environment) : ListView<Node<*>>() {
         items.clear()
 
         if (packageNode != null) {
-            items = ObservableListWrapper(packageNode.children()
+            items = ObservableListWrapper(packageNode.children
                     .stream()
                     .filter { item -> item !is PackageNode }
                     .sorted(Comparator.comparing<Node<*>, String> { n -> NodeUtils.signature(n).toLowerCase() })
@@ -70,27 +67,24 @@ class MemberList(private val environment: Environment) : ListView<Node<*>>() {
                 }
 
                 if (!parts.isEmpty()) {
-                    val changes = ArrayList<Change<*>>()
+                    val changes = ArrayList<Change>()
 
                     val insertFn = InsertNode()
-                            .node(FunctionNode().name(parts[0]).id(Change.newId()))
-                            .parent(packageNode!!.id())
+                            .apply { parent = packageNode!!.id; node = FunctionNode().apply { name = parts[0]; id = newId()}}
 
                     changes.add(insertFn)
 
                     var prev: String? = null
-                    for (i in 1..parts.size - 1) {
-                        val id = Change.newId()
+                    for (i in 1 until parts.size) {
+                        val id = newId()
                         changes.add(InsertNode()
-                                .node(VariableNode().name(parts[i]).id(id))
-                                .parent(insertFn.node()!!.id())
-                                .prev(prev))
+                                .apply { parent = insertFn.node.id; this.prev = prev; node = VariableNode().apply { name = parts[i]; this.id = id } })
                         prev = id
                     }
 
                     environment.workspace().apply(changes)
 
-                    val fn = environment.workspace().node<Node<*>>(insertFn.node()!!.id())
+                    val fn = environment.workspace().node<Node<*>>(insertFn.node.id)
                     selectionModel.select(fn)
                 }
             }
@@ -119,22 +113,19 @@ class MemberList(private val environment: Environment) : ListView<Node<*>>() {
 
             dialog.showAndWait().ifPresent { signature ->
                 if (ref != null) {
-                    val changes = ArrayList<Change<*>>()
+                    val changes = ArrayList<Change>()
 
                     val insertOverride = InsertNode()
-                            .node(OverrideNode().id(Change.newId()))
-                            .parent(packageNode!!.id())
+                            .apply { parent = packageNode!!.id; node = OverrideNode().apply { id = newId() } }
 
                     changes.add(insertOverride)
 
                     changes.add(InsertReference()
-                            .ref(ref!!.id()!!)
-                            .id(Change.newId())
-                            .parent(insertOverride.node()!!.id()))
+                            .apply { id = newId(); this.ref = ref!!.id; parent = insertOverride.node.id })
 
                     environment.workspace().apply(changes)
 
-                    val o = environment.workspace().node<Node<*>>(insertOverride.node()!!.id())
+                    val o = environment.workspace().node<Node<*>>(insertOverride.node.id)
                     selectionModel.select(o)
                 }
             }
@@ -149,7 +140,7 @@ class MemberList(private val environment: Environment) : ListView<Node<*>>() {
                     val dialog = TextInputDialog()
                     dialog.title = "Execute function"
                     dialog.headerText = "Enter function arguments"
-                    dialog.contentText = fn.name()
+                    dialog.contentText = fn.name
 
                     val params = dialog.showAndWait()
                     if (params.isPresent) {
@@ -180,7 +171,7 @@ class MemberList(private val environment: Environment) : ListView<Node<*>>() {
             }
             val selectedItem = selectionModel.selectedItem
             if (selectedItem != null) {
-                environment.workspace().apply(listOf<Change<*>>(Delete().id(selectedItem.id()!!)))
+                environment.workspace().apply(listOf<Change>(Delete().apply { id = selectedItem.id }))
             }
         }
     }

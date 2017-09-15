@@ -19,13 +19,13 @@ class SymbolRegistry(workspace: Workspace) {
     init {
         workspace.changeListeners().add(Consumer{ change ->
             if (change is InsertNode) {
-                val node = (change as InsertNode).node()
+                val node = change.node
                 if (node is FunctionNode || NodeUtils.isField(node)) {
                     symbols.add(node)
-                    nodesById.put(node!!.id()!!, node)
+                    nodesById.put(node!!.id, node)
                 }
             } else if (change is Delete) {
-                val node = nodesById.remove((change as Delete).id())
+                val node = nodesById.remove(change.id)
                 if (node != null) {
                     deleteNode(node)
                 }
@@ -37,7 +37,7 @@ class SymbolRegistry(workspace: Workspace) {
 
     private fun deleteNode(node: Node<*>) {
         symbols.remove(node)
-        node.children().forEach(Consumer<Node<*>> { this.deleteNode(it) })
+        node.children.forEach(Consumer<Node<*>> { this.deleteNode(it) })
     }
 
     fun symbols(s: String): SortedSet<NamedNode<*>> =
@@ -49,7 +49,7 @@ class SymbolRegistry(workspace: Workspace) {
         if (node is FunctionNode || NodeUtils.isField(node)) {
             symbols.add(node)
         } else {
-            node.children().forEach(Consumer<Node<*>> { this.grab(it) })
+            node.children.forEach(Consumer<Node<*>> { this.grab(it) })
         }
 
     }

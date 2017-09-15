@@ -9,11 +9,11 @@ object Interpreter {
         return node.accept(Evaluator(locals))
     }
 
-    fun call(functionNode: FunctionNode, vararg args: Any): Any? {
+    fun call(functionNode: FunctionNode, vararg args: Any?): Any? {
         val head = ReferenceNode(functionNode)
 
         for (arg in args) {
-            head.add(LiteralNode.ofValue(arg))
+            head.children.add(LiteralNode.ofValue(arg!!))
         }
 
         return eval(head, HashTreePMap.empty())

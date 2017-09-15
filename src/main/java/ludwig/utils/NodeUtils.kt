@@ -44,7 +44,7 @@ object NodeUtils {
         if (!onlyChildren) {
             nodes.add(node)
         }
-        for (child in node.children()) {
+        for (child in node.children) {
             expandNode(child, false, nodes)
         }
     }
@@ -55,7 +55,7 @@ object NodeUtils {
                 return signature(declaration(obj))
             }
             val builder = StringBuilder(obj.toString())
-            for (child in obj.children()) {
+            for (child in obj.children) {
                 if (child is VariableNode) {
                     builder.append(' ')
                     builder.append(child.toString())
@@ -79,31 +79,31 @@ object NodeUtils {
             return arguments(declaration(node))
         }
         val args = ArrayList<String>()
-        for (child in node.children()) {
+        for (child in node.children) {
             if (child !is VariableNode) {
                 break
             }
-            args.add(child.name()!!)
+            args.add(child.name)
         }
         return args
     }
 
     fun declaration(node: OverrideNode): FunctionNode {
-        return (node.children()[0] as ReferenceNode).ref() as FunctionNode
+        return (node.children[0] as ReferenceNode).ref as FunctionNode
     }
 
     fun isReadonly(node: Node<*>?): Boolean {
-        return node == null || node.parentOfType(ProjectNode::class.java)!!.readonly()
+        return node == null || node.parentOfType(ProjectNode::class.java)!!.readonly
     }
 
     private fun collectLocals(root: Node<*>, stop: Node<*>, filter: String, locals: MutableList<Node<*>>) {
         if (root === stop) {
             return
         }
-        if (root is VariableNode && root.name()!!.startsWith(filter)) {
+        if (root is VariableNode && root.name.startsWith(filter)) {
             locals.add(root)
         }
-        root.children().forEach { child -> collectLocals(child, stop, filter, locals) }
+        root.children.forEach { child -> collectLocals(child, stop, filter, locals) }
     }
 
     fun collectLocals(root: Node<*>, stop: Node<*>, filter: String): List<Node<*>> {
@@ -114,7 +114,7 @@ object NodeUtils {
     }
 
     fun isField(node: Node<*>?): Boolean {
-        return node is VariableNode && node.parent() is ClassNode
+        return node is VariableNode && node.parent is ClassNode
     }
 
     fun argumentsCount(node: Node<*>): Int {

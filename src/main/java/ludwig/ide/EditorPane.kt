@@ -45,7 +45,7 @@ class EditorPane(private val environment: Environment, private val settings: Set
             }
         }
 
-        environment.workspace().changeListeners().add(Consumer<Change<*>> { this.processChanges(it) })
+        environment.workspace().changeListeners().add(Consumer<Change> { this.processChanges(it) })
     }
 
     private fun displayMember() {
@@ -60,7 +60,7 @@ class EditorPane(private val environment: Environment, private val settings: Set
         } else membersList.selectionModel.selectedItem
     }
 
-    private fun processChanges(change: Change<*>) {
+    private fun processChanges(change: Change) {
         if (!environment.workspace().isBatchUpdate) {
             refresh()
         }
@@ -130,7 +130,7 @@ class EditorPane(private val environment: Environment, private val settings: Set
         fun goToDefinition() {
             val sel = codeEditor.selectedNode()
             if (sel is ReferenceNode) {
-                navigateTo(sel.ref())
+                navigateTo(sel.ref)
             }
         }
     }

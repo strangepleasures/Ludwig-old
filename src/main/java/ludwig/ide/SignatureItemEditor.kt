@@ -14,7 +14,7 @@ class SignatureItemEditor(private val environment: Environment, private val node
 
     init {
 
-        nameTextField = object : TextField(node.name()) {
+        nameTextField = object : TextField(node.name) {
             private var saved: String? = null
 
             init {
@@ -34,13 +34,13 @@ class SignatureItemEditor(private val environment: Environment, private val node
             }
 
             private fun applyChanges() {
-                this@SignatureItemEditor.environment.workspace().apply(listOf(Rename().setNodeId(node.id()!!).name(text)))
+                environment.workspace().apply(listOf(Rename().apply { nodeId = node.id; name = text }))
             }
         }
 
         children.add(nameTextField)
 
-        commentTextField = object : TextField(node.comment()) {
+        commentTextField = object : TextField(node.comment) {
             private var saved: String? = null
 
             init {
@@ -60,7 +60,7 @@ class SignatureItemEditor(private val environment: Environment, private val node
             }
 
             private fun applyChanges() {
-                environment.workspace().apply(listOf(Comment().nodeId(node.id()!!).comment(text)))
+                environment.workspace().apply(listOf(Comment().apply { nodeId = node.id; comment = text }))
             }
         }
 

@@ -6,6 +6,7 @@ import javafx.scene.control.TreeView
 import ludwig.changes.Change
 import ludwig.changes.Delete
 import ludwig.changes.InsertNode
+import ludwig.changes.newId
 import ludwig.model.NamedNode
 import ludwig.model.PackageNode
 import ludwig.utils.NodeUtils
@@ -38,7 +39,7 @@ internal class PackageTreeView : TreeView<NamedNode<*>> {
         if (node == null) {
             return null
         }
-        val parentItem = if (node.parent() == null) root else find(node.parent() as NamedNode<*>?)
+        val parentItem = if (node.parent == null) root else find(node.parent as NamedNode<*>?)
         return parentItem!!.children
                 .stream()
                 .filter { i -> i.value === node }
@@ -66,11 +67,10 @@ internal class PackageTreeView : TreeView<NamedNode<*>> {
                 dialog.contentText = "Package name"
 
                 dialog.showAndWait().ifPresent { name ->
-                    val packageNode = PackageNode().name(name).id(Change.newId())
+                    val packageNode = PackageNode().apply { this.name = name; id = newId()}
                     val insert = InsertNode()
-                            .node(packageNode)
-                            .parent(parent.id())
-                    workspace.apply(listOf<Change<*>>(insert))
+                                 .apply { node = packageNode; this.parent = parent.id }
+                    workspace.apply(listOf<Change>(insert))
                     select(packageNode)
                 }
             }
@@ -83,8 +83,8 @@ internal class PackageTreeView : TreeView<NamedNode<*>> {
                 if (NodeUtils.isReadonly(packageNode)) {
                     return
                 }
-                val parent = packageNode.parent() as NamedNode<*>?
-                workspace.apply(listOf<Change<*>>(Delete().id(packageNode.id()!!)))
+                val parent = packageNode.parent as NamedNode<*>?
+                workspace.apply(listOf(Delete().apply { id = packageNode.id }))
                 select(parent)
             }
         }
@@ -99,7 +99,7 @@ private fun createRoot(workspace: Workspace): TreeItem<NamedNode<*>> {
 
         root.children.add(projectItem)
 
-        for (packageNode in projectNode.children()) {
+        for (packageNode in projectNode.children) {
             processPackage(projectItem, packageNode as PackageNode)
         }
     }
@@ -111,7 +111,7 @@ private fun processPackage(parent: TreeItem<NamedNode<*>>, packageNode: PackageN
     val packageItem = TreeItem<NamedNode<*>>(packageNode)
     parent.children.add(packageItem)
 
-    for (node in packageNode.children()) {
+    for (node in packageNode.children) {
         if (node is PackageNode) {
             processPackage(packageItem, node)
         }

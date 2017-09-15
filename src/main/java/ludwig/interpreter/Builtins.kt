@@ -23,13 +23,14 @@ object Builtins {
         } else {
             packageName = clazz.simpleName.toLowerCase()
         }
-        p.name(packageName).id(packageName)
+        p.name = packageName
+        p.id = packageName
 
         for (method in clazz.declaredMethods) {
             if (Modifier.isPublic(method.modifiers)) {
                 val fn = function(method)
                 callables.put(fn, NativeFunction(method))
-                p.add(fn)
+                p.children.add(fn)
             }
         }
         return p
@@ -38,10 +39,9 @@ object Builtins {
     private fun function(method: Method): FunctionNode {
         val f = FunctionNode()
 
-        f.lazy(method.isAnnotationPresent(Lazy::class.java))
+        f.lazy = method.isAnnotationPresent(Lazy::class.java)
 
-        val methodName = if (method.isAnnotationPresent(Name::class.java)) method.getAnnotation(Name::class.java).value else method.name
-        f.name(methodName)
+        f.name = if (method.isAnnotationPresent(Name::class.java)) method.getAnnotation(Name::class.java).value else method.name
 
         val packageName: String
         if (method.declaringClass.isAnnotationPresent(Name::class.java)) {
@@ -50,27 +50,27 @@ object Builtins {
             packageName = method.declaringClass.simpleName.toLowerCase()
         }
 
-        f.id(packageName + ":" + methodName)
+        f.id = packageName + ":" + f.name
 
         if (method.isAnnotationPresent(Description::class.java)) {
-            f.comment(method.getAnnotation(Description::class.java).value)
+            f.comment = method.getAnnotation(Description::class.java).value
         }
 
         if (method.isAnnotationPresent(Visibility::class.java)) {
-            f.visibility(method.getAnnotation(Visibility::class.java).value)
+            f.visibility = method.getAnnotation(Visibility::class.java).value
         }
 
         for (parameter in method.parameters) {
             val param = VariableNode()
             val paramName = if (parameter.isAnnotationPresent(Name::class.java)) parameter.getAnnotation(Name::class.java).value else parameter.name
-            param.name(paramName)
-                    .id(f.id() + ":" + paramName)
+            param.name = paramName
+            param.id = f.id + ":" + paramName
             if (parameter.isAnnotationPresent(Description::class.java)) {
-                param.comment(parameter.getAnnotation(Description::class.java).value)
+                param.comment = parameter.getAnnotation(Description::class.java).value
             }
             f.add(param)
         }
-        f.add(PlaceholderNode().parameter("Built-in function").id(f.id()!! + ":body"))
+        f.children.add(PlaceholderNode().apply { parameter = "Built-in function"; id = f.id + ":body" })
 
         return f
     }

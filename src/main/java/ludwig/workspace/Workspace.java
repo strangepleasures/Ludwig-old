@@ -15,15 +15,18 @@ public class Workspace {
     public static final int MAX_PROBLEMS = 10;
 
     private final Map<String, Node> nodes = new HashMap<>();
-    private final List<Change<?>> appliedChanges = new ArrayList<>();
+    private final List<Change> appliedChanges = new ArrayList<>();
     private final List<ProjectNode> projects = new ArrayList<>();
-    private final List<Consumer<Change<?>>> changeListeners = new ArrayList<>();
+    private final List<Consumer<Change>> changeListeners = new ArrayList<>();
     private ProjectNode builtins;
     private boolean batchUpdate;
     private boolean loading;
 
     public void init() {
-        builtins = new ProjectNode().name("Runtime").id("Runtime").readonly(true);
+        builtins = new ProjectNode();
+        builtins.setName("Runtime");
+        builtins.setReadonly(true);
+        builtins.setId("Runtime");
         builtins.add(Builtins.INSTANCE.of(StdLib.class));
 
         addNode(builtins);
@@ -40,7 +43,7 @@ public class Workspace {
         }
     }
 
-    public final List<Consumer<Change<?>>> changeListeners() {
+    public final List<Consumer<Change>> changeListeners() {
         return changeListeners;
     }
 
@@ -48,51 +51,52 @@ public class Workspace {
 
         @Override
         public Problem visitInsertNode(InsertNode insert) {
-            return place(insert.node(), insert);
+            return place(insert.getNode(), insert);
         }
 
         @Override
         public Problem visitInsertReference(InsertReference insert) {
-            Node ref = new ReferenceNode(node(insert.ref())).id(insert.id());
+            Node ref = new ReferenceNode(node(insert.getRef()));
+            ref.setId(insert.getId());
             return place(ref, insert);
         }
 
         @Override
         public Problem visitDelete(Delete delete) {
-            Node node = node(delete.id());
-            node.parent().children().remove(node);
+            Node node = node(delete.getId());
+            node.getParent().getChildren().remove(node);
             node.delete();
             return null;
         }
 
         @Override
         public Problem visitComment(Comment comment) {
-            Node node = node(comment.nodeId());
-            node.comment(comment.comment());
+            Node node = node(comment.getNodeId());
+            node.setComment(comment.getComment());
             return null;
         }
 
         @Override
         public Problem visitRename(Rename rename) {
             NamedNode node = node(rename.getNodeId());
-            node.name(rename.name());
+            node.setName(rename.getName());
             return null;
         }
     };
 
     private Problem place(Node node, Insert insert) {
         addNode(node);
-        Node parent = node(insert.parent());
-        node.parent(parent);
+        Node parent = node(insert.getParent());
+        node.setParent(parent);
 
         if (parent != null) {
-            Node prev = node(insert.prev());
-            Node next = node(insert.next());
+            Node prev = node(insert.getPrev());
+            Node next = node(insert.getNext());
 
             if (!parent.isOrdered()) {
                 parent.add(node);
             } else {
-                List items = parent.children();
+                List items = parent.getChildren();
 
                 if (next == null) {
                     if (!items.isEmpty() && items.get(items.size() - 1) == prev || items.isEmpty() && prev == null) {
@@ -119,10 +123,10 @@ public class Workspace {
         return projects;
     }
 
-    public List<Problem> apply(List<Change<?>> changes) {
+    public List<Problem> apply(List<Change> changes) {
         List<Problem> problems = new ArrayList<>();
         for (int i = 0; i < changes.size(); i++) {
-            Change<?> change = changes.get(i);
+            Change change = changes.get(i);
             batchUpdate = i < changes.size() - 1;
             Problem problem = change.accept(changeVisitor);
             if (problem != null) {
@@ -145,7 +149,7 @@ public class Workspace {
         return problems;
     }
 
-    public List<Problem> load(List<Change<?>> changes) {
+    public List<Problem> load(List<Change> changes) {
         loading = true;
         try {
             return apply(changes);
@@ -162,7 +166,7 @@ public class Workspace {
         nodes.clear();
         projects.clear();
 
-        List<Change<?>> changes = new ArrayList<>(appliedChanges);
+        List<Change> changes = new ArrayList<>(appliedChanges);
         appliedChanges.clear();
         apply(changes);
     }
@@ -172,11 +176,11 @@ public class Workspace {
     }
 
     public void addNode(Node<?> node) {
-        nodes.put(node.id(), node);
+        nodes.put(node.getId(), node);
         if (node instanceof ProjectNode) {
             projects.add((ProjectNode) node);
         }
-        node.children().forEach(this::addNode);
+        node.getChildren().forEach(this::addNode);
     }
 
     public boolean isBatchUpdate() {

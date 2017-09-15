@@ -24,7 +24,7 @@ class SignatureEditor(private val environment: Environment) : VBox() {
 
         children.add(SignatureItemEditor(environment, decl!!))
 
-        for (n in decl!!.children()) {
+        for (n in decl.children) {
             if (n !is VariableNode) {
                 break
             }

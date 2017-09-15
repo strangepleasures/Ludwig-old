@@ -1,12 +1,7 @@
 package ludwig.model
 
 
-class ReferenceNode(private val ref: Node<*>) : Node<ReferenceNode>() {
-
-    fun ref(): Node<*> {
-        return ref
-    }
-
+class ReferenceNode(val ref: Node<*>) : Node<ReferenceNode>() {
     override fun <T> accept(visitor: NodeVisitor<T>): T {
         return visitor.visitReference(this)
     }

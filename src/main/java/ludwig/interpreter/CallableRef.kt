@@ -18,7 +18,7 @@ class CallableRef(private val function: Node<*>) : Callable {
     }
 
     override val isLazy: Boolean
-        get() = function is FunctionNode && function.lazy()
+        get() = function is FunctionNode && function.lazy
 
     override fun argCount(): Int {
         return argCount

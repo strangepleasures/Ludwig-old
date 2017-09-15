@@ -14,12 +14,12 @@ class InterpreterTest {
     @Test
     fun testSimpleFunction() {
         val functionNode = FunctionNode()
-        functionNode.name("foo")
+        functionNode.name = "foo"
         val variableNode1 = VariableNode()
-        variableNode1.name("x")
+        variableNode1.name = "x"
         functionNode.add(variableNode1)
         val variableNode2 = VariableNode()
-        variableNode2.name("y")
+        variableNode2.name = "y"
         functionNode.add(variableNode2)
 
         val minus = Parser.item(systemPackage, "-") as FunctionNode?
@@ -39,10 +39,10 @@ class InterpreterTest {
     fun testClosure() {
         val lambda = LambdaNode()
 
-        lambda.add(VariableNode())
+        lambda.children.add(VariableNode())
         val plus = Parser.item(systemPackage, "+") as FunctionNode?
         val head = ReferenceNode(plus!!)
-        val referenceNode = ReferenceNode(lambda.children()[0])
+        val referenceNode = ReferenceNode(lambda.children[0])
         head.add(referenceNode)
         head.add(LiteralNode.ofValue(3.0))
         lambda.add(head)
@@ -59,7 +59,7 @@ class InterpreterTest {
     @Test
     @Ignore
     fun testDelayed() {
-        val or = Parser.item(systemPackage, "or") as FunctionNode?
+        val or = Parser.item(systemPackage, "or") as FunctionNode
         assertEquals(true, Interpreter.call(or, true, true))
         assertEquals(true, Interpreter.call(or, true, false))
         assertEquals(true, Interpreter.call(or, false, true))

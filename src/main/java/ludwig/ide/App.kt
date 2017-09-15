@@ -112,7 +112,7 @@ class App : Application() {
                 val changes = repository!!.pull(null)
                 environment.workspace().load(changes)
 
-                environment.workspace().changeListeners().add(Consumer<Change<*>> { change ->
+                environment.workspace().changeListeners().add(Consumer<Change> { change ->
                     try {
                         if (!environment.workspace().isLoading) {
                             repository!!.push(listOf(change))
