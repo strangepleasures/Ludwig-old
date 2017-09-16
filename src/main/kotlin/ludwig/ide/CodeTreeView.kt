@@ -16,16 +16,16 @@ class CodeTreeView(private val environment: Environment) : TreeView<Node>(TreeIt
         root.children.clear()
 
         if (node is FunctionNode) {
-            for (i in 0..node.children.size - 1) {
-                if (node.children[i] !is VariableNode) {
-                    setContent(root, node.children.subList(i, node.children.size))
+            for (i in 0..node.size - 1) {
+                if (node[i] !is VariableNode) {
+                    setContent(root, node.subList(i, node.size))
                     break
                 }
             }
         } else if (node is OverrideNode) {
-            for (i in 1..node.children.size - 1) {
-                if (node.children[i] !is VariableNode) {
-                    setContent(root, node.children.subList(i, node.children.size))
+            for (i in 1..node.size - 1) {
+                if (node[i] !is VariableNode) {
+                    setContent(root, node.subList(i, node.size))
                     break
                 }
             }
@@ -37,7 +37,7 @@ class CodeTreeView(private val environment: Environment) : TreeView<Node>(TreeIt
             val item = TreeItem(node)
             parent.children.add(item)
             item.isExpanded = true
-            setContent(item, node.children)
+            setContent(item, node)
         }
     }
 

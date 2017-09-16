@@ -13,7 +13,7 @@ object Interpreter {
         val head = ReferenceNode(functionNode)
 
         for (arg in args) {
-            head.children.add(LiteralNode.ofValue(arg!!))
+            head.add(LiteralNode.ofValue(arg!!))
         }
 
         return eval(head, HashTreePMap.empty())

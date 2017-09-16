@@ -96,7 +96,7 @@ private fun createRoot(workspace: Workspace): TreeItem<NamedNode> {
 
         root.children.add(projectItem)
 
-        for (packageNode in projectNode.children) {
+        for (packageNode in projectNode) {
             processPackage(projectItem, packageNode as PackageNode)
         }
     }
@@ -108,7 +108,7 @@ private fun processPackage(parent: TreeItem<NamedNode>, packageNode: PackageNode
     val packageItem = TreeItem<NamedNode>(packageNode)
     parent.children.add(packageItem)
 
-    for (node in packageNode.children) {
+    for (node in packageNode) {
         if (node is PackageNode) {
             processPackage(packageItem, node)
         }

@@ -18,14 +18,14 @@ class PrettyPrinter private constructor() : NodeVisitor<Unit> {
     override fun visitList(node: ListNode) {
         print("list")
         val inline = level(node) < 4
-        for (n in node.children) {
+        for (n in node) {
             child(n, inline)
         }
     }
 
     override fun visitFunction(functionNode: FunctionNode) {
         var body = false
-        for (child in functionNode.children) {
+        for (child in functionNode) {
             if (child !is VariableNode) {
                 body = true
             }
@@ -41,7 +41,7 @@ class PrettyPrinter private constructor() : NodeVisitor<Unit> {
 
     override fun visitCatch(catchNode: CatchNode) {
         print("catch")
-        catchNode.children.forEach { node -> child(node, false) }
+        catchNode.forEach { node -> child(node, false) }
     }
 
 
@@ -59,24 +59,24 @@ class PrettyPrinter private constructor() : NodeVisitor<Unit> {
     override fun visitReference(referenceNode: ReferenceNode) {
         print(referenceNode.toString())
         val inline = canBeInlined(referenceNode)
-        referenceNode.children.forEach { node -> child(node, inline) }
+        referenceNode.forEach { node -> child(node, inline) }
     }
 
     override fun visitFunctionReference(functionReference: FunctionReferenceNode) {
         print("ref ")
-        if (!functionReference.children.isEmpty()) {
-            print(functionReference.children[0].toString())
+        if (!functionReference.isEmpty()) {
+            print(functionReference[0].toString())
         }
     }
 
     override fun visitThrow(throwNode: ThrowNode) {
         print("throw ")
-        throwNode.children[0].accept(this)
+        throwNode[0].accept(this)
     }
 
     override fun visitTry(tryNode: TryNode) {
         print("try")
-        tryNode.children.forEach { node -> child(node, false) }
+        tryNode.forEach { node -> child(node, false) }
     }
 
     override fun visitPlaceholder(placeholderNode: PlaceholderNode) {
@@ -85,26 +85,26 @@ class PrettyPrinter private constructor() : NodeVisitor<Unit> {
 
     override fun visitBreak(breakNode: BreakNode) {
         print("break ")
-        breakNode.children[0].accept(this)
+        breakNode[0].accept(this)
     }
 
     override fun visitContinue(continueNode: ContinueNode) {
         print("continue ")
-        continueNode.children[0].accept(this)
+        continueNode[0].accept(this)
     }
 
     override fun visitOverride(overrideNode: OverrideNode) {
-        for (i in 1..overrideNode.children.size - 1) {
-            child(overrideNode.children[i], false)
+        for (i in 1..overrideNode.size - 1) {
+            child(overrideNode[i], false)
         }
     }
 
     override fun visitCall(callNode: CallNode) {
         print("call")
-        child(callNode.children[0], true)
+        child(callNode[0], true)
         val inline = level(callNode) < 4
-        for (i in 1..callNode.children.size - 1) {
-            child(callNode.children[i], inline)
+        for (i in 1..callNode.size - 1) {
+            child(callNode[i], inline)
         }
     }
 
@@ -113,7 +113,7 @@ class PrettyPrinter private constructor() : NodeVisitor<Unit> {
 
         var body = false
         val inline = level(lambdaNode) < 4
-        for (n in lambdaNode.children) {
+        for (n in lambdaNode) {
             if (!body && n !is VariableNode) {
                 body = true
                 print(" : ")
@@ -128,7 +128,7 @@ class PrettyPrinter private constructor() : NodeVisitor<Unit> {
 
     override fun visitReturn(returnNode: ReturnNode) {
         print("return")
-        returnNode.children.forEach { node -> child(node, true) }
+        returnNode.forEach { node -> child(node, true) }
     }
 
     override fun visitProject(projectNode: ProjectNode) {
@@ -136,30 +136,30 @@ class PrettyPrinter private constructor() : NodeVisitor<Unit> {
 
     override fun visitIf(ifNode: IfNode) {
         print("if")
-        child(ifNode.children[0], true)
-        for (i in 1 until ifNode.children.size) {
-            child(ifNode.children[i], false)
+        child(ifNode[0], true)
+        for (i in 1 until ifNode.size) {
+            child(ifNode[i], false)
         }
     }
 
     override fun visitAssignment(assignmentNode: AssignmentNode) {
         print("= ")
-        child(assignmentNode.children[0], true)
+        child(assignmentNode[0], true)
         val inline = level(assignmentNode) < 4
-        for (i in 1..assignmentNode.children.size - 1) {
-            child(assignmentNode.children[i], inline)
+        for (i in 1..assignmentNode.size - 1) {
+            child(assignmentNode[i], inline)
         }
     }
 
     override fun visitElse(elseNode: ElseNode) {
         print("else")
-        elseNode.children.forEach { node -> child(node, false) }
+        elseNode.forEach { node -> child(node, false) }
     }
 
     override fun visitFor(forNode: ForNode) {
         print("for")
-        for (i in 0..forNode.children.size - 1) {
-            child(forNode.children[i], i < 2)
+        for (i in 0..forNode.size - 1) {
+            child(forNode[i], i < 2)
         }
     }
 
@@ -196,8 +196,8 @@ class PrettyPrinter private constructor() : NodeVisitor<Unit> {
                 return false
             }
 
-            for (i in 0..node.children.size - 1 - 1) {
-                if (NodeUtils.argumentsCount(node.children[i]) > 3) {
+            for (i in 0..node.size - 1 - 1) {
+                if (NodeUtils.argumentsCount(node[i]) > 3) {
                     return false
                 }
             }
@@ -206,7 +206,7 @@ class PrettyPrinter private constructor() : NodeVisitor<Unit> {
         }
 
         private fun level(node: Node): Int {
-            return node.children.stream().map<Int>({ level(it) }).max(Comparator.naturalOrder()).orElse(0) + 1
+            return node.stream().map<Int>({ level(it) }).max(Comparator.naturalOrder()).orElse(0) + 1
         }
     }
 

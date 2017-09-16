@@ -180,13 +180,13 @@ class CodeEditor(private val environment: Environment) : TextArea() {
         val target = selectedItem as FunctionNode?
         if (sel != null) {
             head.parent = sel.parent!!.id
-            val index = sel.parent!!.children.indexOf(sel)
-            head.prev = if (index == 0) null else sel.parent!!.children[index - 1].id
-            head.next = if (index == sel.parent!!.children.size - 1) null else sel.parent!!.children[index + 1].id
+            val index = sel.parent!!.indexOf(sel)
+            head.prev = if (index == 0) null else sel.parent!![index - 1].id
+            head.next = if (index == sel.parent!!.size - 1) null else sel.parent!![index + 1].id
             changes.add(Delete().apply { id = sel.id })
         } else {
             head.parent = target!!.id
-            head.prev = if (target.children.isEmpty()) null else target.children[target.children.size - 1].id
+            head.prev = if (target.isEmpty()) null else target[target.size - 1].id
         }
 
         changes.add(head)

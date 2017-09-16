@@ -11,8 +11,8 @@ class Closure(private val locals: HashPMap<NamedNode, Any>, private val lambda: 
 
     init {
 
-        for (i in 0..lambda.children.size - 1) {
-            val node = lambda.children[i]
+        for (i in 0..lambda.size - 1) {
+            val node = lambda[i]
             if (node !is VariableNode) {
                 argCount = i
                 break
@@ -25,8 +25,8 @@ class Closure(private val locals: HashPMap<NamedNode, Any>, private val lambda: 
         var visitor: Evaluator? = null
         var result: Any? = null
 
-        for (i in 0..lambda.children.size - 1) {
-            val node = lambda.children[i]
+        for (i in 0..lambda.size - 1) {
+            val node = lambda[i]
             if (node is VariableNode) {
                 env = env.plus(node as NamedNode, args[i])
             } else {

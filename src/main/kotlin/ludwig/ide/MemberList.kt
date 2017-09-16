@@ -33,7 +33,7 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
         items.clear()
 
         if (packageNode != null) {
-            items = ObservableListWrapper(packageNode.children
+            items = ObservableListWrapper(packageNode
                     .stream()
                     .filter { item -> item !is PackageNode }
                     .sorted(Comparator.comparing<Node, String> { n -> NodeUtils.signature(n).toLowerCase() })

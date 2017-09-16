@@ -42,7 +42,7 @@ object NodeUtils {
         if (!onlyChildren) {
             nodes.add(node)
         }
-        for (child in node.children) {
+        for (child in node) {
             expandNode(child, false, nodes)
         }
     }
@@ -53,7 +53,7 @@ object NodeUtils {
                 return signature(declaration(obj))
             }
             val builder = StringBuilder(obj.toString())
-            for (child in obj.children) {
+            for (child in obj) {
                 if (child is VariableNode) {
                     builder.append(' ')
                     builder.append(child.toString())
@@ -77,7 +77,7 @@ object NodeUtils {
             return arguments(declaration(node))
         }
         val args = mutableListOf<String>()
-        for (child in node.children) {
+        for (child in node) {
             if (child !is VariableNode) {
                 break
             }
@@ -87,7 +87,7 @@ object NodeUtils {
     }
 
     fun declaration(node: OverrideNode): FunctionNode {
-        return (node.children[0] as ReferenceNode).ref as FunctionNode
+        return (node[0] as ReferenceNode).ref as FunctionNode
     }
 
     fun isReadonly(node: Node?): Boolean {
@@ -101,7 +101,7 @@ object NodeUtils {
         if (root is VariableNode && root.name.startsWith(filter)) {
             locals.add(root)
         }
-        root.children.forEach { child -> collectLocals(child, stop, filter, locals) }
+        root.forEach { child -> collectLocals(child, stop, filter, locals) }
     }
 
     fun collectLocals(root: Node, stop: Node, filter: String): List<Node> {

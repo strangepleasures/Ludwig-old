@@ -16,10 +16,10 @@ class ClassType private constructor(node: ClassNode) {
 
     init {
         this.name = node.name
-        this.superClass = if (node.children.isEmpty()) null else of((node.children[0] as ReferenceNode).ref as ClassNode)
+        this.superClass = if (node.isEmpty()) null else of((node[0] as ReferenceNode).ref as ClassNode)
         var fields = superClass?.fields ?: TreePVector.empty()
-        for (i in 1..node.children.size - 1) {
-            fields = fields.plus(node.children[i] as VariableNode)
+        for (i in 1..node.size - 1) {
+            fields = fields.plus(node[i] as VariableNode)
         }
         this.fields = fields
         typesByName.put(node.parent.toString() + ":" + node.name, this)

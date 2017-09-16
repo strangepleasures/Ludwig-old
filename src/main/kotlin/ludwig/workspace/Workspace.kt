@@ -28,7 +28,7 @@ class Workspace {
         builtins.name = "Runtime"
         builtins.readonly = true
         builtins.id = "Runtime"
-        builtins.children.add(Builtins.of(StdLib))
+        builtins.add(Builtins.of(StdLib))
 
         addNode(builtins)
 
@@ -59,7 +59,7 @@ class Workspace {
 
         override fun visitDelete(delete: Delete): Problem? {
             val node = node<Node>(delete.id)
-            node!!.parent!!.children.remove(node)
+            node!!.parent!!.remove(node)
             node.delete()
             return null
         }
@@ -87,13 +87,13 @@ class Workspace {
             val next = node<Node>(insert.next)
 
             if (!parent.isOrdered) {
-                parent.children.add(node)
+                parent.add(node)
             } else {
-                val items = parent.children
+                val items = parent
 
                 if (next == null) {
                     if (!items.isEmpty() && items[items.size - 1] === prev || items.isEmpty() && prev == null) {
-                        parent.children.add(node)
+                        parent.add(node)
                     }
                 } else if (prev == null) {
                     if (!items.isEmpty() && items[0] === next) {
@@ -165,7 +165,7 @@ class Workspace {
         if (node is ProjectNode) {
             projects.add(node)
         }
-        node.children.forEach(Consumer { this.addNode(it) })
+        node.forEach(Consumer { this.addNode(it) })
     }
 
     companion object {

@@ -16,7 +16,7 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
 
     override fun visitList(listNode: ListNode): Any? {
         var list = TreePVector.empty<Any?>()
-        for (item in listNode.children) {
+        for (item in listNode) {
             list = list.plus(item.accept(this))
         }
         return list
@@ -38,28 +38,28 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
         val head = referenceNode.ref
 
         val isLazy = head is FunctionNode && head.lazy
-        val args = arrayOfNulls<Any>(referenceNode.children.size)
+        val args = arrayOfNulls<Any>(referenceNode.size)
         for (i in args.indices) {
-            args[i] = if (isLazy) Return<Any?>(referenceNode.children[i], locals!!) else referenceNode.children[i].accept(this)
+            args[i] = if (isLazy) Return<Any?>(referenceNode[i], locals!!) else referenceNode[i].accept(this)
         }
 
         return untail(tail(head, args))
     }
 
     override fun visitFunctionReference(functionReference: FunctionReferenceNode): Any? {
-        val node = (functionReference.children[0] as ReferenceNode).ref
+        val node = (functionReference[0] as ReferenceNode).ref
         return if (node !is Callable) {
             CallableRef(node)
         } else node
     }
 
     override fun visitThrow(throwNode: ThrowNode): Any {
-        return Error(throwNode.children[0].accept(this).toString())
+        return Error(throwNode[0].accept(this).toString())
     }
 
     override fun visitTry(tryNode: TryNode): Any? {
         var result: Any? = null
-        for (node in tryNode.children) {
+        for (node in tryNode) {
             try {
                 result = node.accept(this)
                 if (result is Signal) {
@@ -104,7 +104,7 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
         val saved = Error.error()
 
         var result: Any? = null
-        for (node in catchNode.children) {
+        for (node in catchNode) {
             try {
                 result = node.accept(this)
                 if (result is Signal) {
@@ -122,7 +122,7 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
     }
 
     override fun visitCall(callNode: CallNode): Any? {
-        val head = callNode.children[0].accept(this)
+        val head = callNode[0].accept(this)
         if (head is Delayed<*>) {
             return untail(head.get())
         }
@@ -131,7 +131,7 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
 
         val delayed = callable.isLazy
 
-        val args = callNode.children
+        val args = callNode
                 .stream()
                 .skip(1)
                 .map { node -> if (delayed) Return<Any?>(node, locals!!) else node.accept(this) }
@@ -145,7 +145,7 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
     }
 
     override fun visitReturn(returnNode: ReturnNode): Any? {
-        return Return<Any?>(returnNode.children[0], locals!!)
+        return Return<Any?>(returnNode[0], locals!!)
     }
 
     override fun visitProject(projectNode: ProjectNode): Any? {
@@ -153,10 +153,10 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
     }
 
     override fun visitIf(ifNode: IfNode): Any? {
-        val test = ifNode.children[0].accept(this) as Boolean
+        val test = ifNode[0].accept(this) as Boolean
         if (test) {
             var result: Any? = null
-            for (node in ifNode.children) {
+            for (node in ifNode) {
                 result = node.accept(this)
                 if (result is Signal) {
                     break
@@ -170,13 +170,13 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
     }
 
     override fun visitAssignment(assignmentNode: AssignmentNode): Any? {
-        val value = assignmentNode.children[1].accept(this)
+        val value = assignmentNode[1].accept(this)
 
-        var lhs = assignmentNode.children[0]
+        var lhs = assignmentNode[0]
         if (lhs is ReferenceNode) {
             lhs = lhs.ref
             if (NodeUtils.isField(lhs)) {
-                val instance = assignmentNode.children[0].children[0].accept(this) as Instance
+                val instance = assignmentNode[0][0].accept(this) as Instance
                 instance[lhs as VariableNode] = value
                 return value
             }
@@ -190,7 +190,7 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
         if (doElse) {
             doElse = false
             var result: Any? = null
-            for (node in elseNode.children) {
+            for (node in elseNode) {
                 result = node.accept(this)
                 if (result is Signal) {
                     break
@@ -203,11 +203,11 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
     }
 
     override fun visitFor(forNode: ForNode): Any? {
-        loop@ for (`var` in forNode.children[1].accept(this) as Iterable<*>) {
-            val v = forNode.children[0] as VariableNode
+        loop@ for (`var` in forNode[1].accept(this) as Iterable<*>) {
+            val v = forNode[0] as VariableNode
             locals = locals!!.plus(v, `var`)
-            for (i in 1..forNode.children.size - 1) {
-                val value = forNode.children[i].accept(this)
+            for (i in 1..forNode.size - 1) {
+                val value = forNode[i].accept(this)
                 if (value is Signal) {
                     if (value is Break) {
                         break@loop
@@ -268,21 +268,21 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
 
             try {
                 for (i in args.indices) {
-                    locals = locals!!.plus(head.children[i] as NamedNode, args[i])
+                    locals = locals!!.plus(head[i] as NamedNode, args[i])
                 }
 
                 var result: Any? = null
 
                 if (impl is OverrideNode) {
-                    for (i in 1..impl.children.size - 1) {
-                        result = impl.children[i].accept(this)
+                    for (i in 1..impl.size - 1) {
+                        result = impl[i].accept(this)
                         if (result is Signal) {
                             break
                         }
                     }
                 } else {
-                    for (i in args.size..head.children.size - 1) {
-                        result = head.children[i].accept(this)
+                    for (i in args.size..head.size - 1) {
+                        result = head[i].accept(this)
                         if (result is Signal) {
                             break
                         }
@@ -296,19 +296,19 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
             }
         }
         if (head is OverrideNode) {
-            val fn = (head.children[0] as ReferenceNode).ref as FunctionNode
+            val fn = (head[0] as ReferenceNode).ref as FunctionNode
             val savedLocals = locals
 
             try {
                 for (i in args.indices) {
-                    locals = locals!!.plus(fn.children[i] as NamedNode, args[i])
+                    locals = locals!!.plus(fn[i] as NamedNode, args[i])
                 }
 
                 var result: Any? = null
 
                 if (impl is OverrideNode) {
-                    for (i in 1..impl.children.size - 1) {
-                        result = impl.children[i].accept(this)
+                    for (i in 1..impl.size - 1) {
+                        result = impl[i].accept(this)
                         if (result is Signal) {
                             break
                         }

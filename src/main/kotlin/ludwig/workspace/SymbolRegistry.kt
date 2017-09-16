@@ -37,7 +37,7 @@ class SymbolRegistry(workspace: Workspace) {
 
     private fun deleteNode(node: Node) {
         symbols.remove(node)
-        node.children.forEach(Consumer<Node> { this.deleteNode(it) })
+        node.forEach(Consumer<Node> { this.deleteNode(it) })
     }
 
     fun symbols(s: String): SortedSet<NamedNode> =
@@ -48,7 +48,7 @@ class SymbolRegistry(workspace: Workspace) {
         if (node is FunctionNode || NodeUtils.isField(node)) {
             symbols.add(node)
         } else {
-            node.children.forEach(Consumer<Node> { this.grab(it) })
+            node.forEach(Consumer<Node> { this.grab(it) })
         }
 
     }

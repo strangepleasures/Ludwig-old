@@ -30,7 +30,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
         consume("package")
 
         val packageName = nextToken()
-        val packageNode = projectNode.children.stream().map { n -> n as PackageNode }
+        val packageNode = projectNode.stream().map { n -> n as PackageNode }
                 .filter { n -> n.name == packageName }
                 .findFirst()
                 .orElseGet { append(projectNode, PackageNode().apply { name = packageName }) }
@@ -120,7 +120,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                 }
                 val node = item(packageNode, nextToken()) as FunctionNode?
                 locals = HashTreePMap.empty<String, NamedNode>()
-                for (child in node!!.children) {
+                for (child in node!!) {
                     if (child !is VariableNode) {
                         break
                     }
@@ -147,14 +147,14 @@ class Parser private constructor(private val tokens: List<String>, private val w
 
                 locals = HashTreePMap.empty<String, NamedNode>()
 
-                for (child in fn!!.children) {
+                for (child in fn!!) {
                     if (child !is VariableNode) {
                         break
                     }
                     locals = locals.plus(child.name, child)
                 }
 
-                for (child in classNode!!.children) {
+                for (child in classNode!!) {
                     if (child !is VariableNode) {
                         continue
                     }
@@ -251,7 +251,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
 
                     if (!isField) {
                         pos = savedPos
-                        node!!.children.clear()
+                        node!!.clear()
                         if (locals.containsKey(name)) {
                             appendRef(node, locals[name])
                             parseChild(node)
@@ -286,7 +286,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                             val r = appendRef(parent, fn)
                             if (currentToken() == ")") {
                                 pos = savedPos
-                                parent!!.children.removeAt(parent.children.size - 1)
+                                parent!!.removeAt(parent.size - 1)
                             } else {
                                 parseChild(r)
                                 return
@@ -301,16 +301,16 @@ class Parser private constructor(private val tokens: List<String>, private val w
                     if (headNode is FunctionNode) {
                         val fn = headNode as FunctionNode?
                         val r = appendRef(parent, fn)
-                        for (param in fn!!.children) {
+                        for (param in fn!!) {
                             if (param !is VariableNode) {
                                 break
                             }
                             parseChild(r)
                         }
                     } else if (headNode is OverrideNode) {
-                        val fn = (headNode.children[0] as ReferenceNode).ref as FunctionNode
+                        val fn = (headNode[0] as ReferenceNode).ref as FunctionNode
                         val r = appendRef(parent, headNode)
-                        for (param in fn.children) {
+                        for (param in fn) {
                             if (param !is VariableNode) {
                                 break
                             }
@@ -358,7 +358,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
     // TODO: Optimize
     private fun find(name: String): NamedNode? {
         return workspace.projects
-                .flatMap { it.children }
+                .flatMap { it }
                 .map { it as PackageNode }
                 .firstOrNull { item(it, name) != null }
                 ?.let { item(it, name) }
@@ -389,7 +389,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
         val change = InsertNode().apply {
             this.node = node;
             this.parent = parent!!.id;
-            prev = if (parent.children.isEmpty()) null else parent.children[parent.children.size - 1].id
+            prev = if (parent.isEmpty()) null else parent[parent.size - 1].id
         }
         workspace.apply(listOf(change))
         return workspace.node<Node>(node.id) as T?
@@ -397,7 +397,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
 
     private fun appendRef(parent: Node?, node: Node?): ReferenceNode {
         val change = InsertReference()
-                .apply { id = newId(); ref = node!!.id; this.parent = parent!!.id; prev = if (parent.children.isEmpty()) null else parent.children[parent.children.size - 1].id }
+                .apply { id = newId(); ref = node!!.id; this.parent = parent!!.id; prev = if (parent.isEmpty()) null else parent[parent.size - 1].id }
         workspace.apply(listOf(change))
         return workspace.node<Node>(change.id) as ReferenceNode
     }
@@ -416,7 +416,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
         }
 
         fun item(findByName: PackageNode, name: String): NamedNode? {
-            return findByName.children.stream().filter { n -> n is NamedNode }.map { n -> n as NamedNode }.filter { it -> it.name == name }.findFirst().orElse(null)
+            return findByName.stream().filter { n -> n is NamedNode }.map { n -> n as NamedNode }.filter { it -> it.name == name }.findFirst().orElse(null)
         }
     }
 }

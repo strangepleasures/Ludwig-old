@@ -1,15 +1,16 @@
 package ludwig.model
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
-abstract class Node {
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+abstract class Node : MutableList<Node> by mutableListOf<Node>() {
     lateinit var id: String
     var comment: String? = null
     @JsonIgnore
     var parent: Node? = null
-    val children = mutableListOf<Node>()
     @JsonIgnore
     private var deleted = false
 
@@ -31,9 +32,9 @@ abstract class Node {
     fun delete() {
         this.deleted = true
         if (parent != null && !parent!!.deleted) {
-            parent!!.children.remove(this)
+            parent!!.remove(this)
         }
-        children.forEach({ it.delete() })
+        forEach({ it.delete() })
     }
 
     open val isOrdered: Boolean

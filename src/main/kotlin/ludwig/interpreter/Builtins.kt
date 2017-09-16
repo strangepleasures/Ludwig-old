@@ -31,7 +31,7 @@ object Builtins {
             if (Modifier.isPublic(method.modifiers)) {
                 val fn = function(method)
                 callables.put(fn, NativeFunction(instance, method))
-                p.children.add(fn)
+                p.add(fn)
             }
         }
         return p
@@ -69,9 +69,9 @@ object Builtins {
             if (parameter.isAnnotationPresent(Description::class.java)) {
                 param.comment = parameter.getAnnotation(Description::class.java).value
             }
-            f.children.add(param)
+            f.add(param)
         }
-        f.children.add(PlaceholderNode().apply { parameter = "Built-in function"; id = f.id + ":body" })
+        f.add(PlaceholderNode().apply { parameter = "Built-in function"; id = f.id + ":body" })
 
         return f
     }
