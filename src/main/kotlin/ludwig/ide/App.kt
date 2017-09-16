@@ -1,11 +1,14 @@
 package ludwig.ide
 
+import aballano.kotlinmemoization.memoize
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import javafx.application.Application
 import javafx.application.Platform
 import javafx.scene.Scene
 import javafx.scene.control.*
+import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.layout.BorderPane
 import javafx.stage.FileChooser
 import javafx.stage.Stage
@@ -137,3 +140,5 @@ class App : Application() {
         }
     }
 }
+
+val icons = { name: String -> ImageView(Image(App::class.java.getResourceAsStream("/icons/$name.png"))) }.memoize()
