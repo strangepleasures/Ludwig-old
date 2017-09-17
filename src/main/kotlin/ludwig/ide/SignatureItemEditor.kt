@@ -34,7 +34,7 @@ class SignatureItemEditor(private val environment: Environment, private val node
             }
 
             private fun applyChanges() {
-                environment.workspace().apply(listOf(Rename().apply { nodeId = node.id; name = text }))
+                environment.workspace().apply(Rename().apply { nodeId = node.id; name = text })
             }
         }
 
@@ -60,7 +60,7 @@ class SignatureItemEditor(private val environment: Environment, private val node
             }
 
             private fun applyChanges() {
-                environment.workspace().apply(listOf(Comment().apply { nodeId = node.id; comment = text }))
+                environment.workspace().apply(Comment().apply { nodeId = node.id; comment = text })
             }
         }
 

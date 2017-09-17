@@ -3,7 +3,6 @@ package ludwig.ide
 import javafx.scene.control.SplitPane
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.VBox
-import ludwig.changes.Change
 import ludwig.model.*
 import ludwig.workspace.Environment
 
@@ -44,7 +43,7 @@ class EditorPane(private val environment: Environment, private val settings: Set
             }
         }
 
-        environment.workspace().changeListeners().add({ processChanges(it) })
+        environment.workspace().changeListeners().add({ refresh() })
     }
 
     private fun displayMember() {
@@ -59,11 +58,6 @@ class EditorPane(private val environment: Environment, private val settings: Set
         } else membersList.selectionModel.selectedItem
     }
 
-    private fun processChanges(change: Change) {
-        if (!environment.workspace().isBatchUpdate) {
-            refresh()
-        }
-    }
 
     private fun navigateTo(node: Node) {
         packageTree.select(node.parentOfType(PackageNode::class.java))

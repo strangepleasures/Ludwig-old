@@ -6,8 +6,8 @@ import java.io.IOException
 
 interface ChangeRepository {
     @Throws(IOException::class)
-    fun push(changes: List<Change>)
+    fun push(changes: Array<out Change>)
 
     @Throws(IOException::class)
-    fun pull(sinceChangeId: String?): List<Change>
+    fun pull(sinceChangeId: String?): Array<out Change>
 }

@@ -17,7 +17,7 @@ class SymbolRegistry(workspace: Workspace) {
     private val nodesById = HashMap<String, Node>()
 
     init {
-        workspace.changeListeners().add({ change ->
+        workspace.changeListeners().add(changeListener { change ->
             if (change is Rename) {
                 val node = workspace.node(change.nodeId)
                 if (node is FunctionNode || NodeUtils.isField(node)) {

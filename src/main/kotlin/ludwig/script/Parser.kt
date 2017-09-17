@@ -61,7 +61,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                     append(classNode, VariableNode().apply { name = nextToken() })
                 }
                 consume(")")
-                ClassType.of(classNode!!)
+                ClassType.of(classNode)
             }
             "def" -> {
                 var lazy = false
@@ -148,14 +148,14 @@ class Parser private constructor(private val tokens: List<String>, private val w
 
                 locals = HashTreePMap.empty<String, NamedNode>()
 
-                for (child in fn!!) {
+                for (child in fn) {
                     if (child !is VariableNode) {
                         break
                     }
                     locals = locals.plus(child.name, child)
                 }
 
-                for (child in classNode!!) {
+                for (child in classNode) {
                     if (child !is VariableNode) {
                         continue
                     }
@@ -172,7 +172,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                     nextToken()
                 }
 
-                ClassType.of(classNode).overrides().put(fn, node!!)
+                ClassType.of(classNode).overrides().put(fn, node)
             }
             "field" -> {
                 nextToken()
@@ -345,8 +345,12 @@ class Parser private constructor(private val tokens: List<String>, private val w
 
     @Throws(ParserException::class)
     private fun consume(token: String) {
-        if (nextToken() != token) {
-            throw ParserException("Expected " + token)
+        try {
+            if (nextToken() != token) {
+                throw ParserException("Expected " + token)
+            }
+        } catch (e: ParserException) {
+
         }
     }
 
@@ -390,14 +394,14 @@ class Parser private constructor(private val tokens: List<String>, private val w
             changes.add(Value().apply { nodeId = create.changeId; value = node.text })
         }
 
-        workspace.apply(changes)
+        workspace.apply(*changes.toTypedArray())
         return workspace.node(create.changeId) as T
     }
 
     private fun appendRef(parent: Node?, node: Node?): ReferenceNode {
         val create = Create().apply { nodeType = ReferenceNode::class.simpleName!!; this.parent = parent!!.id; prev = if (parent.isEmpty()) null else parent[parent.size - 1].id }
         val value = Value().apply { nodeId = create.changeId; value = node!!.id }
-        workspace.apply(listOf(create, value))
+        workspace.apply(create, value)
         return workspace.node(create.changeId) as ReferenceNode
     }
 

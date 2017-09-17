@@ -175,7 +175,7 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
             }
             val selectedItem = selectionModel.selectedItem
             if (selectedItem != null) {
-                environment.workspace().apply(listOf<Change>(Delete().apply { nodeId = selectedItem.id }))
+                environment.workspace().apply(Delete().apply { nodeId = selectedItem.id })
             }
         }
     }

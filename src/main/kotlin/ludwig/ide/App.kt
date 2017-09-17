@@ -113,10 +113,10 @@ class App : Application() {
                 val changes = repository!!.pull(null)
                 environment.workspace().load(changes)
 
-                environment.workspace().changeListeners().add({ change ->
+                environment.workspace().changeListeners().add({ changes ->
                     try {
                         if (!environment.workspace().isLoading) {
-                            repository!!.push(listOf(change))
+                            repository!!.push(changes)
                         }
                     } catch (e: IOException) {
 

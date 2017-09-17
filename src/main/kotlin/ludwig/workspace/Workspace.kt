@@ -14,10 +14,8 @@ class Workspace {
     private val nodes = HashMap<String, Node>()
     private val appliedChanges = mutableListOf<Change>()
     val projects = mutableListOf<ProjectNode>()
-    private val changeListeners = mutableListOf<(Change) -> Unit>()
+    private val changeListeners = mutableListOf<(Array<out Change>) -> Unit>()
     private val builtins = ProjectNode()
-    var isBatchUpdate: Boolean = false
-        private set
     var isLoading: Boolean = false
         private set
 
@@ -30,15 +28,15 @@ class Workspace {
         addNode(builtins)
 
         try {
-            InputStreamReader(Workspace::class.java.getResourceAsStream("/system.lw")).use { reader -> Parser.parse(reader, this, builtins!!) }
-            InputStreamReader(Workspace::class.java.getResourceAsStream("/system-tests.lw")).use { reader -> Parser.parse(reader, this, builtins!!) }
+            InputStreamReader(Workspace::class.java.getResourceAsStream("/system.lw")).use { reader -> Parser.parse(reader, this, builtins) }
+            InputStreamReader(Workspace::class.java.getResourceAsStream("/system-tests.lw")).use { reader -> Parser.parse(reader, this, builtins) }
         } catch (e: Exception) {
             throw RuntimeException(e)
         }
 
     }
 
-    fun changeListeners(): MutableList<(Change) -> Unit> {
+    fun changeListeners(): MutableList<(Array<out Change>) -> Unit> {
         return changeListeners
     }
 
@@ -77,7 +75,7 @@ class Workspace {
         return null
     }
 
-    fun apply(changes: List<Change>): List<Problem> {
+    fun apply(vararg changes: Change): List<Problem> {
         val problems = mutableListOf<Problem>()
         for (change in changes) {
             when (change) {
@@ -99,6 +97,8 @@ class Workspace {
             }
         }
 
+        changeListeners.forEach({ it(changes) })
+
         if (problems.isEmpty()) { // TODO: Make a distinction between warnings and errors
             appliedChanges.addAll(changes)
 
@@ -109,10 +109,10 @@ class Workspace {
         return problems
     }
 
-    fun load(changes: List<Change>): List<Problem> {
+    fun load(changes: Array<out Change>): List<Problem> {
         isLoading = true
         try {
-            return apply(changes)
+            return apply(*changes)
         } finally {
             isLoading = false
         }
@@ -124,7 +124,7 @@ class Workspace {
 
         val changes = ArrayList(appliedChanges)
         appliedChanges.clear()
-        apply(changes)
+        apply(*changes.toTypedArray())
     }
 
     fun node(id: String?): Node? {
@@ -138,8 +138,6 @@ class Workspace {
         }
         node.forEach(Consumer { this.addNode(it) })
     }
-
-    companion object {
-        val MAX_PROBLEMS = 10
-    }
 }
+
+fun changeListener(consumer: (Change) -> Unit): (Array<out Change>) -> Unit = { changes -> changes.forEach(consumer) }

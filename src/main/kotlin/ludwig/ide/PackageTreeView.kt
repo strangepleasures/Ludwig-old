@@ -65,7 +65,7 @@ internal class PackageTreeView : TreeView<NamedNode> {
                 dialog.showAndWait().ifPresent { name ->
                     val create = Create().apply { nodeType = PackageNode::class.simpleName!!; this.parent = parent.id }
                     val rename = Rename().apply { this.name = name; nodeId = create.changeId }
-                    workspace.apply(listOf(create, rename))
+                    workspace.apply(create, rename)
                     //                   select(packageNode)
                 }
             }
@@ -79,7 +79,7 @@ internal class PackageTreeView : TreeView<NamedNode> {
                     return
                 }
                 val parent = packageNode.parent as NamedNode?
-                workspace.apply(listOf(Delete().apply { nodeId = packageNode.id }))
+                workspace.apply(Delete().apply { nodeId = packageNode.id })
                 select(parent)
             }
         }

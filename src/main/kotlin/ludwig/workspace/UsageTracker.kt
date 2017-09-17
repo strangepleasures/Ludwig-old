@@ -2,21 +2,21 @@ package ludwig.workspace
 
 import com.google.common.collect.HashMultimap
 import ludwig.changes.Value
-import ludwig.model.NamedNode
+import ludwig.model.Node
 import ludwig.model.ReferenceNode
 
 class UsageTracker(workspace: Workspace) {
-    private val refs = HashMultimap.create<NamedNode, ReferenceNode>()
+    private val refs = HashMultimap.create<Node, ReferenceNode>()
 
     init {
-        workspace.changeListeners().add({ change ->
+        workspace.changeListeners().add(changeListener { change ->
             if (change is Value && workspace.node(change.nodeId) is ReferenceNode) {
-                refs.put(workspace.node(change.value) as NamedNode, workspace.node(change.nodeId) as ReferenceNode)
+                refs.put(workspace.node(change.value), workspace.node(change.nodeId) as ReferenceNode)
             }
         })
     }
 
-    fun usages(node: NamedNode): Set<ReferenceNode> {
+    fun usages(node: Node): Set<ReferenceNode> {
         return refs.get(node)
     }
 
