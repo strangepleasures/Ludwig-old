@@ -1,8 +1,9 @@
 package ludwig.script
 
-import ludwig.changes.InsertNode
-import ludwig.changes.InsertReference
-import ludwig.changes.newId
+import ludwig.changes.Change
+import ludwig.changes.Create
+import ludwig.changes.Rename
+import ludwig.changes.Value
 import ludwig.interpreter.ClassType
 import ludwig.model.*
 import ludwig.utils.NodeUtils.isField
@@ -209,7 +210,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
 
             when (head) {
                 "call", "if", "else", "return", "throw", "try", "catch", "list", "break", "continue" -> {
-                    val node = append(parent, createSpecial(head))
+                    val node = append(parent, createSpecial(head)!!)
                     while (currentToken() != ")") {
                         parseChild(node)
                     }
@@ -222,10 +223,8 @@ class Parser private constructor(private val tokens: List<String>, private val w
                     val node = append(parent, ForNode())
                     val variable = VariableNode()
                     variable.name = nextToken()
-                    append(node, variable)
-
                     val savedLocals = locals
-                    locals = locals.plus(variable.name, variable)
+                    locals = locals.plus(variable.name, append(node, variable))
 
                     while (currentToken() != ")") {
                         parseChild(node)
@@ -323,7 +322,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                             parseChild(r)
                         }
                     } else if (Lexer.isLiteral(head)) {
-                        append(parent, LiteralNode(head))
+                        append(parent, LiteralNode().apply { text = head })
                     } else {
                         throw ParserException("Unknown symbol: " + head)
                     }
@@ -380,26 +379,26 @@ class Parser private constructor(private val tokens: List<String>, private val w
         return null
     }
 
-    private fun <T : Node> append(parent: Node?, node: T?): T? {
+    private fun <T : Node> append(parent: Node?, node: T): T {
+        val create = Create().apply { nodeType = node::class.simpleName!!; this.parent = parent!!.id; prev = if (parent.isEmpty()) null else parent[parent.size - 1].id }
+        val changes = mutableListOf<Change>(create)
         if (node is NamedNode) {
-            node.id = parent!!.id + ":" + (node as NamedNode).name
-        } else {
-            node!!.id = newId()
+            create.changeId = parent!!.id + ":" + node.name
+            changes.add(Rename().apply { nodeId = create.changeId; name = node.name })
         }
-        val change = InsertNode().apply {
-            this.node = node;
-            this.parent = parent!!.id;
-            prev = if (parent.isEmpty()) null else parent[parent.size - 1].id
+        if (node is LiteralNode) {
+            changes.add(Value().apply { nodeId = create.changeId; value = node.text })
         }
-        workspace.apply(listOf(change))
-        return workspace.node<Node>(node.id) as T?
+
+        workspace.apply(changes)
+        return workspace.node(create.changeId) as T
     }
 
     private fun appendRef(parent: Node?, node: Node?): ReferenceNode {
-        val change = InsertReference()
-                .apply { id = newId(); ref = node!!.id; this.parent = parent!!.id; prev = if (parent.isEmpty()) null else parent[parent.size - 1].id }
-        workspace.apply(listOf(change))
-        return workspace.node<Node>(change.id) as ReferenceNode
+        val create = Create().apply { nodeType = ReferenceNode::class.simpleName!!; this.parent = parent!!.id; prev = if (parent.isEmpty()) null else parent[parent.size - 1].id }
+        val value = Value().apply { nodeId = create.changeId; value = node!!.id }
+        workspace.apply(listOf(create, value))
+        return workspace.node(create.changeId) as ReferenceNode
     }
 
     companion object {

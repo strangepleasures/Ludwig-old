@@ -3,10 +3,9 @@ package ludwig.ide
 import javafx.scene.control.TextInputDialog
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeView
-import ludwig.changes.Change
+import ludwig.changes.Create
 import ludwig.changes.Delete
-import ludwig.changes.InsertNode
-import ludwig.changes.newId
+import ludwig.changes.Rename
 import ludwig.model.NamedNode
 import ludwig.model.PackageNode
 import ludwig.utils.NodeUtils
@@ -64,11 +63,10 @@ internal class PackageTreeView : TreeView<NamedNode> {
                 dialog.contentText = "Package name"
 
                 dialog.showAndWait().ifPresent { name ->
-                    val packageNode = PackageNode().apply { this.name = name; id = newId() }
-                    val insert = InsertNode()
-                            .apply { node = packageNode; this.parent = parent.id }
-                    workspace.apply(listOf<Change>(insert))
-                    select(packageNode)
+                    val create = Create().apply { nodeType = PackageNode::class.simpleName!!; this.parent = parent.id }
+                    val rename = Rename().apply { this.name = name; nodeId = create.changeId }
+                    workspace.apply(listOf(create, rename))
+                    //                   select(packageNode)
                 }
             }
         }
@@ -81,7 +79,7 @@ internal class PackageTreeView : TreeView<NamedNode> {
                     return
                 }
                 val parent = packageNode.parent as NamedNode?
-                workspace.apply(listOf(Delete().apply { id = packageNode.id }))
+                workspace.apply(listOf(Delete().apply { nodeId = packageNode.id }))
                 select(parent)
             }
         }

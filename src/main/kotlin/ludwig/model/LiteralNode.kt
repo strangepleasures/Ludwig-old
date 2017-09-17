@@ -2,7 +2,8 @@ package ludwig.model
 
 import ludwig.utils.NodeUtils
 
-class LiteralNode(val text: String) : Node() {
+class LiteralNode() : Node() {
+    lateinit var text: String
 
     //@JsonIgnore
     val value: Any? by lazy {
@@ -15,12 +16,5 @@ class LiteralNode(val text: String) : Node() {
 
     override fun toString(): String {
         return text
-    }
-
-    companion object {
-
-        fun ofValue(value: Any): LiteralNode {
-            return LiteralNode(value.toString())
-        }
     }
 }

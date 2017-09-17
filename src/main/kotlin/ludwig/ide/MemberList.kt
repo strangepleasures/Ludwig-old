@@ -5,10 +5,13 @@ import impl.org.controlsfx.autocompletion.AutoCompletionTextFieldBinding
 import javafx.scene.control.Alert
 import javafx.scene.control.ListView
 import javafx.scene.control.TextInputDialog
-import ludwig.changes.*
+import ludwig.changes.Change
+import ludwig.changes.Delete
 import ludwig.interpreter.Callable
 import ludwig.interpreter.CallableRef
-import ludwig.model.*
+import ludwig.model.NamedNode
+import ludwig.model.Node
+import ludwig.model.PackageNode
 import ludwig.script.Lexer
 import ludwig.script.LexerException
 import ludwig.utils.NodeUtils
@@ -67,25 +70,25 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
                 }
 
                 if (!parts.isEmpty()) {
-                    val changes = mutableListOf<Change>()
-
-                    val insertFn = InsertNode()
-                            .apply { parent = packageNode!!.id; node = FunctionNode().apply { name = parts[0]; id = newId() } }
-
-                    changes.add(insertFn)
-
-                    var prev: String? = null
-                    for (i in 1 until parts.size) {
-                        val id = newId()
-                        changes.add(InsertNode()
-                                .apply { parent = insertFn.node.id; this.prev = prev; node = VariableNode().apply { name = parts[i]; this.id = id } })
-                        prev = id
-                    }
-
-                    environment.workspace().apply(changes)
-
-                    val fn = environment.workspace().node<Node>(insertFn.node.id)
-                    selectionModel.select(fn)
+//                    val changes = mutableListOf<Change>()
+//
+//                    val insertFn = InsertNode()
+//                            .apply { parent = packageNode!!.id; node = FunctionNode().apply { name = parts[0]; id = newId() } }
+//
+//                    changes.add(insertFn)
+//
+//                    var prev: String? = null
+//                    for (i in 1 until parts.size) {
+//                        val id = newId()
+//                        changes.add(InsertNode()
+//                                .apply { parent = insertFn.node.id; this.prev = prev; node = VariableNode().apply { name = parts[i]; this.id = id } })
+//                        prev = id
+//                    }
+//
+//                    environment.workspace().apply(changes)
+//
+//                    val fn = environment.workspace().node<Node>(insertFn.node.id)
+//                    selectionModel.select(fn)
                 }
             }
         }
@@ -114,19 +117,20 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
             dialog.showAndWait().ifPresent { signature ->
                 if (ref != null) {
                     val changes = mutableListOf<Change>()
+                    // TODO:  Reimplement
 
-                    val insertOverride = InsertNode()
-                            .apply { parent = packageNode!!.id; node = OverrideNode().apply { id = newId() } }
+//                    val insertOverride = InsertNode()
+//                            .apply { parent = packageNode!!.id; node = OverrideNode().apply { id = newId() } }
+//
+//                    changes.add(insertOverride)
+//
+//                    changes.add(InsertReference()
+//                            .apply { nodeId = newId(); this.ref = ref!!.id; parent = insertOverride.node.id })
 
-                    changes.add(insertOverride)
+//                    environment.workspace().apply(changes)
 
-                    changes.add(InsertReference()
-                            .apply { id = newId(); this.ref = ref!!.id; parent = insertOverride.node.id })
-
-                    environment.workspace().apply(changes)
-
-                    val o = environment.workspace().node<Node>(insertOverride.node.id)
-                    selectionModel.select(o)
+//                    val o = environment.workspace().node<Node>(insertOverride.node.id)
+//                    selectionModel.select(o)
                 }
             }
         }
@@ -171,7 +175,7 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
             }
             val selectedItem = selectionModel.selectedItem
             if (selectedItem != null) {
-                environment.workspace().apply(listOf<Change>(Delete().apply { id = selectedItem.id }))
+                environment.workspace().apply(listOf<Change>(Delete().apply { nodeId = selectedItem.id }))
             }
         }
     }

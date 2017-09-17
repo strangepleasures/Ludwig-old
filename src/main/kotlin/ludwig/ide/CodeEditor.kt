@@ -9,13 +9,11 @@ import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.stage.Popup
-import ludwig.changes.*
-import ludwig.model.*
-import ludwig.script.Lexer
+import ludwig.model.Node
+import ludwig.model.PlaceholderNode
 import ludwig.utils.NodeUtils
 import ludwig.utils.PrettyPrinter
 import ludwig.workspace.Environment
-
 
 class CodeEditor(private val environment: Environment) : TextArea() {
     private var node: Node? = null
@@ -170,40 +168,40 @@ class CodeEditor(private val environment: Environment) : TextArea() {
     }
 
     fun insertNode(node: Node) {
-        val sel = selectedNode()
-        val head = if (node is NamedNode) InsertReference().apply { id = newId(); ref = node.id } else InsertNode().apply { this.node = node }
-        val changes = mutableListOf<Change>()
-        val selectedItem = this.node
-        if (selectedItem !is FunctionNode || !isEditable) {
-            return
-        }
-        val target = selectedItem as FunctionNode?
-        if (sel != null) {
-            head.parent = sel.parent!!.id
-            val index = sel.parent!!.indexOf(sel)
-            head.prev = if (index == 0) null else sel.parent!![index - 1].id
-            head.next = if (index == sel.parent!!.size - 1) null else sel.parent!![index + 1].id
-            changes.add(Delete().apply { id = sel.id })
-        } else {
-            head.parent = target!!.id
-            head.prev = if (target.isEmpty()) null else target[target.size - 1].id
-        }
-
-        changes.add(head)
-
-        var prev: String? = null
-
-        for (arg in NodeUtils.arguments(node)) {
-            val insertPlaceholder = InsertNode()
-                    .apply { parent = (head as InsertReference).id; this.prev = prev; this.node = PlaceholderNode().apply { parameter = arg; id = newId() } }
-            changes.add(insertPlaceholder)
-            prev = insertPlaceholder.node.id
-        }
-
-
-        environment.workspace().apply(changes)
-
-        selectNextNode()
+//        val sel = selectedNode()
+//        val head = if (node is NamedNode) InsertReference().apply { nodeId = newId(); ref = node.id } else InsertNode().apply { this.node = node }
+//        val changes = mutableListOf<Change>()
+//        val selectedItem = this.node
+//        if (selectedItem !is FunctionNode || !isEditable) {
+//            return
+//        }
+//        val target = selectedItem as FunctionNode?
+//        if (sel != null) {
+//            head.parent = sel.parent!!.id
+//            val index = sel.parent!!.indexOf(sel)
+//            head.prev = if (index == 0) null else sel.parent!![index - 1].id
+//            head.next = if (index == sel.parent!!.size - 1) null else sel.parent!![index + 1].id
+//            changes.add(Delete().apply { nodeId = sel.id })
+//        } else {
+//            head.parent = target!!.id
+//            head.prev = if (target.isEmpty()) null else target[target.size - 1].id
+//        }
+//
+//        changes.add(head)
+//
+//        var prev: String? = null
+//
+//        for (arg in NodeUtils.arguments(node)) {
+//            val insertPlaceholder = InsertNode()
+//                    .apply { parent = (head as InsertReference).nodeId; this.prev = prev; this.node = PlaceholderNode().apply { parameter = arg; id = newId() } }
+//            changes.add(insertPlaceholder)
+//            prev = insertPlaceholder.node.id
+//        }
+//
+//
+//        environment.workspace().apply(changes)
+//
+//        selectNextNode()
     }
 
 
@@ -218,36 +216,36 @@ class CodeEditor(private val environment: Environment) : TextArea() {
                     val suggestions = mutableListOf<Node>()
 //                    if (param.userText.isEmpty() || "= variable value".startsWith(param.userText)) {
 //                        suggestions.add(AssignmentNode()
-//                                .add(PlaceholderNode().apply { parameter = "variable"; id = newId()})
-//                                .add(PlaceholderNode().apply { parameter = "value"; id = newId()}))
+//                                .add(PlaceholderNode().apply { parameter = "variable"; nodeId = newId()})
+//                                .add(PlaceholderNode().apply { parameter = "value"; nodeId = newId()}))
 //                    }
 //                    if (param.userText.isEmpty() || param.userText.startsWith("λ") || param.userText.startsWith("\\")) {
 //                        suggestions.add(LambdaNode()
-//                                .add(PlaceholderNode().apply { parameter = "args..."; id = newId()}))
+//                                .add(PlaceholderNode().apply { parameter = "args..."; nodeId = newId()}))
 //                    }
 //                    if (param.userText.isEmpty() || "ref fn".startsWith(param.userText)) {
 //                        suggestions.add(FunctionReferenceNode()
-//                                .add(PlaceholderNode().apply { parameter = "fn"; id = newId()}))
+//                                .add(PlaceholderNode().apply { parameter = "fn"; nodeId = newId()}))
 //                    }
 //                    if (param.userText.isEmpty() || "call fn args...".startsWith(param.userText)) {
 //                        suggestions.add(CallNode()
-//                                .add(PlaceholderNode().apply { parameter = "fn"; id = newId()})
-//                                .add(PlaceholderNode().apply { parameter = "args..."; id = newId()}))
+//                                .add(PlaceholderNode().apply { parameter = "fn"; nodeId = newId()})
+//                                .add(PlaceholderNode().apply { parameter = "args..."; nodeId = newId()}))
 //                    }
 //                    if (param.userText.isEmpty() || "if condition statements...>".startsWith(param.userText)) {
 //                        suggestions.add(IfNode()
-//                                .add(PlaceholderNode().apply { parameter = "condition"; id = newId()})
-//                                .add(PlaceholderNode().apply { parameter = "statements"; id = newId()}))
+//                                .add(PlaceholderNode().apply { parameter = "condition"; nodeId = newId()})
+//                                .add(PlaceholderNode().apply { parameter = "statements"; nodeId = newId()}))
 //                    }
 //                    if (param.userText.isEmpty() || "else statements...".startsWith(param.userText)) {
 //                        suggestions.add(ElseNode()
-//                                .add(PlaceholderNode().apply { parameter = "statements..."; id = newId()}))
+//                                .add(PlaceholderNode().apply { parameter = "statements..."; nodeId = newId()}))
 //                    }
 //                    if (param.userText.isEmpty() || "for var seq statements...".startsWith(param.userText)) {
 //                        suggestions.add(ForNode()
-//                                .add(PlaceholderNode().apply { parameter = "var"; id = newId()})
-//                                .add(PlaceholderNode().apply { parameter = "seq"; id = newId()})
-//                                .add(PlaceholderNode().apply { parameter = "statements"; id = newId()}))
+//                                .add(PlaceholderNode().apply { parameter = "var"; nodeId = newId()})
+//                                .add(PlaceholderNode().apply { parameter = "seq"; nodeId = newId()})
+//                                .add(PlaceholderNode().apply { parameter = "statements"; nodeId = newId()}))
 //                    }
 //                    if (param.userText.isEmpty() || "break".startsWith(param.userText)) {
 //                        suggestions.add(BreakNode())
@@ -257,7 +255,7 @@ class CodeEditor(private val environment: Environment) : TextArea() {
 //                    }
 //                    if (param.userText.isEmpty() || "return result".startsWith(param.userText)) {
 //                        suggestions.add(ReturnNode()
-//                                .add(PlaceholderNode().apply { parameter = "result"; id = newId()}))
+//                                .add(PlaceholderNode().apply { parameter = "result"; nodeId = newId()}))
 //                    }
 
                     suggestions.addAll(NodeUtils.collectLocals(this.node!!, selectedNode()!!, param.userText))
@@ -275,13 +273,13 @@ class CodeEditor(private val environment: Environment) : TextArea() {
         val skin = skin as TextAreaSkin
         val caretBounds = localToScreen(skin.caretBounds)
         autoCompleteTextField.setOnAction { ev ->
-            if (Lexer.isLiteral(autoCompleteTextField.text)) {
-                insertNode(LiteralNode(autoCompleteTextField.text).apply { id = newId() })
-            } else if (ref != null) {
-                insertNode(ref!!)
-            } else if (!autoCompleteTextField.text.isEmpty()) {
-                insertNode(VariableNode().apply { name = autoCompleteTextField.text; id = newId() })
-            }
+            //            if (Lexer.isLiteral(autoCompleteTextField.text)) {
+//                insertNode(LiteralNode(autoCompleteTextField.text).apply { id = newId() })
+//            } else if (ref != null) {
+//                insertNode(ref!!)
+//            } else if (!autoCompleteTextField.text.isEmpty()) {
+//                insertNode(VariableNode().apply { name = autoCompleteTextField.text; id = newId() })
+//            }
             popup.hide()
             autoCompletionTextFieldBinding.dispose()
         }

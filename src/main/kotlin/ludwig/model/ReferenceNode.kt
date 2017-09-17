@@ -1,7 +1,9 @@
 package ludwig.model
 
 
-class ReferenceNode(val ref: Node) : Node() {
+class ReferenceNode() : Node() {
+    lateinit var ref: Node
+
     override fun <T> accept(visitor: NodeVisitor<T>): T {
         return visitor.visitReference(this)
     }

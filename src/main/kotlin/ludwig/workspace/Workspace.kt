@@ -2,10 +2,7 @@ package ludwig.workspace
 
 import ludwig.changes.*
 import ludwig.interpreter.Builtins
-import ludwig.model.NamedNode
-import ludwig.model.Node
-import ludwig.model.ProjectNode
-import ludwig.model.ReferenceNode
+import ludwig.model.*
 import ludwig.runtime.StdLib
 import ludwig.script.Parser
 import java.io.InputStreamReader
@@ -45,46 +42,14 @@ class Workspace {
         return changeListeners
     }
 
-    private val changeVisitor = object : ChangeVisitor<Problem?> {
-
-        override fun visitInsertNode(insert: InsertNode): Problem? {
-            return place(insert.node, insert)
-        }
-
-        override fun visitInsertReference(insert: InsertReference): Problem? {
-            val ref = ReferenceNode(node(insert.ref)!!)
-            ref.id = insert.id
-            return place(ref, insert)
-        }
-
-        override fun visitDelete(delete: Delete): Problem? {
-            val node = node<Node>(delete.id)
-            node!!.parent!!.remove(node)
-            node.delete()
-            return null
-        }
-
-        override fun visitComment(comment: Comment): Problem? {
-            val node = node<Node>(comment.nodeId)
-            node!!.comment = comment.comment
-            return null
-        }
-
-        override fun visitRename(rename: Rename): Problem? {
-            val node = node<NamedNode>(rename.nodeId)
-            node!!.name = rename.name
-            return null
-        }
-    }
-
     private fun place(node: Node, insert: Insert): Problem? {
         addNode(node)
-        val parent = node<Node>(insert.parent)
+        val parent = node(insert.parent)
         node.parent = parent
 
         if (parent != null) {
-            val prev = node<Node>(insert.prev)
-            val next = node<Node>(insert.next)
+            val prev = node(insert.prev)
+            val next = node(insert.next)
 
             if (!parent.isOrdered) {
                 parent.add(node)
@@ -114,17 +79,23 @@ class Workspace {
 
     fun apply(changes: List<Change>): List<Problem> {
         val problems = mutableListOf<Problem>()
-        for (i in changes.indices) {
-            val change = changes[i]
-            isBatchUpdate = i < changes.size - 1
-            val problem = change.accept(changeVisitor)
-            if (problem != null) {
-                problems.add(problem)
-                if (problems.size == MAX_PROBLEMS) {
-                    break
+        for (change in changes) {
+            when (change) {
+                is Create -> {
+                    val node = Class.forName(Node::class.java.`package`.name + "." + change.nodeType).newInstance() as Node
+                    node.id = change.changeId
+                    place(node, change)
                 }
-            } else {
-                changeListeners.forEach { listener -> listener(change) }
+                is Delete -> node(change.nodeId)!!.delete()
+                is Comment -> node(change.nodeId)!!.comment = change.comment
+                is Rename -> (node(change.nodeId) as NamedNode).name = change.name
+                is Value -> {
+                    val node = node(change.nodeId)
+                    when (node) {
+                        is LiteralNode -> node.text = change.value
+                        is ReferenceNode -> node.ref = node(change.value)!!
+                    }
+                }
             }
         }
 
@@ -156,8 +127,8 @@ class Workspace {
         apply(changes)
     }
 
-    fun <T : Node> node(id: String?): T? {
-        return if (id == null) null else nodes[id] as T
+    fun node(id: String?): Node? {
+        return if (id == null) null else nodes[id]
     }
 
     fun addNode(node: Node) {

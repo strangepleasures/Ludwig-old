@@ -2,7 +2,7 @@ package ludwig.workspace
 
 
 import ludwig.changes.Delete
-import ludwig.changes.InsertNode
+import ludwig.changes.Rename
 import ludwig.model.FunctionNode
 import ludwig.model.NamedNode
 import ludwig.model.Node
@@ -18,14 +18,14 @@ class SymbolRegistry(workspace: Workspace) {
 
     init {
         workspace.changeListeners().add({ change ->
-            if (change is InsertNode) {
-                val node = change.node
+            if (change is Rename) {
+                val node = workspace.node(change.nodeId)
                 if (node is FunctionNode || NodeUtils.isField(node)) {
                     symbols.add(node)
-                    nodesById.put(node.id, node)
+                    nodesById.put(change.name, workspace.node(change.nodeId)!!)
                 }
             } else if (change is Delete) {
-                val node = nodesById.remove(change.id)
+                val node = nodesById.remove(change.nodeId)
                 if (node != null) {
                     deleteNode(node)
                 }
