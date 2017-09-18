@@ -2,7 +2,7 @@ package ludwig.interpreter
 
 import ludwig.model.FunctionNode
 import ludwig.model.Node
-import ludwig.utils.NodeUtils
+import ludwig.utils.arguments
 import org.pcollections.HashTreePMap
 
 
@@ -10,7 +10,7 @@ class CallableRef(private val function: Node) : Callable {
     private val argCount: Int
 
     init {
-        argCount = NodeUtils.arguments(function).size // TODO: Optimize
+        argCount = arguments(function).size // TODO: Optimize
     }
 
     override fun tail(args: Array<Any?>): Any? {

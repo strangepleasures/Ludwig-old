@@ -6,7 +6,7 @@ import ludwig.changes.Rename
 import ludwig.changes.Value
 import ludwig.interpreter.ClassType
 import ludwig.model.*
-import ludwig.utils.NodeUtils.isField
+import ludwig.utils.isField
 import ludwig.workspace.Workspace
 import org.pcollections.HashPMap
 import org.pcollections.HashTreePMap
@@ -223,7 +223,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                 }
             }
             "ref" -> {
-                val ref = append(parent, FunctionReferenceNode())
+                val ref = append(parent, RefNode())
                 appendRef(ref, find(nextToken()))
             }
             "for" -> {
@@ -314,7 +314,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                         parseChild(r)
                     }
                 } else if (headNode is OverrideNode) {
-                    val fn = (headNode[0] as ReferenceNode).ref as FunctionNode
+                    val fn = (headNode[0] as SymbolNode).ref as FunctionNode
                     val r = appendRef(parent, headNode)
                     for (param in fn) {
                         if (param !is VariableNode) {
@@ -396,11 +396,11 @@ class Parser private constructor(private val tokens: List<String>, private val w
         return workspace.node(create.changeId) as T
     }
 
-    private fun appendRef(parent: Node?, node: Node?): ReferenceNode {
-        val create = Create().apply { nodeType = ReferenceNode::class.simpleName!!; this.parent = parent!!.id; prev = if (parent.isEmpty()) null else parent[parent.size - 1].id }
+    private fun appendRef(parent: Node?, node: Node?): SymbolNode {
+        val create = Create().apply { nodeType = SymbolNode::class.simpleName!!; this.parent = parent!!.id; prev = if (parent.isEmpty()) null else parent[parent.size - 1].id }
         val value = Value().apply { nodeId = create.changeId; value = node!!.id }
         workspace.apply(create, value)
-        return workspace.node(create.changeId) as ReferenceNode
+        return workspace.node(create.changeId) as SymbolNode
     }
 
     companion object {

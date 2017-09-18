@@ -91,7 +91,7 @@ class Workspace {
                     val node = node(change.nodeId)
                     when (node) {
                         is LiteralNode -> node.text = change.value
-                        is ReferenceNode -> node.ref = node(change.value)!!
+                        is SymbolNode -> node.ref = node(change.value)!!
                     }
                 }
             }

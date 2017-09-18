@@ -5,7 +5,7 @@ import javafx.scene.layout.VBox
 import ludwig.changes.Comment
 import ludwig.changes.Rename
 import ludwig.model.NamedNode
-import ludwig.utils.NodeUtils
+import ludwig.utils.isReadonly
 import ludwig.workspace.Environment
 
 class SignatureItemEditor(private val environment: Environment, private val node: NamedNode) : VBox() {
@@ -30,7 +30,7 @@ class SignatureItemEditor(private val environment: Environment, private val node
                     }
                 }
 
-                isEditable = !NodeUtils.isReadonly(node)
+                isEditable = !isReadonly(node)
             }
 
             private fun applyChanges() {
@@ -56,7 +56,7 @@ class SignatureItemEditor(private val environment: Environment, private val node
                     }
                 }
 
-                isEditable = !NodeUtils.isReadonly(node)
+                isEditable = !isReadonly(node)
             }
 
             private fun applyChanges() {

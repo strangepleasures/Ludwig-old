@@ -2,7 +2,7 @@ package ludwig.interpreter
 
 import ludwig.model.ClassNode
 import ludwig.model.Node
-import ludwig.model.ReferenceNode
+import ludwig.model.SymbolNode
 import ludwig.model.VariableNode
 import org.pcollections.TreePVector
 import java.util.*
@@ -16,7 +16,7 @@ class ClassType private constructor(node: ClassNode) {
 
     init {
         this.name = node.name
-        this.superClass = if (node.isEmpty()) null else of((node[0] as ReferenceNode).ref as ClassNode)
+        this.superClass = if (node.isEmpty()) null else of((node[0] as SymbolNode).ref as ClassNode)
         var fields = superClass?.fields ?: TreePVector.empty()
         for (i in 1..node.size - 1) {
             fields = fields.plus(node[i] as VariableNode)

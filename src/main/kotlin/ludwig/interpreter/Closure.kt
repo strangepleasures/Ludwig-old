@@ -9,8 +9,7 @@ class Closure(private val locals: HashPMap<NamedNode, Any>, private val lambda: 
     private var argCount: Int = 0
 
     init {
-
-        for (i in 0..lambda.size - 1) {
+        for (i in 0 until lambda.size) {
             val node = lambda[i]
             if (node !is VariableNode) {
                 argCount = i
@@ -21,7 +20,7 @@ class Closure(private val locals: HashPMap<NamedNode, Any>, private val lambda: 
 
     override fun tail(args: Array<Any?>): Any? {
         var env: HashPMap<NamedNode, Any> = locals
-        var visitor: Evaluator? = null
+        var evaluator: Evaluator? = null
         var result: Any? = null
 
         for (i in 0..lambda.size - 1) {
@@ -29,10 +28,10 @@ class Closure(private val locals: HashPMap<NamedNode, Any>, private val lambda: 
             if (node is VariableNode) {
                 env = env.plus(node as NamedNode, args[i])
             } else {
-                if (visitor == null) {
-                    visitor = Evaluator(env)
+                if (evaluator == null) {
+                    evaluator = Evaluator(env)
                 }
-                result = node.accept(visitor)
+                result = evaluator.eval(node)
                 if (result is Signal) {
                     break
                 }

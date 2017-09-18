@@ -5,7 +5,7 @@ import ludwig.model.NamedNode
 import ludwig.model.Node
 import ludwig.model.OverrideNode
 import ludwig.model.VariableNode
-import ludwig.utils.NodeUtils
+import ludwig.utils.declaration
 import ludwig.workspace.Environment
 
 
@@ -17,7 +17,7 @@ class SignatureEditor(private val environment: Environment) : VBox() {
 
         children.clear()
 
-        val decl = if (node is OverrideNode) NodeUtils.declaration((node as OverrideNode?)!!) else node as NamedNode?
+        val decl = if (node is OverrideNode) declaration((node as OverrideNode?)!!) else node as NamedNode?
         if (node == null) {
             return
         }

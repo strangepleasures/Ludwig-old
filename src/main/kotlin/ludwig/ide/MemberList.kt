@@ -14,7 +14,10 @@ import ludwig.model.Node
 import ludwig.model.PackageNode
 import ludwig.script.Lexer
 import ludwig.script.LexerException
-import ludwig.utils.NodeUtils
+import ludwig.utils.formatLiteral
+import ludwig.utils.isReadonly
+import ludwig.utils.parseLiteral
+import ludwig.utils.signature
 import ludwig.workspace.Environment
 import java.io.IOException
 import java.io.StringReader
@@ -39,7 +42,7 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
             items = ObservableListWrapper(packageNode
                     .stream()
                     .filter { item -> item !is PackageNode }
-                    .sorted(Comparator.comparing<Node, String> { n -> NodeUtils.signature(n).toLowerCase() })
+                    .sorted(Comparator.comparing<Node, String> { n -> signature(n).toLowerCase() })
                     .collect(Collectors.toList()))
 
             if (!items.isEmpty()) {
@@ -50,7 +53,7 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
 
     inner class Actions {
         fun addFunction() {
-            if (NodeUtils.isReadonly(packageNode)) {
+            if (isReadonly(packageNode)) {
                 return
             }
 
@@ -151,7 +154,7 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
                         val args = Lexer.read(StringReader(params.get()))
                                 .stream()
                                 .filter { s -> s != "(" && s != ")" }
-                                .map({ NodeUtils.parseLiteral(it) })
+                                .map({ parseLiteral(it) })
                                 .toArray()
                         result = callable.call(args)
                     } else {
@@ -161,7 +164,7 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
                 } else {
                     result = callable.call(arrayOf<Any?>())
                 }
-                Alert(Alert.AlertType.INFORMATION, "Result: " + NodeUtils.formatLiteral(result)).show()
+                Alert(Alert.AlertType.INFORMATION, "Result: " + formatLiteral(result)).show()
             } catch (err: Exception) {
                 err.printStackTrace()
                 Alert(Alert.AlertType.ERROR, "Error: " + err.toString()).show()
@@ -170,7 +173,7 @@ class MemberList(private val environment: Environment) : ListView<Node>() {
         }
 
         fun delete() {
-            if (NodeUtils.isReadonly(packageNode)) {
+            if (isReadonly(packageNode)) {
                 return
             }
             val selectedItem = selectionModel.selectedItem

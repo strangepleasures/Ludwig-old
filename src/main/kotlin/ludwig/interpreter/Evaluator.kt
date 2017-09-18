@@ -2,66 +2,74 @@ package ludwig.interpreter
 
 import ludwig.model.*
 import ludwig.runtime.StdLib
-import ludwig.utils.NodeUtils
+import ludwig.utils.isField
 import org.pcollections.HashPMap
 import org.pcollections.TreePVector
 
-internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVisitor<Any?> {
+internal class Evaluator(private var locals: HashPMap<NamedNode, Any>) {
     private var doElse: Boolean = false
 
-
-    override fun visitFunction(functionNode: FunctionNode): Any? {
-        throw UnsupportedOperationException()
+    fun eval(node: Node): Any? = when (node) {
+        is LiteralNode -> visitLiteral(node)
+        is SymbolNode -> visitReference(node)
+        is AssignmentNode -> visitAssignment(node)
+        is CallNode -> visitCall(node)
+        is RefNode -> visitFunctionReference(node)
+        is LambdaNode -> visitLambda(node)
+        is IfNode -> visitIf(node)
+        is ElseNode -> visitElse(node)
+        is ForNode -> visitFor(node)
+        is BreakNode -> visitBreak(node)
+        is ContinueNode -> visitContinue(node)
+        is ReturnNode -> visitReturn(node)
+        is ListNode -> visitList(node)
+        is ThrowNode -> visitThrow(node)
+        is TryNode -> visitTry(node)
+        is CatchNode -> visitCatch(node)
+        else -> throw UnsupportedOperationException()
     }
 
-    override fun visitList(listNode: ListNode): Any? {
+
+    fun visitList(listNode: ListNode): Any? {
         var list = TreePVector.empty<Any?>()
         for (item in listNode) {
-            list = list.plus(item.accept(this))
+            list = list.plus(eval(item))
         }
         return list
     }
 
-    override fun visitLiteral(literalNode: LiteralNode): Any? {
+    fun visitLiteral(literalNode: LiteralNode): Any? {
         return literalNode.value
     }
 
-    override fun visitPackage(packageNode: PackageNode): Any {
-        throw UnsupportedOperationException()
-    }
-
-    override fun visitVariable(variableNode: VariableNode): Any {
-        throw UnsupportedOperationException()
-    }
-
-    override fun visitReference(referenceNode: ReferenceNode): Any? {
-        val head = referenceNode.ref
+    fun visitReference(symbolNode: SymbolNode): Any? {
+        val head = symbolNode.ref
 
         val isLazy = head is FunctionNode && head.lazy
-        val args = arrayOfNulls<Any>(referenceNode.size)
+        val args = arrayOfNulls<Any>(symbolNode.size)
         for (i in args.indices) {
-            args[i] = if (isLazy) Return<Any?>(referenceNode[i], locals!!) else referenceNode[i].accept(this)
+            args[i] = if (isLazy) Return<Any?>(symbolNode[i], locals) else eval(symbolNode[i])
         }
 
         return untail(tail(head, args))
     }
 
-    override fun visitFunctionReference(functionReference: FunctionReferenceNode): Any? {
-        val node = (functionReference[0] as ReferenceNode).ref
+    fun visitFunctionReference(ref: RefNode): Any? {
+        val node = (ref[0] as SymbolNode).ref
         return if (node !is Callable) {
             CallableRef(node)
         } else node
     }
 
-    override fun visitThrow(throwNode: ThrowNode): Any {
-        return Error(throwNode[0].accept(this).toString())
+    fun visitThrow(throwNode: ThrowNode): Any {
+        return Error(eval(throwNode[0]).toString())
     }
 
-    override fun visitTry(tryNode: TryNode): Any? {
+    fun visitTry(tryNode: TryNode): Any? {
         var result: Any? = null
         for (node in tryNode) {
             try {
-                result = node.accept(this)
+                result = eval(node)
                 if (result is Signal) {
                     break
                 }
@@ -77,27 +85,15 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
         }
     }
 
-    override fun visitPlaceholder(placeholderNode: PlaceholderNode): Any? {
-        return null
-    }
-
-    override fun visitBreak(breakNode: BreakNode): Any {
+    fun visitBreak(breakNode: BreakNode): Any {
         return Break()
     }
 
-    override fun visitContinue(continueNode: ContinueNode): Any {
+    fun visitContinue(continueNode: ContinueNode): Any {
         return Continue()
     }
 
-    override fun visitOverride(overrideNode: OverrideNode): Any {
-        throw UnsupportedOperationException()
-    }
-
-    override fun visitClass(classNode: ClassNode): Any? {
-        return null
-    }
-
-    override fun visitCatch(catchNode: CatchNode): Any? {
+    fun visitCatch(catchNode: CatchNode): Any? {
         if (Error.error() == null) {
             return null
         }
@@ -106,7 +102,7 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
         var result: Any? = null
         for (node in catchNode) {
             try {
-                result = node.accept(this)
+                result = eval(node)
                 if (result is Signal) {
                     break
                 }
@@ -121,8 +117,8 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
         return result
     }
 
-    override fun visitCall(callNode: CallNode): Any? {
-        val head = callNode[0].accept(this)
+    fun visitCall(callNode: CallNode): Any? {
+        val head = eval(callNode[0])
         if (head is Delayed<*>) {
             return untail(head.get())
         }
@@ -134,30 +130,26 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
         val args = callNode
                 .stream()
                 .skip(1)
-                .map { node -> if (delayed) Return<Any?>(node, locals!!) else node.accept(this) }
+                .map { node -> if (delayed) Return<Any?>(node, locals) else eval(node) }
                 .toArray()
 
         return untail(callable.tail(args))
     }
 
-    override fun visitLambda(lambdaNode: LambdaNode): Any? {
-        return Closure(locals!!, lambdaNode)
+    fun visitLambda(lambdaNode: LambdaNode): Any? {
+        return Closure(locals, lambdaNode)
     }
 
-    override fun visitReturn(returnNode: ReturnNode): Any? {
-        return Return<Any?>(returnNode[0], locals!!)
+    fun visitReturn(returnNode: ReturnNode): Any? {
+        return Return<Any?>(returnNode[0], locals)
     }
 
-    override fun visitProject(projectNode: ProjectNode): Any? {
-        throw UnsupportedOperationException()
-    }
-
-    override fun visitIf(ifNode: IfNode): Any? {
-        val test = ifNode[0].accept(this) as Boolean
+    fun visitIf(ifNode: IfNode): Any? {
+        val test = eval(ifNode[0]) as Boolean
         if (test) {
             var result: Any? = null
             for (node in ifNode) {
-                result = node.accept(this)
+                result = eval(node)
                 if (result is Signal) {
                     break
                 }
@@ -169,29 +161,29 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
         return null
     }
 
-    override fun visitAssignment(assignmentNode: AssignmentNode): Any? {
-        val value = assignmentNode[1].accept(this)
+    fun visitAssignment(assignmentNode: AssignmentNode): Any? {
+        val value = eval(assignmentNode[1])
 
         var lhs = assignmentNode[0]
-        if (lhs is ReferenceNode) {
+        if (lhs is SymbolNode) {
             lhs = lhs.ref
-            if (NodeUtils.isField(lhs)) {
-                val instance = assignmentNode[0][0].accept(this) as Instance
+            if (isField(lhs)) {
+                val instance = eval(assignmentNode[0][0]) as Instance
                 instance[lhs as VariableNode] = value
                 return value
             }
         }
 
-        locals = locals!!.plus(lhs as NamedNode, value)
+        locals = locals.plus(lhs as NamedNode, value)
         return value
     }
 
-    override fun visitElse(elseNode: ElseNode): Any? {
+    fun visitElse(elseNode: ElseNode): Any? {
         if (doElse) {
             doElse = false
             var result: Any? = null
             for (node in elseNode) {
-                result = node.accept(this)
+                result = eval(node)
                 if (result is Signal) {
                     break
                 }
@@ -202,12 +194,12 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
         return null
     }
 
-    override fun visitFor(forNode: ForNode): Any? {
-        loop@ for (x in forNode[1].accept(this) as Iterable<*>) {
-            val v = forNode[0] as VariableNode
-            locals = locals!!.plus(v, x)
-            for (i in 1 until forNode.size) {
-                val value = forNode[i].accept(this)
+    fun visitFor(forNode: ForNode): Any? {
+        val v = forNode[0] as VariableNode
+        loop@ for (x in eval(forNode[1]) as Iterable<*>) {
+            locals = locals.plus(v, x)
+            for (i in 2 until forNode.size) {
+                val value = eval(forNode[i])
                 if (value is Signal) {
                     if (value is Break) {
                         break@loop
@@ -222,18 +214,18 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
     }
 
     private fun untail(result: Any?): Any? {
-        var result = result
-        while (result is Return<*>) {
-            val tail = result as Return<*>?
+        var ret = result
+        while (ret is Return<*>) {
+            val tail = ret as Return<*>?
             val state = locals
             try {
                 locals = tail!!.locals
-                result = tail.node.accept(this)
+                ret = eval(tail.node)
             } finally {
                 locals = state
             }
         }
-        return result
+        return ret
     }
 
     fun tail(head: Node, args: Array<Any?>): Any? {
@@ -252,7 +244,7 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
             impl = StdLib.type(args[0])!!.implementation(head)
         }
 
-        if (NodeUtils.isField(impl)) {
+        if (isField(impl)) {
             return (args[0] as Instance).get<Any>(impl as VariableNode)
         }
 
@@ -268,21 +260,21 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
 
             try {
                 for (i in args.indices) {
-                    locals = locals!!.plus(head[i] as NamedNode, args[i])
+                    locals = locals.plus(head[i] as NamedNode, args[i])
                 }
 
                 var result: Any? = null
 
                 if (impl is OverrideNode) {
                     for (i in 1..impl.size - 1) {
-                        result = impl[i].accept(this)
+                        result = eval(impl[i])
                         if (result is Signal) {
                             break
                         }
                     }
                 } else {
                     for (i in args.size..head.size - 1) {
-                        result = head[i].accept(this)
+                        result = eval(head[i])
                         if (result is Signal) {
                             break
                         }
@@ -296,19 +288,19 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
             }
         }
         if (head is OverrideNode) {
-            val fn = (head[0] as ReferenceNode).ref as FunctionNode
+            val fn = (head[0] as SymbolNode).ref as FunctionNode
             val savedLocals = locals
 
             try {
                 for (i in args.indices) {
-                    locals = locals!!.plus(fn[i] as NamedNode, args[i])
+                    locals = locals.plus(fn[i] as NamedNode, args[i])
                 }
 
                 var result: Any? = null
 
                 if (impl is OverrideNode) {
                     for (i in 1..impl.size - 1) {
-                        result = impl[i].accept(this)
+                        result = eval(impl[i])
                         if (result is Signal) {
                             break
                         }
@@ -321,6 +313,6 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
             }
         }
 
-        return locals!![head]
+        return locals[head]
     }
 }

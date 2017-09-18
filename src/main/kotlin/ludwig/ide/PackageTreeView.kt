@@ -8,7 +8,7 @@ import ludwig.changes.Delete
 import ludwig.changes.Rename
 import ludwig.model.NamedNode
 import ludwig.model.PackageNode
-import ludwig.utils.NodeUtils
+import ludwig.utils.isReadonly
 import ludwig.workspace.Workspace
 
 
@@ -48,7 +48,7 @@ internal class PackageTreeView(val workspace: Workspace) : TreeView<NamedNode>(c
             if (selectedItem != null) {
                 val parent = selectedItem.value
 
-                if (NodeUtils.isReadonly(parent)) {
+                if (isReadonly(parent)) {
                     return
                 }
 
@@ -70,7 +70,7 @@ internal class PackageTreeView(val workspace: Workspace) : TreeView<NamedNode>(c
             val selectedItem = selectionModel.selectedItem
             if (selectedItem != null) {
                 val packageNode = selectedItem.value
-                if (NodeUtils.isReadonly(packageNode)) {
+                if (isReadonly(packageNode)) {
                     return
                 }
                 val parent = packageNode.parent as NamedNode?

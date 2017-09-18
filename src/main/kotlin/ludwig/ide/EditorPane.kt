@@ -122,7 +122,7 @@ class EditorPane(private val environment: Environment, private val settings: Set
     inner class CodeEditorActions {
         fun goToDefinition() {
             val sel = codeEditor.selectedNode()
-            if (sel is ReferenceNode) {
+            if (sel is SymbolNode) {
                 navigateTo(sel.ref)
             }
         }

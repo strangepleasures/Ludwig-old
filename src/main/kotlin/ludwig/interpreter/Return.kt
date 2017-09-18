@@ -11,7 +11,7 @@ class Return<T>(var node: Node, var locals: HashPMap<NamedNode, Any>) : Signal, 
         var l: HashPMap<NamedNode, Any> = locals
 
         while (true) {
-            val r = n.accept(Evaluator(l))
+            val r = Evaluator(l).eval(n)
             if (r is Return<*>) {
                 n = r.node
                 l = r.locals
