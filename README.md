@@ -70,7 +70,7 @@ We're going to give it a quick start, it means that Ludwig should be able to uti
 Ludwig programs should be easily portable between different containers. We're not going to implement for example HTTP stack from scratch, that would take years. That also means that at least the version the language will come without low-level support for concurrent programming.
  
 
-# #The NOTs or what shouldn't be a part of the language
+## The NOTs or what shouldn't be a part of the language
 - Not a multi-paradigm language. Ludwig uses only a very limited set of base concepts and language constructs.
 - No macros. Although some people consider macros to be the most powerful feature of Lisp, they are hard to learn, hard to read, hard to support by IDE and lead to fragmentation of the language by invention of new sublanguages.
 - More generally, no magic. Ludwig's philosophy denies any kind of implicit behavior or coding by convention. Dependency injection is a part of the language and has very simple semantics. 
