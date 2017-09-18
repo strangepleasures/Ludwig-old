@@ -76,7 +76,7 @@ class Lexer private constructor(private val reader: Reader) {
     }
 
     private fun applyToken() {
-        if (builder.length > 0) {
+        if (builder.isNotEmpty()) {
             val token = builder.toString()
             if (token == "call") {
                 tokens.add("(")

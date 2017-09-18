@@ -203,10 +203,10 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>?) : NodeVi
     }
 
     override fun visitFor(forNode: ForNode): Any? {
-        loop@ for (`var` in forNode[1].accept(this) as Iterable<*>) {
+        loop@ for (x in forNode[1].accept(this) as Iterable<*>) {
             val v = forNode[0] as VariableNode
-            locals = locals!!.plus(v, `var`)
-            for (i in 1..forNode.size - 1) {
+            locals = locals!!.plus(v, x)
+            for (i in 1 until forNode.size) {
                 val value = forNode[i].accept(this)
                 if (value is Signal) {
                     if (value is Break) {

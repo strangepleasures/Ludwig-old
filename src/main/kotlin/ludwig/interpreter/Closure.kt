@@ -3,7 +3,6 @@ package ludwig.interpreter
 import ludwig.model.LambdaNode
 import ludwig.model.NamedNode
 import ludwig.model.VariableNode
-import ludwig.utils.PrettyPrinter
 import org.pcollections.HashPMap
 
 class Closure(private val locals: HashPMap<NamedNode, Any>, private val lambda: LambdaNode) : Callable {
@@ -45,9 +44,5 @@ class Closure(private val locals: HashPMap<NamedNode, Any>, private val lambda: 
 
     override fun argCount(): Int {
         return argCount
-    }
-
-    override fun toString(): String {
-        return PrettyPrinter.print(lambda)
     }
 }

@@ -12,42 +12,22 @@ object StdLib {
 
 
     fun type(o: Any?): ClassType? {
-        if (o == null) {
-            return ClassType.byName("system:Null")
+        when (o) {
+            null -> return ClassType.byName("system:Null")
+            is Instance -> return o.type()
+            is String -> return ClassType.byName("system:String")
+            is PVector<*> -> return ClassType.byName("system:List")
+            is PSet<*> -> return ClassType.byName("system:Set")
+            is Iterable<*> -> return ClassType.byName("system:Sequence")
+            is Boolean -> return ClassType.byName("system:Boolean")
+            is Long -> return ClassType.byName("system:Integer")
+            is Double -> return ClassType.byName("system:Real")
+            is Callable -> return ClassType.byName("system:Function")
+            is ClassType -> return ClassType.byName("system:Class")
+            else -> return if (o is ErrorInfo) {
+                ClassType.byName("system:Error")
+            } else ClassType.byName("system:Any")
         }
-        if (o is Instance) {
-            return o.type()
-        }
-        if (o is String) {
-            return ClassType.byName("system:String")
-        }
-        if (o is PVector<*>) {
-            return ClassType.byName("system:List")
-        }
-        if (o is PSet<*>) {
-            return ClassType.byName("system:Set")
-        }
-        if (o is Iterable<*>) {
-            return ClassType.byName("system:Sequence")
-        }
-        if (o is Boolean) {
-            return ClassType.byName("system:Boolean")
-        }
-        if (o is Long) {
-            return ClassType.byName("system:Integer")
-        }
-        if (o is Double) {
-            return ClassType.byName("system:Real")
-        }
-        if (o is Callable) {
-            return ClassType.byName("system:Function")
-        }
-        if (o is ClassType) {
-            return ClassType.byName("system:Class")
-        }
-        return if (o is ErrorInfo) {
-            ClassType.byName("system:Error")
-        } else ClassType.byName("system:Any")
     }
 
 

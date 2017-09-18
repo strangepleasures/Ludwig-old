@@ -11,13 +11,8 @@ import ludwig.model.PackageNode
 import ludwig.utils.NodeUtils
 import ludwig.workspace.Workspace
 
-internal class PackageTreeView : TreeView<NamedNode> {
-    private val workspace: Workspace
 
-    constructor(workspace: Workspace) : super(createRoot(workspace)) {
-        this.workspace = workspace
-    }
-
+internal class PackageTreeView(val workspace: Workspace) : TreeView<NamedNode>(createRoot(workspace)) {
     init {
         isShowRoot = false
 

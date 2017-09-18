@@ -101,7 +101,7 @@ object NodeUtils {
         if (root is VariableNode && root.name.startsWith(filter)) {
             locals.add(root)
         }
-        root.forEach { child -> collectLocals(child, stop, filter, locals) }
+        root.forEach { collectLocals(it, stop, filter, locals) }
     }
 
     fun collectLocals(root: Node, stop: Node, filter: String): List<Node> {
@@ -111,11 +111,37 @@ object NodeUtils {
         return locals
     }
 
-    fun isField(node: Node?): Boolean {
-        return node is VariableNode && node.parent is ClassNode
-    }
+    fun isField(node: Node?): Boolean =
+            node is VariableNode && node.parent is ClassNode
+}
 
-    fun argumentsCount(node: Node): Int {
-        return node.accept(ArgumentsCount())!!
+fun hasOpenArgs(node: Node): Boolean = when (node) {
+    is ListNode -> true
+    is LambdaNode -> true
+    is CallNode -> true
+    is IfNode -> true
+    is ElseNode -> true
+    is ForNode -> true
+    is CatchNode -> true
+    else -> false
+}
+
+fun inline(node: Node): String {
+    val builder = StringBuilder()
+    inline(node, builder)
+    while (builder.endsWith(" :")) {
+        builder.setLength(builder.length - 2)
     }
+    return builder.toString()
+}
+
+private fun inline(node: Node, builder: StringBuilder) {
+    if (!builder.isEmpty()) {
+        builder.append(' ')
+    }
+    builder.append(node)
+    node.forEach {
+        inline(it, builder)
+    }
+    if (hasOpenArgs(node)) builder.append(" :")
 }

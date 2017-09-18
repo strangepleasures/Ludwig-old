@@ -12,11 +12,10 @@ internal class ConsIterator<T>(private var head: Delayed<T>?, private var tail: 
         }
         if (it == null) {
             val i = tail!!.get().iterator()
-            if (i is ConsIterator<*>) {
-                val ci = i as ConsIterator<T>
+            if (i is ConsIterator<T>) {
                 first = true
-                head = ci.head
-                tail = ci.tail
+                head = i.head
+                tail = i.tail
                 return true
             }
             it = i
@@ -31,10 +30,9 @@ internal class ConsIterator<T>(private var head: Delayed<T>?, private var tail: 
         }
         if (it == null) {
             val i = tail!!.get().iterator()
-            if (i is ConsIterator<*>) {
-                val ci = i as ConsIterator<T>
-                head = ci.head
-                tail = ci.tail
+            if (i is ConsIterator<T>) {
+                head = i.head
+                tail = i.tail
                 return head!!.get()
             }
             it = i

@@ -205,132 +205,134 @@ class Parser private constructor(private val tokens: List<String>, private val w
             nextToken()
         }
 
-        try {
-            val head = nextToken()
+        parseChildBody(parent)
 
-            when (head) {
-                "call", "if", "else", "return", "throw", "try", "catch", "list", "break", "continue" -> {
-                    val node = append(parent, createSpecial(head)!!)
-                    while (currentToken() != ")") {
+        for (i in 0 until level) {
+            consume(")")
+        }
+    }
+
+    private fun parseChildBody(parent: Node?) {
+        val head = nextToken()
+
+        when (head) {
+            "call", "if", "else", "return", "throw", "try", "catch", "list", "break", "continue" -> {
+                val node = append(parent, createSpecial(head)!!)
+                while (currentToken() != ")") {
+                    parseChild(node)
+                }
+            }
+            "ref" -> {
+                val ref = append(parent, FunctionReferenceNode())
+                appendRef(ref, find(nextToken()))
+            }
+            "for" -> {
+                val node = append(parent, ForNode())
+                val variable = VariableNode()
+                variable.name = nextToken()
+                val savedLocals = locals
+                locals = locals.plus(variable.name, append(node, variable))
+
+                while (currentToken() != ")") {
+                    parseChild(node)
+                }
+                locals = savedLocals
+            }
+            "=" -> {
+                val name = nextToken()
+                val node = append(parent, AssignmentNode())
+
+                var isField = false
+                val savedPos = pos
+
+                val f = find(name)
+                if (isField(f)) {
+                    val r = appendRef(node, f)
+                    parseChild(r)
+                    if (currentToken() != ")") {
                         parseChild(node)
+                        isField = true
                     }
                 }
-                "ref" -> {
-                    val ref = append(parent, FunctionReferenceNode())
-                    appendRef(ref, find(nextToken()))
-                }
-                "for" -> {
-                    val node = append(parent, ForNode())
-                    val variable = VariableNode()
-                    variable.name = nextToken()
-                    val savedLocals = locals
-                    locals = locals.plus(variable.name, append(node, variable))
 
-                    while (currentToken() != ")") {
+                if (!isField) {
+                    pos = savedPos
+                    node!!.clear()
+                    if (locals.containsKey(name)) {
+                        appendRef(node, locals[name])
                         parseChild(node)
-                    }
-                    locals = savedLocals
-                }
-                "=" -> {
-                    val name = nextToken()
-                    val node = append(parent, AssignmentNode())
-
-                    var isField = false
-                    val savedPos = pos
-
-                    val f = find(name)
-                    if (isField(f)) {
-                        val r = appendRef(node, f)
-                        parseChild(r)
-                        if (currentToken() != ")") {
-                            parseChild(node)
-                            isField = true
-                        }
-                    }
-
-                    if (!isField) {
-                        pos = savedPos
-                        node!!.clear()
-                        if (locals.containsKey(name)) {
-                            appendRef(node, locals[name])
-                            parseChild(node)
-                        } else {
-                            val lhs = append(node, VariableNode().apply { this.name = name })
-                            locals = locals.plus(name, lhs)
-                            parseChild(node)
-                        }
-                    }
-                }
-                "λ", "\\" -> {
-                    val node = append(parent, LambdaNode())
-                    val savedLocals = locals
-                    while (currentToken() != ")") {
-                        val param = append(node, VariableNode().apply { name = nextToken() })
-                        locals = locals.plus(param!!.name, param)
-                    }
-                    consume(")")
-                    consume("(")
-                    while (currentToken() != ")") {
-                        parseChild(node)
-                    }
-                    locals = savedLocals
-                }
-
-                else -> {
-                    if (locals.containsKey(head)) {
-                        val local = locals[head]
-                        if (isField(local)) {
-                            val savedPos = pos
-                            val fn = local as VariableNode
-                            val r = appendRef(parent, fn)
-                            if (currentToken() == ")") {
-                                pos = savedPos
-                                parent!!.removeAt(parent.size - 1)
-                            } else {
-                                parseChild(r)
-                                return
-                            }
-                        } else {
-                            appendRef(parent, local)
-                        }
-                        return
-                    }
-
-                    val headNode = if ("super" == head) superFunction else find(head)
-                    if (headNode is FunctionNode) {
-                        val fn = headNode as FunctionNode?
-                        val r = appendRef(parent, fn)
-                        for (param in fn!!) {
-                            if (param !is VariableNode) {
-                                break
-                            }
-                            parseChild(r)
-                        }
-                    } else if (headNode is OverrideNode) {
-                        val fn = (headNode[0] as ReferenceNode).ref as FunctionNode
-                        val r = appendRef(parent, headNode)
-                        for (param in fn) {
-                            if (param !is VariableNode) {
-                                break
-                            }
-                            parseChild(r)
-                        }
-                    } else if (headNode is ClassNode) {
-                        val cn = headNode as ClassNode?
-                        val r = appendRef(parent, cn)
-                        while (currentToken() != ")") {
-                            parseChild(r)
-                        }
-                    } else if (Lexer.isLiteral(head)) {
-                        append(parent, LiteralNode().apply { text = head })
                     } else {
-                        throw ParserException("Unknown symbol: " + head)
+                        val lhs = append(node, VariableNode().apply { this.name = name })
+                        locals = locals.plus(name, lhs)
+                        parseChild(node)
                     }
                 }
             }
-        } finally {
-            for (i in 0 until level) {
+            "λ", "\\" -> {
+                val node = append(parent, LambdaNode())
+                val savedLocals = locals
+                while (currentToken() != ")") {
+                    val param = append(node, VariableNode().apply { name = nextToken() })
+                    locals = locals.plus(param!!.name, param)
+                }
                 consume(")")
+                consume("(")
+                while (currentToken() != ")") {
+                    parseChild(node)
+                }
+                locals = savedLocals
+            }
+
+            else -> {
+                if (locals.containsKey(head)) {
+                    val local = locals[head]
+                    if (isField(local)) {
+                        val savedPos = pos
+                        val fn = local as VariableNode
+                        val r = appendRef(parent, fn)
+                        if (currentToken() == ")") {
+                            pos = savedPos
+                            parent!!.removeAt(parent.size - 1)
+                        } else {
+                            parseChild(r)
+                            return
+                        }
+                    } else {
+                        appendRef(parent, local)
+                    }
+                    return
+                }
+
+                val headNode = if ("super" == head) superFunction else find(head)
+                if (headNode is FunctionNode) {
+                    val fn = headNode as FunctionNode?
+                    val r = appendRef(parent, fn)
+                    for (param in fn!!) {
+                        if (param !is VariableNode) {
+                            break
+                        }
+                        parseChild(r)
+                    }
+                } else if (headNode is OverrideNode) {
+                    val fn = (headNode[0] as ReferenceNode).ref as FunctionNode
+                    val r = appendRef(parent, headNode)
+                    for (param in fn) {
+                        if (param !is VariableNode) {
+                            break
+                        }
+                        parseChild(r)
+                    }
+                } else if (headNode is ClassNode) {
+                    val cn = headNode as ClassNode?
+                    val r = appendRef(parent, cn)
+                    while (currentToken() != ")") {
+                        parseChild(r)
+                    }
+                } else if (Lexer.isLiteral(head)) {
+                    append(parent, LiteralNode().apply { text = head })
+                } else {
+                    throw ParserException("Unknown symbol: " + head)
+                }
             }
         }
     }
@@ -345,12 +347,8 @@ class Parser private constructor(private val tokens: List<String>, private val w
 
     @Throws(ParserException::class)
     private fun consume(token: String) {
-        try {
-            if (nextToken() != token) {
-                throw ParserException("Expected " + token)
-            }
-        } catch (e: ParserException) {
-
+        if (nextToken() != token) {
+            throw ParserException("Expected " + token)
         }
     }
 
