@@ -145,3 +145,14 @@ private fun inline(node: Node, builder: StringBuilder) {
     }
     if (hasOpenArgs(node)) builder.append(" :")
 }
+
+fun argCount(lambda: LambdaNode): Int {
+    var n = 0
+    for (node in lambda) {
+        if (node !is VariableNode) {
+            break
+        }
+        n++
+    }
+    return n
+}

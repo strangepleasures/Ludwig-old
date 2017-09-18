@@ -187,7 +187,7 @@ object StdLib {
     }
 
     fun error(): ErrorInfo {
-        return ErrorInfo(Error.error())
+        return ErrorInfo(Error.error()!!)
     }
 
     @Name("list-get")

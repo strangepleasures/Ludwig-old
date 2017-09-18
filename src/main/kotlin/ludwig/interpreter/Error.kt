@@ -11,9 +11,9 @@ class Error(val message: String) : Signal {
     }
 
     companion object {
-        private val error = ThreadLocal<Error>()
+        private val error = ThreadLocal<Error?>()
 
-        fun error(): Error {
+        fun error(): Error? {
             return error.get()
         }
 
