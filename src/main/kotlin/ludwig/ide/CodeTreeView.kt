@@ -56,8 +56,10 @@ class CodeTreeView(private val environment: Environment) : TreeView<Node>(TreeIt
     private fun setContent(parent: TreeItem<Node>, nodes: List<Node>) {
         val head = parent.value
         val skip = when (head) {
-            is ForNode -> 1
-            is AssignmentNode -> 1
+            is IfNode -> 1
+            is ReturnNode -> 1
+            is ForNode -> 2
+            is AssignmentNode -> 2
             is LambdaNode -> argCount(head)
             else -> 0
         }
@@ -79,7 +81,7 @@ class CodeTreeView(private val environment: Environment) : TreeView<Node>(TreeIt
 
     }
 
-    private fun expand(node: Node): Boolean = !node.isEmpty() && (node is LambdaNode || node.take(node.size - 1).any { expandInner(it) } || expand(node.last()))
+    private fun expand(node: Node): Boolean = !node.isEmpty() && (node is LambdaNode || node is IfNode || node is ForNode || node.take(node.size - 1).any { expandInner(it) } || expand(node.last()))
 
     private fun expandInner(node: Node): Boolean = node is LambdaNode || hasOpenArgs(node) || node.any { expandInner(it) }
 }
@@ -87,8 +89,10 @@ class CodeTreeView(private val environment: Environment) : TreeView<Node>(TreeIt
 object ExpandedConverter : StringConverter<Node>() {
     override fun toString(node: Node?): String = when (node) {
         null -> ""
-        is AssignmentNode -> "= " + toString(node[0])
-        is ForNode -> "for " + toString(node[0])
+        is AssignmentNode -> inline(node)
+        is ReturnNode -> inline(node)
+        is IfNode -> "if " + inline(node[0])
+        is ForNode -> "for " + toString(node[0]) + " " + inline(node[1])
         is LambdaNode -> "λ " + node.take(argCount(node)).joinToString(separator = " ")
         else -> node.toString()
     }

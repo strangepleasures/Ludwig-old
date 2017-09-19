@@ -1,9 +1,6 @@
 package ludwig.script
 
-import ludwig.changes.Change
-import ludwig.changes.Create
-import ludwig.changes.Rename
-import ludwig.changes.Value
+import ludwig.changes.*
 import ludwig.interpreter.ClassType
 import ludwig.model.*
 import ludwig.utils.isField
@@ -391,7 +388,9 @@ class Parser private constructor(private val tokens: List<String>, private val w
         if (node is LiteralNode) {
             changes.add(Value().apply { nodeId = create.changeId; value = node.text })
         }
-
+        if (node is FunctionNode && node.lazy) {
+            changes.add(Lazy().apply { nodeId = create.changeId; this.lazy = true })
+        }
         workspace.apply(*changes.toTypedArray())
         return workspace.node(create.changeId) as T
     }

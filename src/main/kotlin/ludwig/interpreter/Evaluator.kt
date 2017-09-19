@@ -240,7 +240,7 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>) {
             return instance
         }
 
-        if (args.size > 0 && args[0] is Instance) {
+        if (args.isNotEmpty() && args[0] is Instance) {
             impl = StdLib.type(args[0])!!.implementation(head)
         }
 
@@ -266,14 +266,14 @@ internal class Evaluator(private var locals: HashPMap<NamedNode, Any>) {
                 var result: Any? = null
 
                 if (impl is OverrideNode) {
-                    for (i in 1..impl.size - 1) {
+                    for (i in 1 until impl.size) {
                         result = eval(impl[i])
                         if (result is Signal) {
                             break
                         }
                     }
                 } else {
-                    for (i in args.size..head.size - 1) {
+                    for (i in args.size until head.size) {
                         result = eval(head[i])
                         if (result is Signal) {
                             break

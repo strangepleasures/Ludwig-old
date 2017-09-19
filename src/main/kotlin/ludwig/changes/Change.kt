@@ -40,3 +40,8 @@ class Rename : Change() {
     lateinit var nodeId: String
     lateinit var name: String
 }
+
+class Lazy : Change() {
+    lateinit var nodeId: String
+    var lazy: Boolean = false
+}

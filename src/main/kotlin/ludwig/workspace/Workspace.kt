@@ -94,6 +94,9 @@ class Workspace {
                         is SymbolNode -> node.ref = node(change.value)!!
                     }
                 }
+                is Lazy -> {
+                    (node(change.nodeId) as FunctionNode).lazy = change.lazy
+                }
             }
         }
 
