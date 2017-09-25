@@ -12,36 +12,14 @@ fun newId(): String {
     return UUID.randomUUID().toString()
 }
 
-abstract class Insert : Change() {
-    var parent: String? = null
-    var prev: String? = null
-    var next: String? = null
-}
+class Create(var nodeType: String = "", var parent: String? = null, var prev: String? = null, var next: String? = null) : Change()
 
-class Create : Insert() {
-    lateinit var nodeType: String
-}
+class Comment(var nodeId: String = "", var comment: String? = null) : Change()
 
-class Comment : Change() {
-    lateinit var nodeId: String
-    var comment: String? = null
-}
+class Value(var nodeId: String = "", var value: String = "") : Change()
 
-class Value : Change() {
-    lateinit var nodeId: String
-    lateinit var value: String
-}
+class Delete(var nodeId: String = "") : Change()
 
-class Delete : Change() {
-    lateinit var nodeId: String
-}
+class Rename(var nodeId: String = "", var name: String = "") : Change()
 
-class Rename : Change() {
-    lateinit var nodeId: String
-    lateinit var name: String
-}
-
-class Lazy : Change() {
-    lateinit var nodeId: String
-    var lazy: Boolean = false
-}
+class Lazy(var nodeId: String = "", var lazy: Boolean = false) : Change()

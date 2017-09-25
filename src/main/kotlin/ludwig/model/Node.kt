@@ -1,18 +1,11 @@
 package ludwig.model
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import ludwig.utils.parseLiteral
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 abstract class Node : MutableList<Node> by mutableListOf<Node>() {
     lateinit var id: String
     var comment: String? = null
-    @JsonIgnore
     var parent: Node? = null
-    @JsonIgnore
     private var deleted = false
 
     fun <T : Node> parentOfType(type: Class<T>): T? {
@@ -36,7 +29,6 @@ abstract class Node : MutableList<Node> by mutableListOf<Node>() {
     }
 
     open val isOrdered: Boolean
-        @JsonIgnore
         get() = true
 
     override fun toString(): String {
@@ -82,7 +74,6 @@ class ListNode : Node()
 class LiteralNode() : Node() {
     lateinit var text: String
 
-    //@JsonIgnore
     val value: Any? by lazy {
         parseLiteral(text)
     }

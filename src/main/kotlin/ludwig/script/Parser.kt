@@ -28,8 +28,8 @@ class Parser private constructor(private val tokens: List<String>, private val w
         consume("package")
 
         val packageName = nextToken()
-        val packageNode = projectNode.stream().map { n -> n as PackageNode }
-                .filter { n -> n.name == packageName }
+        val packageNode = projectNode.stream().map { it as PackageNode }
+                .filter { it.name == packageName }
                 .findFirst()
                 .orElseGet { append(projectNode, PackageNode().apply { name = packageName }) }
 
@@ -195,7 +195,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
 
 
     @Throws(ParserException::class)
-    private fun parseChild(parent: Node?) {
+    private fun parseChild(parent: Node) {
         var level = 0
         while (currentToken() == "(") {
             level++
@@ -209,7 +209,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
         }
     }
 
-    private fun parseChildBody(parent: Node?) {
+    private fun parseChildBody(parent: Node) {
         val head = nextToken()
 
         when (head) {
@@ -254,7 +254,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
 
                 if (!isField) {
                     pos = savedPos
-                    node!!.clear()
+                    node.clear()
                     if (locals.containsKey(name)) {
                         appendRef(node, locals[name])
                         parseChild(node)
@@ -270,7 +270,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                 val savedLocals = locals
                 while (currentToken() != ")") {
                     val param = append(node, VariableNode().apply { name = nextToken() })
-                    locals = locals.plus(param!!.name, param)
+                    locals = locals.plus(param.name, param)
                 }
                 consume(")")
                 consume("(")
@@ -289,7 +289,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
                         val r = appendRef(parent, fn)
                         if (currentToken() == ")") {
                             pos = savedPos
-                            parent!!.removeAt(parent.size - 1)
+                            parent.removeAt(parent.size - 1)
                         } else {
                             parseChild(r)
                             return
@@ -378,25 +378,25 @@ class Parser private constructor(private val tokens: List<String>, private val w
         return null
     }
 
-    private fun <T : Node> append(parent: Node?, node: T): T {
-        val create = Create().apply { nodeType = node::class.simpleName!!; this.parent = parent!!.id; prev = if (parent.isEmpty()) null else parent[parent.size - 1].id }
+    private fun <T : Node> append(parent: Node, node: T): T {
+        val create = Create(node::class.simpleName!!, parent.id, prev = if (parent.isEmpty()) null else parent.last().id)
         val changes = mutableListOf<Change>(create)
         if (node is NamedNode) {
-            create.changeId = parent!!.id + ":" + node.name
-            changes.add(Rename().apply { nodeId = create.changeId; name = node.name })
+            create.changeId = parent.id + ":" + node.name
+            changes.add(Rename(create.changeId, node.name))
         }
         if (node is LiteralNode) {
-            changes.add(Value().apply { nodeId = create.changeId; value = node.text })
+            changes.add(Value(create.changeId, node.text))
         }
         if (node is FunctionNode && node.lazy) {
-            changes.add(Lazy().apply { nodeId = create.changeId; this.lazy = true })
+            changes.add(Lazy(create.changeId, true))
         }
         workspace.apply(*changes.toTypedArray())
         return workspace.node(create.changeId) as T
     }
 
     private fun appendRef(parent: Node?, node: Node?): SymbolNode {
-        val create = Create().apply { nodeType = SymbolNode::class.simpleName!!; this.parent = parent!!.id; prev = if (parent.isEmpty()) null else parent[parent.size - 1].id }
+        val create = Create(SymbolNode::class.simpleName!!, parent!!.id, prev = if (parent.isEmpty()) null else parent.last().id)
         val value = Value().apply { nodeId = create.changeId; value = node!!.id }
         workspace.apply(create, value)
         return workspace.node(create.changeId) as SymbolNode
@@ -416,7 +416,7 @@ class Parser private constructor(private val tokens: List<String>, private val w
         }
 
         fun item(findByName: PackageNode, name: String): NamedNode? {
-            return findByName.stream().filter { n -> n is NamedNode }.map { n -> n as NamedNode }.filter { it -> it.name == name }.findFirst().orElse(null)
+            return findByName.stream().filter { it is NamedNode }.map { it as NamedNode }.filter { it.name == name }.findFirst().orElse(null)
         }
     }
 }

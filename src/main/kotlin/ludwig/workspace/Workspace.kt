@@ -40,7 +40,7 @@ class Workspace {
         return changeListeners
     }
 
-    private fun place(node: Node, insert: Insert): Problem? {
+    private fun place(node: Node, insert: Create): Problem? {
         addNode(node)
         val parent = node(insert.parent)
         node.parent = parent
@@ -55,7 +55,7 @@ class Workspace {
                 val items = parent
 
                 if (next == null) {
-                    if (!items.isEmpty() && items[items.size - 1] === prev || items.isEmpty() && prev == null) {
+                    if (!items.isEmpty() && items.last() === prev || items.isEmpty() && prev == null) {
                         parent.add(node)
                     }
                 } else if (prev == null) {
@@ -94,9 +94,8 @@ class Workspace {
                         is SymbolNode -> node.ref = node(change.value)!!
                     }
                 }
-                is Lazy -> {
-                    (node(change.nodeId) as FunctionNode).lazy = change.lazy
-                }
+                is Lazy -> (node(change.nodeId) as FunctionNode).lazy = change.lazy
+
             }
         }
 
